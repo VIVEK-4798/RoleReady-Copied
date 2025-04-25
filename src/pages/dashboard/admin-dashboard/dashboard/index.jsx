@@ -1,0 +1,90 @@
+import React from 'react';
+import Header from "../../../../components/header/dashboard-header/index";
+import Sidebar from "../../../../components/dashboard/admin-dashboard/common/Sidebar";
+import DashboardCard from "./components/DashboardCard";
+import { Link } from 'react-router-dom';
+import ChartSelect from "./components/ChartSelect";
+import ChartMain from "./components/ChartMain";
+// import RercentBooking from "./components/RercentBooking";
+import Footer from "../../../../components/dashboard/admin-dashboard/common/Footer";
+
+const index = () => {
+  return (
+    <>
+      <Header />
+
+      <div className="dashboard__sidebar bg-white scroll-bar-1">
+           <Sidebar />
+           {/* End sidebar */}
+      </div>
+
+      <div className="dashboard__main">
+          <div className="dashboard__content bg-light-2">
+            <div className="row y-gap-20 justify-between items-end pb-60 lg:pb-40 md:pb-32">
+              <div className="col-12">
+                {/* <h1 className="text-30 lh-14 fw-600">{dashboardTitle}</h1> */}
+                <h1 className="text-30 lh-14 fw-600">Admin Dashboard</h1>
+                <div className="text-15 text-light-1">
+                  Track and manage customer orders and all bookings.
+                </div>
+              </div>
+              {/* End .col-12 */}
+            </div>
+            {/* End .row */}
+
+            {/* <DashboardCard stateCount={stateCount} adminCardData={adminCardData} /> */}
+            <DashboardCard />
+
+            <div className="row y-gap-30 pt-20 chart_responsive">
+              <div className="col-xl-5 col-md-6">
+                <div className="py-30 px-30 rounded-4 bg-white shadow-3">
+                  <div className="d-flex justify-between items-center">
+                    <h2 className="text-18 lh-1 fw-500">Today's Bookings</h2>
+                    <div>
+                      <Link to="#" className="text-14 text-blue-1 fw-500 underline">
+                        View All
+                      </Link>
+                    </div>
+                  </div>
+                  {/* End d-flex */}
+
+                  {/* <RercentBooking
+                    // todaysBooking={todaysBooking}
+                    // filterTodaysBooking={filterTodaysBooking}
+                    // setFilterTodaysBooking={setFilterTodaysBooking}
+                  /> */}
+                </div>
+                {/* End py-30 */}
+              </div>
+              {/* End .col */}
+              <div className="col-xl-7 col-md-6">
+                <div className="py-30 px-30 rounded-4 bg-white shadow-3">
+                  <div className="d-flex justify-between items-center">
+                    <h2 className="text-18 lh-1 fw-500">Earning Statistics</h2>
+                    {/* <ChartSelect
+                      // options={options}
+                      // selectedOption={selectedOption}
+                      // setSelectedOption={setSelectedOption}
+                    /> */}
+                  </div>
+                  {/* End .d-flex */}
+
+                  <div className="pt-30">
+                    <ChartMain />
+                    {/* <ChartMain chartData={chartData} /> */}
+                  </div>
+                </div>
+              </div>
+              {/* End .col */}
+            </div>
+            {/* End .row */}
+
+            <Footer />
+          </div>
+          {/* End .dashboard__content */}
+        </div>
+    </>
+  )
+}
+
+export default index

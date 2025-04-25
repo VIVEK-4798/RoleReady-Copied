@@ -1,0 +1,234 @@
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import "../../../../styles/modals.css";
+
+const Sidebar = () => {
+  const navigate = useNavigate();
+  const [tab, setTab] = useState();
+
+  const userRole = localStorage.getItem("role");
+
+  const sidebarData = [
+    {
+      icon: "/img/dashboard/sidebar/booking.svg",
+      title: "Booking Manager",
+      href: "booking",
+      allowedRole: ["admin", "venue-user", "vendor-user"],
+    },
+    {
+      icon: "/img/dashboard/sidebar/gear.svg",
+      title: "Claimed Listings",
+      href: "claim-business",
+      allowedRole: ["admin"],
+    },
+    {
+      icon: "/img/dashboard/sidebar/house.svg",
+      title: "Venue",
+      allowedRole: ["admin", "venue-user"],
+      links: [
+        { title: "All Venues", href: "venues", allowedRole: ["admin", "venue-user"] },
+        { title: "Add Venue", href: "venue/add", allowedRole: ["admin", "venue-user"] },
+      ],
+    },
+    {
+      icon: "/img/dashboard/sidebar/house.svg",
+      title: "Vendor",
+      // title: userRole === "admin" ? "Vendor" : userRole === "vendor-user" ? "Services" : "",
+      allowedRole: ["admin", "vendor-user"],
+      links: [
+        { title: "All Vendor", href: "vendors", allowedRole: ["admin"] },
+        { title: "Add Vendor", href: "vendor/add", allowedRole: ["admin"] },
+        { title: "All Services", href: "vendors", allowedRole: ["vendor-user"] },
+        { title: "Add Sevice", href: "vendor/add", allowedRole: ["vendor-user"] },
+      ],
+    },
+    {
+      icon: "/img/dashboard/sidebar/house.svg",
+      title: "Users",
+      allowedRole: ["admin"],
+      links: [
+        { title: "All Users", href: "users", allowedRole: ["admin"] },
+        { title: "Add User", href: "user/add", allowedRole: ["admin"] },
+      ],
+    },
+    {
+      icon: "/img/dashboard/sidebar/gear.svg",
+      title: "Packages",
+      href: "packages",
+      allowedRole: ["admin"],
+    },
+    
+    {
+      icon: "/img/dashboard/sidebar/gear.svg",
+      title: "E-Mail",
+      href: "mail",
+      allowedRole: ["admin"],
+    },
+    {
+      icon: "/img/dashboard/sidebar/gear.svg",
+      title: "City",
+      href: "city",
+      allowedRole: ["admin"],
+    },
+    {
+      icon: "/img/dashboard/sidebar/gear.svg",
+      title: "Regions",
+      href: "regions",
+      allowedRole: ["admin"],
+    },
+    {
+      icon: "/img/dashboard/sidebar/gear.svg",
+      title: "Venues Category",
+      href: "categories",
+      allowedRole: ["admin"],
+    },
+    // Individual items from Settings
+    {
+      icon: "/img/dashboard/sidebar/gear.svg",
+      title: "Vendors Category",
+      href: "services",
+      allowedRole: ["admin"],
+    },
+    {
+      icon: "/img/dashboard/sidebar/gear.svg",
+      title: "Settings",
+      href: "settings",
+      allowedRole: ["admin", "venue-user", "vendor-user"],
+    }
+  ];
+
+  useEffect(() => {
+    const currentUrl = window.location.href;
+    const regex = /admin-dashboard\/(.+)/;
+    const match = currentUrl.match(regex);
+    if (match && match[1]) {
+      setTab(match[1]);
+    } else {
+      setTab("No match found");
+    }
+  }, []);
+
+  const handleRoute = (path, newTab) => {
+    setTab(newTab);
+    navigate(path);
+  };
+
+  const logout = () => {
+    localStorage.clear();
+    navigate("/");
+  };
+
+  return (
+    <div className="sidebar -dashboard" id="vendorSidebarMenu">
+      {/* Static Items */}
+      <div className="sidebar__item">
+        <a
+          onClick={() => handleRoute("/admin-dashboard/dashboard", "dashboard")}
+          className={`${tab === "dashboard" ? "side_current" : ""} cursor sidebar__button d-flex items-center text-15 lh-1 fw-500`}
+        >
+          <img src="/img/dashboard/sidebar/compass.svg" alt="image" className="mr-15" />
+          Dashboard
+        </a>
+      </div>
+
+      {/* <div className="sidebar__item">
+        <a
+          onClick={() => handleRoute("/admin-dashboard/booking", "Booking Manager")}
+          className={`${tab === "Booking Manager" ? "side_current" : ""} cursor sidebar__button d-flex items-center text-15 lh-1 fw-500`}
+        >
+          <img src="/img/dashboard/sidebar/booking.svg" alt="image" className="mr-15" />
+          Booking Manager
+        </a>
+      </div> */}
+
+{sidebarData.map((item, index) => {
+  if (item.links) {
+    // Render dropdown items like Venues and Vendors
+    return (
+      // item.allowedRole.includes(localStorage.getItem("role")) && ( // <-- Commented out role check
+      <div className="sidebar__item" key={index}>
+        <div className="accordion -db-sidebar js-accordion">
+          <div className="accordion__item">
+            <div
+              className={`accordion__button ${
+                item.links.some((link) => tab === link.href) ? "side_current" : ""
+              }`}
+              data-bs-toggle="collapse"
+              data-bs-target={`#sidebarItem${index}`}
+            >
+              <div className="sidebar__button col-12 d-flex items-center justify-between">
+                <div className="d-flex items-center text-15 lh-1 fw-500">
+                  <img src={item.icon} alt="image" className="mr-10" />
+                  {item.title}
+                </div>
+                <div className="icon-chevron-sm-down text-7" />
+              </div>
+            </div>
+            <div
+              id={`sidebarItem${index}`}
+              className={`collapse ${item.links.some((link) => tab === link.href) ? "show" : ""}`}
+              data-bs-parent="#vendorSidebarMenu"
+            >
+              <ul className="list-disc pb-5 pl-40">
+                {item.links.map((link, linkIndex) => {
+                  return (
+                    // link.allowedRole.includes(localStorage.getItem("role")) && ( // <-- Commented out link role check
+                    <li key={linkIndex}>
+                      <a
+                        onClick={() =>
+                          handleRoute(`/admin-dashboard/${link.href}`, link.href)
+                        }
+                        className={`text-15 ${
+                          tab === link.href ? "side_current" : ""
+                        } cursor`}
+                      >
+                        {link.title}
+                      </a>
+                    </li>
+                    // )
+                  );
+                })}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      // )
+    );
+  } else {
+    // Render standalone items
+    return (
+      // item.allowedRole.includes(localStorage.getItem("role")) && ( // <-- Commented out role check
+      <div className="sidebar__item" key={index}>
+        <a
+          onClick={() => handleRoute(`/admin-dashboard/${item.href}`, item.href)}
+          className={`${
+            tab === item.href ? "side_current" : ""
+          } cursor sidebar__button d-flex items-center text-15 lh-1 fw-500`}
+        >
+          <img src={item.icon} alt="image" className="mr-15" />
+          {item.title}
+        </a>
+      </div>
+      // )
+    );
+  }
+})}
+
+
+      {/* Logout */}
+      <div className="sidebar__item">
+        <a
+          href="/"
+          onClick={logout}
+          className="sidebar__button d-flex items-center text-15 lh-1 fw-500"
+        >
+          <img src="/img/dashboard/sidebar/log-out.svg" alt="image" className="mr-15" />
+          Logout
+        </a>
+      </div>
+    </div>
+  );
+};
+
+export default Sidebar;
