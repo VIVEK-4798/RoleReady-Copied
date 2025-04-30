@@ -4,10 +4,9 @@ import "cal-heatmap/cal-heatmap.css";
 import Tooltip from "cal-heatmap/plugins/Tooltip";
 
 const StreaksSection = () => {
-  const calRef = useRef(null); // 👈 Store CalHeatmap instance
+  const calRef = useRef(null); 
 
   useEffect(() => {
-    // Avoid painting again if already initialized
     if (calRef.current) return;
 
     const simulatedData = {
@@ -38,7 +37,7 @@ const StreaksSection = () => {
     );
 
     const cal = new CalHeatmap();
-    calRef.current = cal; // 👈 Save reference
+    calRef.current = cal; 
 
     cal.paint({
       itemSelector: "#cal-heatmap",
