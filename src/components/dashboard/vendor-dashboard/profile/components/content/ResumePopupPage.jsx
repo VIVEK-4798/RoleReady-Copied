@@ -9,7 +9,7 @@ const ResumePopupPage = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [showResumeTips, setShowResumeTips] = useState(false);
   const [resumeFile, setResumeFile] = useState(null);
-  const [savedResumeName, setSavedResumeName] = useState('');
+  const [savedResumeName, setSavedResumeName] = useState("");
 
   const user = JSON.parse(localStorage.getItem("user"));
   const user_id = user?.user_id;
@@ -48,7 +48,11 @@ const ResumePopupPage = () => {
   };
 
   const handleFileChange = (e) => {
-    setResumeFile(e.target.files[0]);
+    const file = e.target.files[0];
+    setResumeFile(file);
+    if (file) {
+      setSavedResumeName(file.name);
+    }
   };
 
   const handleSave = async () => {
@@ -66,6 +70,7 @@ const ResumePopupPage = () => {
       if (res.data.success) {
         toast.success("Resume uploaded successfully");
         setSavedResumeName(resumeFile.name);
+        setResumeFile(null);
         setShowPopup(false);
       } else {
         toast.error("Failed to upload resume");
@@ -76,6 +81,7 @@ const ResumePopupPage = () => {
   };
 
   const openEditPopup = () => {
+    setResumeFile(null); // Reset to allow new selection
     setShowPopup(true);
   };
 
@@ -125,8 +131,18 @@ const ResumePopupPage = () => {
             <p style={{ fontSize: "0.875rem", color: "#6B7280", marginBottom: "1rem" }}>
               Upload a one-pager that highlights your skills, experience, and accomplishments.
             </p>
+
+            {/* Preview previously uploaded resume */}
+            {savedResumeName && !resumeFile && (
+              <div style={{ marginBottom: "1rem", color: "#4B5563", fontSize: "0.875rem" }}>
+                <strong>Current Resume:</strong> {savedResumeName}
+              </div>
+            )}
+
+            {/* New file input */}
             <input type="file" accept=".pdf,.doc,.docx" onChange={handleFileChange} />
 
+            {/* Resume Tips Button */}
             <button
               onClick={() => setShowResumeTips(true)}
               style={{
@@ -151,6 +167,7 @@ const ResumePopupPage = () => {
               Resume Tips
             </button>
 
+            {/* Action Buttons */}
             <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "1.5rem" }}>
               <button onClick={() => setShowPopup(false)} className="cancel-button">Cancel</button>
               <button onClick={handleSave} className="save-button">Save</button>
