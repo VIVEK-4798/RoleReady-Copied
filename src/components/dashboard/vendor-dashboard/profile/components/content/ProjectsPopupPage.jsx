@@ -25,15 +25,15 @@ const ProjectsPopupPage = () => {
 
   const fetchProject = async () => {
     try {
-      const res = await axios.get(`${api}/api/profile/get-project/${user_id}`);
-      if (res.data.project) {
-        const parsed = JSON.parse(res.data.project);
-        setSavedProject(parsed);
+      const res = await axios.get(`${api}/api/profile/get-projects/${user_id}`);
+      if (res.data.projects) {
+        setSavedProject(res.data.projects); 
       }
     } catch (err) {
       console.error("Error fetching project:", err);
     }
   };
+  
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -45,11 +45,11 @@ const ProjectsPopupPage = () => {
 
   const handleSave = async () => {
     try {
-      const res = await axios.post(`${api}/api/profile/save-project`, {
+      const res = await axios.post(`${api}/api/profile/save-projects`, {
         user_id,
-        project: projectData,
+        projects: projectData,
       });
-
+  
       if (res.data.success) {
         toast.success("Project saved successfully");
         setSavedProject(projectData);
@@ -62,6 +62,7 @@ const ProjectsPopupPage = () => {
       console.error(err);
     }
   };
+  
 
   const handleOverlayClick = (e) => {
     if (e.target.classList.contains("overlay")) {

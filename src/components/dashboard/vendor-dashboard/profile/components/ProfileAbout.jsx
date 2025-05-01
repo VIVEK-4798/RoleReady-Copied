@@ -11,6 +11,7 @@ import CertificatePopupPage from './content/CertificatePopupPage';
 import ProjectsPopupPage from './content/ProjectsPopupPage';
 
 const ProfileAbout = () => {
+  
   return (
          <div className="row">
             <div className="col-lg-8 bg-white shadow">

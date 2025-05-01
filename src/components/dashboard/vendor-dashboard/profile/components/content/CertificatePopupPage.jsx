@@ -31,7 +31,6 @@ const CertificatePopupPage = () => {
       if (res.data.certificate) {
         const parsed = JSON.parse(res.data.certificate); // Parse it here
         setSavedCertificate(parsed);
-        console.log(parsed);
       }
     } catch (err) {
       console.error("Error fetching certificate:", err);

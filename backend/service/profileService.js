@@ -17,6 +17,37 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
+// Get About info
+router.get('/get-profile-info/:user_id', (req, res) => {
+  const userId = req.params.user_id;
+  if (!userId) return res.status(400).json({ message: 'user_id is required' });
+
+  const query = `
+    SELECT about_text, skills, experience, resume_file, projects, certificate, education
+    FROM profile_info WHERE user_id = ?
+  `;
+
+  db.query(query, [userId], (err, results) => {
+    if (err) return res.status(500).json({ message: 'Database error', error: err.message });
+
+    if (results.length === 0) {
+      return res.status(200).json({
+        about_text: '',
+        skills: '',
+        experience: '',
+        resume_file: '',
+        projects: '',
+        certificate: '',
+        education: '',
+      });
+    }
+
+    res.status(200).json(results[0]);
+  });
+});
+
+
+
 // GET About info
 router.get('/get-about/:user_id', (req, res) => {
   const userId = req.params.user_id;

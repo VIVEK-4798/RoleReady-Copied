@@ -27,7 +27,6 @@ const AboutPopupPage = () => {
       const res = await axios.get(`${api}/api/profile/get-about/${user_id}`);
       if (res.data.about_text) {
         setSavedAboutText(res.data.about_text);
-        console.log(res.data.about_text);
       }
     } catch (err) {
       console.error("Error fetching about text:", err.message);

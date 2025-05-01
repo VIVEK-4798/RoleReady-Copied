@@ -35,7 +35,7 @@ const EducationPopupPage = () => {
     try {
       const res = await axios.get(`${api}/api/profile/get-education/${user_id}`);
       if (res.data.education) {
-        const parsedEducation = JSON.parse(res.data.education); // Parse JSON string
+        const parsedEducation = JSON.parse(res.data.education); 
         setSavedEducation(parsedEducation);
       }
     } catch (err) {
@@ -99,19 +99,25 @@ const EducationPopupPage = () => {
             </h5>
             {savedEducation ? (
               <>
-                <p style={{ fontSize: "1rem", color: "#4B5563", whiteSpace: "pre-line", marginBottom: "0.5rem" }}>
-                  <strong>{savedEducation.course}</strong> in <strong>{savedEducation.specialization}</strong> at <strong>{savedEducation.college}</strong><br />
-                  {savedEducation.startYear} to {savedEducation.endYear}<br />
-                  {savedEducation.qualification} | {savedEducation.courseType}<br />
-                  CGPA: {savedEducation.cgpa} | Skills: {savedEducation.skills}<br />
-                  {savedEducation.description}
-                </p>
-                <FontAwesomeIcon
-                  icon={faPenToSquare}
-                  onClick={openEditPopup}
-                  className="text-blue-500 cursor-pointer hover:opacity-80"
-                  size="lg"
-                />
+                <div style={{ display: "flex",flexDirection: "column",  gap: "0.5rem", flexWrap: "wrap" }}>
+                  <div>
+                  <p style={{ fontSize: "1rem", color: "#4B5563", whiteSpace: "pre-line", marginBottom: 0 }}>
+                    <strong>{savedEducation.course}</strong> in <strong>{savedEducation.specialization}</strong> at <strong>{savedEducation.college}</strong><br />
+                    {savedEducation.startYear} to {savedEducation.endYear}<br />
+                    {savedEducation.qualification} | {savedEducation.courseType}<br />
+                    CGPA: {savedEducation.cgpa} | Skills: {savedEducation.skills}<br />
+                    {savedEducation.description}
+                  </p>
+                  </div>
+                  <div>
+                  <FontAwesomeIcon
+                    icon={faPenToSquare}
+                    onClick={openEditPopup}
+                    className="text-blue-500 cursor-pointer hover:opacity-80"
+                    size="lg"
+                  />
+                  </div>
+                </div>
               </>
             ) : (
               <span
