@@ -5,6 +5,50 @@ const bcrypt = require('bcrypt');
 const lodash = require('lodash');
 const app = express();
 
+/**
+ * @swagger
+ * /add-vendor:
+ *   post:
+ *     summary: Add a new vendor
+ *     tags: [Vendors]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: "Vendor ABC"
+ *               email:
+ *                 type: string
+ *                 example: "vendor@example.com"
+ *               phone:
+ *                 type: string
+ *                 example: "9876543210"
+ *               address:
+ *                 type: string
+ *                 example: "123, MG Road, Bangalore"
+ *     responses:
+ *       201:
+ *         description: Vendor added successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Vendor added successfully!
+ *                 results:
+ *                   type: boolean
+ *                   example: true
+ *                 id:
+ *                   type: integer
+ *                   example: 42
+ */
+
 app.post('/add-vendor', (req, res) => {
 	const vendor = req.body;
 	const query = 'INSERT INTO vendors SET ?';

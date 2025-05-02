@@ -46,8 +46,6 @@ router.get('/get-profile-info/:user_id', (req, res) => {
   });
 });
 
-
-
 // GET About info
 router.get('/get-about/:user_id', (req, res) => {
   const userId = req.params.user_id;
@@ -87,19 +85,64 @@ router.get('/get-about/:user_id', (req, res) => {
 
 
 // POST About info
-router.post('/post-about/:user_id', (req, res) => {
-  const userId = req.params.user_id;
-  const { about_text } = req.body;
-  const pathParts = req.originalUrl.split('/');
+router.post('/save-about', (req, res) => {
+  const { user_id, about_text } = req.body;
 
-  const role = pathParts.includes('mentor-dashboard')
+  const referer = req.headers.referer || '';
+
+  // Determine role from referer URL
+  const role = referer.includes('mentor-dashboard')
     ? 'mentor'
-    : pathParts.includes('admin-dashboard')
+    : referer.includes('admin-dashboard')
     ? 'admin'
     : 'user';
 
-  if (!userId || !about_text) {
-    return res.status(400).json({ message: 'user_id and about_text are required' });
+  if (!user_id || !about_text) {
+    return res.status(400).json({ success: false, message: 'user_id and about_text are required' });
+  }
+
+  let tableName;
+  if (role === 'user') tableName = 'profile_info';
+  else if (role === 'mentor') tableName = 'mentor_profile_info';
+  else if (role === 'admin') tableName = 'admin_profile_info';
+  else return res.status(400).json({ success: false, message: 'Invalid role' });
+
+  const checkQuery = `SELECT * FROM ${tableName} WHERE user_id = ?`;
+  const updateQuery = `UPDATE ${tableName} SET about_text = ? WHERE user_id = ?`;
+  const insertQuery = `INSERT INTO ${tableName} (user_id, about_text) VALUES (?, ?)`;
+
+  db.query(checkQuery, [user_id], (err, results) => {
+    if (err) return res.status(500).json({ success: false, message: 'Database error', error: err.message });
+
+    if (results.length > 0) {
+      db.query(updateQuery, [about_text, user_id], (err) => {
+        if (err) return res.status(500).json({ success: false, message: 'Update failed', error: err.message });
+        return res.status(200).json({ success: true, message: 'About info updated successfully' });
+      });
+    } else {
+      db.query(insertQuery, [user_id, about_text], (err) => {
+        if (err) return res.status(500).json({ success: false, message: 'Insert failed', error: err.message });
+        return res.status(201).json({ success: true, message: 'About info inserted successfully' });
+      });
+    }
+  });
+});
+
+
+
+// GET Resume info
+router.get('/get-resume/:user_id', (req, res) => {
+  const userId = req.params.user_id;
+  const referer = req.headers.referer || '';
+
+  const role = referer.includes('mentor-dashboard')
+    ? 'mentor'
+    : referer.includes('admin-dashboard')
+    ? 'admin'
+    : 'user';
+
+  if (!userId) {
+    return res.status(400).json({ message: 'user_id is required' });
   }
 
   let tableName;
@@ -108,37 +151,7 @@ router.post('/post-about/:user_id', (req, res) => {
   else if (role === 'admin') tableName = 'admin_profile_info';
   else return res.status(400).json({ message: 'Invalid role' });
 
-  const checkQuery = `SELECT * FROM ${tableName} WHERE user_id = ?`;
-  const updateQuery = `UPDATE ${tableName} SET about_text = ? WHERE user_id = ?`;
-  const insertQuery = `INSERT INTO ${tableName} (user_id, about_text) VALUES (?, ?)`;
-
-  db.query(checkQuery, [userId], (err, results) => {
-    if (err) return res.status(500).json({ message: 'Database error', error: err.message });
-
-    if (results.length > 0) {
-      db.query(updateQuery, [about_text, userId], (err) => {
-        if (err) return res.status(500).json({ message: 'Update failed', error: err.message });
-        return res.status(200).json({ message: 'About info updated successfully' });
-      });
-    } else {
-      db.query(insertQuery, [userId, about_text], (err) => {
-        if (err) return res.status(500).json({ message: 'Insert failed', error: err.message });
-        return res.status(201).json({ message: 'About info inserted successfully' });
-      });
-    }
-  });
-});
-
-
-// GET Resume info
-router.get('/get-resume/:user_id', (req, res) => {
-  const userId = req.params.user_id;
-
-  if (!userId) {
-    return res.status(400).json({ message: 'user_id is required' });
-  }
-
-  const query = `SELECT resume_file FROM profile_info WHERE user_id = ?`;
+  const query = `SELECT resume_file FROM ${tableName} WHERE user_id = ?`;
 
   db.query(query, [userId], (err, results) => {
     if (err) {
@@ -154,17 +167,31 @@ router.get('/get-resume/:user_id', (req, res) => {
   });
 });
 
+
 // POST Resume info
 router.post('/upload-resume', upload.single('resume'), (req, res) => {
   const user_id = req.body.user_id;
   const resume_file = req.file?.filename;
+  const referer = req.headers.referer || '';
+
+  const role = referer.includes('mentor-dashboard')
+    ? 'mentor'
+    : referer.includes('admin-dashboard')
+    ? 'admin'
+    : 'user';
 
   if (!user_id || !resume_file) {
     return res.status(400).json({ message: 'user_id and resume_file are required' });
   }
 
+  let tableName;
+  if (role === 'user') tableName = 'profile_info';
+  else if (role === 'mentor') tableName = 'mentor_profile_info';
+  else if (role === 'admin') tableName = 'admin_profile_info';
+  else return res.status(400).json({ message: 'Invalid role' });
+
   const query = `
-    INSERT INTO profile_info (user_id, resume_file)
+    INSERT INTO ${tableName} (user_id, resume_file)
     VALUES (?, ?)
     ON DUPLICATE KEY UPDATE resume_file = VALUES(resume_file)
   `;
@@ -179,15 +206,29 @@ router.post('/upload-resume', upload.single('resume'), (req, res) => {
   });
 });
 
+
 // GET Skills
 router.get('/get-skills/:user_id', (req, res) => {
   const userId = req.params.user_id;
+  const referer = req.headers.referer || '';
+
+  const role = referer.includes('mentor-dashboard')
+    ? 'mentor'
+    : referer.includes('admin-dashboard')
+    ? 'admin'
+    : 'user';
 
   if (!userId) {
     return res.status(400).json({ message: 'user_id is required' });
   }
 
-  const query = `SELECT skills FROM profile_info WHERE user_id = ?`;
+  let tableName;
+  if (role === 'user') tableName = 'profile_info';
+  else if (role === 'mentor') tableName = 'mentor_profile_info';
+  else if (role === 'admin') tableName = 'admin_profile_info';
+  else return res.status(400).json({ message: 'Invalid role' });
+
+  const query = `SELECT skills FROM ${tableName} WHERE user_id = ?`;
 
   db.query(query, [userId], (err, results) => {
     if (err) {
@@ -203,16 +244,30 @@ router.get('/get-skills/:user_id', (req, res) => {
   });
 });
 
+
 // POST Skills
 router.post('/save-skills', (req, res) => {
   const { user_id, skills } = req.body;
+  const referer = req.headers.referer || '';
+
+  const role = referer.includes('mentor-dashboard')
+    ? 'mentor'
+    : referer.includes('admin-dashboard')
+    ? 'admin'
+    : 'user';
 
   if (!user_id || !skills) {
     return res.status(400).json({ message: 'user_id and skills are required' });
   }
 
+  let tableName;
+  if (role === 'user') tableName = 'profile_info';
+  else if (role === 'mentor') tableName = 'mentor_profile_info';
+  else if (role === 'admin') tableName = 'admin_profile_info';
+  else return res.status(400).json({ message: 'Invalid role' });
+
   const query = `
-    INSERT INTO profile_info (user_id, skills)
+    INSERT INTO ${tableName} (user_id, skills)
     VALUES (?, ?)
     ON DUPLICATE KEY UPDATE skills = VALUES(skills)
   `;
@@ -227,15 +282,29 @@ router.post('/save-skills', (req, res) => {
   });
 });
 
+
 // GET Experience Info
 router.get('/get-experience/:user_id', (req, res) => {
   const userId = req.params.user_id;
+  const referer = req.headers.referer || '';
+
+  const role = referer.includes('mentor-dashboard')
+    ? 'mentor'
+    : referer.includes('admin-dashboard')
+    ? 'admin'
+    : 'user';
 
   if (!userId) {
     return res.status(400).json({ message: 'user_id is required' });
   }
 
-  const query = `SELECT experience FROM profile_info WHERE user_id = ?`;
+  let tableName;
+  if (role === 'user') tableName = 'profile_info';
+  else if (role === 'mentor') tableName = 'mentor_profile_info';
+  else if (role === 'admin') tableName = 'admin_profile_info';
+  else return res.status(400).json({ message: 'Invalid role' });
+
+  const query = `SELECT experience FROM ${tableName} WHERE user_id = ?`;
 
   db.query(query, [userId], (err, results) => {
     if (err) {
@@ -247,20 +316,37 @@ router.get('/get-experience/:user_id', (req, res) => {
       return res.status(404).json({ message: 'No experience info found', experience: [] });
     }
 
-    res.status(200).json({ message: 'Experience info retrieved successfully', experience: results[0].experience });
+    res.status(200).json({
+      message: 'Experience info retrieved successfully',
+      experience: results[0].experience
+    });
   });
 });
+
 
 // POST Experience Info
 router.post('/save-experience', (req, res) => {
   const { user_id, experience } = req.body;
+  const referer = req.headers.referer || '';
+
+  const role = referer.includes('mentor-dashboard')
+    ? 'mentor'
+    : referer.includes('admin-dashboard')
+    ? 'admin'
+    : 'user';
 
   if (!user_id || !experience) {
     return res.status(400).json({ message: 'user_id and experience are required' });
   }
 
+  let tableName;
+  if (role === 'user') tableName = 'profile_info';
+  else if (role === 'mentor') tableName = 'mentor_profile_info';
+  else if (role === 'admin') tableName = 'admin_profile_info';
+  else return res.status(400).json({ message: 'Invalid role' });
+
   const query = `
-    INSERT INTO profile_info (user_id, experience)
+    INSERT INTO ${tableName} (user_id, experience)
     VALUES (?, ?)
     ON DUPLICATE KEY UPDATE experience = VALUES(experience)
   `;
@@ -275,15 +361,29 @@ router.post('/save-experience', (req, res) => {
   });
 });
 
+
 // GET Education Info
 router.get('/get-education/:user_id', (req, res) => {
   const userId = req.params.user_id;
+  const referer = req.headers.referer || '';
+
+  const role = referer.includes('mentor-dashboard')
+    ? 'mentor'
+    : referer.includes('admin-dashboard')
+    ? 'admin'
+    : 'user';
 
   if (!userId) {
     return res.status(400).json({ message: 'user_id is required' });
   }
 
-  const query = `SELECT education FROM profile_info WHERE user_id = ?`;
+  let tableName;
+  if (role === 'user') tableName = 'profile_info';
+  else if (role === 'mentor') tableName = 'mentor_profile_info';
+  else if (role === 'admin') tableName = 'admin_profile_info';
+  else return res.status(400).json({ message: 'Invalid role' });
+
+  const query = `SELECT education FROM ${tableName} WHERE user_id = ?`;
 
   db.query(query, [userId], (err, results) => {
     if (err) {
@@ -295,20 +395,37 @@ router.get('/get-education/:user_id', (req, res) => {
       return res.status(404).json({ message: 'No education info found', education: [] });
     }
 
-    res.status(200).json({ message: 'Education info retrieved successfully', education: results[0].education });
+    res.status(200).json({
+      message: 'Education info retrieved successfully',
+      education: results[0].education
+    });
   });
 });
+
 
 // POST Education Info
 router.post('/save-education', (req, res) => {
   const { user_id, education } = req.body;
+  const referer = req.headers.referer || '';
+
+  const role = referer.includes('mentor-dashboard')
+    ? 'mentor'
+    : referer.includes('admin-dashboard')
+    ? 'admin'
+    : 'user';
 
   if (!user_id || !education) {
     return res.status(400).json({ message: 'user_id and education are required' });
   }
 
+  let tableName;
+  if (role === 'user') tableName = 'profile_info';
+  else if (role === 'mentor') tableName = 'mentor_profile_info';
+  else if (role === 'admin') tableName = 'admin_profile_info';
+  else return res.status(400).json({ message: 'Invalid role' });
+
   const query = `
-    INSERT INTO profile_info (user_id, education)
+    INSERT INTO ${tableName} (user_id, education)
     VALUES (?, ?)
     ON DUPLICATE KEY UPDATE education = VALUES(education)
   `;
@@ -326,12 +443,25 @@ router.post('/save-education', (req, res) => {
 // GET Certificate Info
 router.get('/get-certificate/:user_id', (req, res) => {
   const userId = req.params.user_id;
+  const referer = req.headers.referer || '';
+
+  const role = referer.includes('mentor-dashboard')
+    ? 'mentor'
+    : referer.includes('admin-dashboard')
+    ? 'admin'
+    : 'user';
 
   if (!userId) {
     return res.status(400).json({ message: 'user_id is required' });
   }
 
-  const query = `SELECT certificate FROM profile_info WHERE user_id = ?`;
+  let tableName;
+  if (role === 'user') tableName = 'profile_info';
+  else if (role === 'mentor') tableName = 'mentor_profile_info';
+  else if (role === 'admin') tableName = 'admin_profile_info';
+  else return res.status(400).json({ message: 'Invalid role' });
+
+  const query = `SELECT certificate FROM ${tableName} WHERE user_id = ?`;
 
   db.query(query, [userId], (err, results) => {
     if (err) {
@@ -350,16 +480,30 @@ router.get('/get-certificate/:user_id', (req, res) => {
   });
 });
 
+
 // POST Certificate Info
 router.post('/save-certificate', (req, res) => {
   const { user_id, certificate } = req.body;
+  const referer = req.headers.referer || '';
+
+  const role = referer.includes('mentor-dashboard')
+    ? 'mentor'
+    : referer.includes('admin-dashboard')
+    ? 'admin'
+    : 'user';
 
   if (!user_id || !certificate) {
     return res.status(400).json({ message: 'user_id and certificate are required' });
   }
 
+  let tableName;
+  if (role === 'user') tableName = 'profile_info';
+  else if (role === 'mentor') tableName = 'mentor_profile_info';
+  else if (role === 'admin') tableName = 'admin_profile_info';
+  else return res.status(400).json({ message: 'Invalid role' });
+
   const query = `
-    INSERT INTO profile_info (user_id, certificate)
+    INSERT INTO ${tableName} (user_id, certificate)
     VALUES (?, ?)
     ON DUPLICATE KEY UPDATE certificate = VALUES(certificate)
   `;
@@ -374,15 +518,29 @@ router.post('/save-certificate', (req, res) => {
   });
 });
 
+
 // GET Project Info
 router.get('/get-projects/:user_id', (req, res) => {
   const userId = req.params.user_id;
+  const referer = req.headers.referer || '';
+
+  const role = referer.includes('mentor-dashboard')
+    ? 'mentor'
+    : referer.includes('admin-dashboard')
+    ? 'admin'
+    : 'user';
 
   if (!userId) {
     return res.status(400).json({ message: 'user_id is required' });
   }
 
-  const query = `SELECT projects FROM profile_info WHERE user_id = ?`;
+  let tableName;
+  if (role === 'user') tableName = 'profile_info';
+  else if (role === 'mentor') tableName = 'mentor_profile_info';
+  else if (role === 'admin') tableName = 'admin_profile_info';
+  else return res.status(400).json({ message: 'Invalid role' });
+
+  const query = `SELECT projects FROM ${tableName} WHERE user_id = ?`;
 
   db.query(query, [userId], (err, results) => {
     if (err) {
@@ -404,13 +562,26 @@ router.get('/get-projects/:user_id', (req, res) => {
 // POST Project Info
 router.post('/save-projects', (req, res) => {
   const { user_id, projects } = req.body;
+  const referer = req.headers.referer || '';
+
+  const role = referer.includes('mentor-dashboard')
+    ? 'mentor'
+    : referer.includes('admin-dashboard')
+    ? 'admin'
+    : 'user';
 
   if (!user_id || !projects) {
     return res.status(400).json({ message: 'user_id and projects are required' });
   }
 
+  let tableName;
+  if (role === 'user') tableName = 'profile_info';
+  else if (role === 'mentor') tableName = 'mentor_profile_info';
+  else if (role === 'admin') tableName = 'admin_profile_info';
+  else return res.status(400).json({ message: 'Invalid role' });
+
   const query = `
-    INSERT INTO profile_info (user_id, projects)
+    INSERT INTO ${tableName} (user_id, projects)
     VALUES (?, ?)
     ON DUPLICATE KEY UPDATE projects = VALUES(projects)
   `;
@@ -424,6 +595,70 @@ router.post('/save-projects', (req, res) => {
     res.status(200).json({ message: 'Projects info saved successfully', success: true });
   });
 });
+
+// GET niche or Experience 
+router.get('/get-niche-or-experience/:user_id/:role', (req, res) => {
+  const { user_id, role } = req.params;
+
+  if (!user_id || !role) {
+    return res.status(400).json({ message: 'user_id and role are required' });
+  }
+
+  const query = role === 'mentor'
+    ? `SELECT work_experience FROM mentor_profile_info WHERE user_id = ?`
+    : `SELECT niche FROM profile_info WHERE user_id = ?`;
+
+  db.query(query, [user_id], (err, results) => {
+    if (err) {
+      console.error('Error fetching info:', err);
+      return res.status(500).json({ message: 'Database error', error: err.message });
+    }
+
+    const data =
+      results.length === 0
+        ? null
+        : role === 'mentor'
+        ? results[0].work_experience
+        : results[0].niche;
+
+    res.status(200).json({
+      message: 'Info fetched successfully',
+      value: data
+    });
+  });
+});
+
+// POST niche or experience
+router.post('/save-niche-or-experience', (req, res) => {
+  const { user_id, role, value } = req.body;  
+
+  if (!user_id || !role || !value) {
+    return res.status(400).json({ message: 'user_id, role, and value are required' });
+  }
+
+  const query =
+    role === 'mentor'
+      ? `
+      INSERT INTO mentor_profile_info (user_id, work_experience)
+      VALUES (?, ?)
+      ON DUPLICATE KEY UPDATE work_experience = VALUES(work_experience)
+    `
+      : `
+      INSERT INTO profile_info (user_id, niche)
+      VALUES (?, ?)
+      ON DUPLICATE KEY UPDATE niche = VALUES(niche)
+    `;
+
+  db.query(query, [user_id, value], (err, result) => {
+    if (err) {
+      console.error('Error saving info:', err);
+      return res.status(500).json({ message: 'Database error', error: err.message });
+    }
+
+    res.status(200).json({ message: 'Info saved successfully', success: true });
+  });
+});
+
 
 
 module.exports = router;

@@ -3,6 +3,7 @@ const db = require('./db');
 require('dotenv').config();
 const app = express();
 const cors = require('cors');
+const { swaggerUi, swaggerSpec } = require("./swagger");
 
 const corsOptions = {
   origin: 'http://localhost:5173',  //'https://startups.com', // Replace with your frontend domain
@@ -50,12 +51,12 @@ app.use('/api/package', packagesService);
 app.use('/api/email', emailService);
 app.use("", googleAuth);
 app.use('/api/profile', profileService);
-
-
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 
 // Start the server
 const PORT = process.env.SERVER_PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
+  console.log("Swagger docs at http://localhost:5000/api-docs");
 });
