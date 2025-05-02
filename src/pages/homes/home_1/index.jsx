@@ -15,8 +15,8 @@ import SelectFilter from "@/components/hotels/filter-tabs/SelectFilter";
 import MetaComponent from "@/components/common/MetaComponent";
 
 const metadata = {
-  title: "Home-1 || GoTrip - Travel & Tour ReactJs Template",
-  description: "GoTrip - Travel & Tour ReactJs Template",
+  title: "Home || Startups24x7 - Discover, Connect & Grow with Startups",
+  description: "Startups24x7 - A platform to explore top startups, services, events, and growth opportunities.",
 };
 
 const Home_1 = () => {

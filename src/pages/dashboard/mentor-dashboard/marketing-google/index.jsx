@@ -1,5 +1,5 @@
 import React from "react";
-import DashboardPage from "../../../../components/dashboard/vendor-dashboard/marketing-google";
+import DashboardPage from "../../../../components/dashboard/mentor-dashboard/marketing-google";
 
 import MetaComponent from "@/components/common/MetaComponent";
 
@@ -8,7 +8,7 @@ const metadata = {
   description: "GoTrip - Travel & Tour ReactJs Template",
 };
 
-export default function VendorMarketingGoogle() {
+export default function MentorMarketingGoogle() {
   return (
     <>
       <MetaComponent meta={metadata} />

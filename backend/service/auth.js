@@ -8,7 +8,7 @@ const sendEmail = require('../Utils/SendEmail');
 const app = express();
 let otpStore = {}; 
 
-const allowedRoles = ['user', 'mentor']; 
+const allowedRoles = ['user', 'mentor', 'admin']; 
 
 // ---------------- LOGIN ---------------- //
 app.post('/login', (req, res) => {

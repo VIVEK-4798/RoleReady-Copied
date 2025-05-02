@@ -37,7 +37,10 @@ const LoginForm = () => {
         localStorage.setItem("user", JSON.stringify(userData));
         localStorage.setItem(`${userRole}Id`, userId);
         localStorage.setItem("role", userRole);
+        
         sessionStorage.setItem("user", userRole);
+        console.log("userRole", userRole);
+        
 
         toast.success("Login successful!");
 

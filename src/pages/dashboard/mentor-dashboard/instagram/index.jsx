@@ -1,6 +1,6 @@
 import React from "react";
-import DashboardPage from "../../../../components/dashboard/vendor-dashboard/instagram";
-import LandingPage from "../../../../components/dashboard/vendor-dashboard/landing-page";
+import DashboardPage from "../../../../components/dashboard/mentor-dashboard/instagram";
+import LandingPage from "../../../../components/dashboard/mentor-dashboard/landing-page";
 
 import MetaComponent from "@/components/common/MetaComponent";
 import { useNavigate } from "react-router-dom";
@@ -10,7 +10,7 @@ const metadata = {
   description: "GoTrip - Travel & Tour ReactJs Template",
 };
 
-export default function VendorInstagram() {
+export default function MentorInstagram() {
   return (
     <>
       <MetaComponent meta={metadata} />

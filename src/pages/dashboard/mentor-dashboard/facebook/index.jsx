@@ -1,6 +1,6 @@
 import React from "react";
-import DashboardPage from "../../../../components/dashboard/vendor-dashboard/facebook";
-import LandingPage from "../../../../components/dashboard/vendor-dashboard/landing-page";
+import DashboardPage from "../../../../components/dashboard/mentor-dashboard/facebook";
+import LandingPage from "../../../../components/dashboard/mentor-dashboard/landing-page";
 
 import MetaComponent from "@/components/common/MetaComponent";
 import { useNavigate } from "react-router-dom";
@@ -10,7 +10,7 @@ const metadata = {
   description: "GoTrip - Travel & Tour ReactJs Template",
 };
 
-export default function VendorFacebook() {
+export default function MentorFacebook() {
   return (
     <>
       <MetaComponent meta={metadata} />

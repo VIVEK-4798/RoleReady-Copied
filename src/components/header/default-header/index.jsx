@@ -9,6 +9,7 @@ import MobileMenu from "../MobileMenu";
 const Header1 = () => {
   const [navbar, setNavbar] = useState(false);
   const user = sessionStorage.getItem("user");
+  
 
   const changeBackground = () => {
     if (window.scrollY >= 10) {
@@ -84,7 +85,15 @@ const Header1 = () => {
                     <div className="w-1 h-20 bg-black-20" />
                   </div>
                   <Link
-                    to="/login"
+                    to={
+                      user === "mentor"
+                        ? "/mentor-dashboard/dashboard"
+                        : user === "admin"
+                        ? "/admin-dashboard/dashboard"
+                        : user === "user"
+                        ? "/vendor-dashboard/dashboard"
+                        : "/login"
+                    }
                     className="button px-30 fw-400 text-14 -white h-50 text-dark-1"
                   >
                     {user ? "Dashboard" : "Login"}

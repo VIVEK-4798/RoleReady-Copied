@@ -6,8 +6,8 @@ import MetaComponent from "@/components/common/MetaComponent";
 import { useNavigate } from "react-router-dom";
 
 const metadata = {
-  title: "Vendor Dashboard || GoTrip - Travel & Tour ReactJs Template",
-  description: "GoTrip - Travel & Tour ReactJs Template",
+  title: "Vendor Dashboard || Startups24x7 - Startup Discovery & Services Platform",
+  description: "Startups24x7 - Manage your listings, bookings, and startup services all in one place.",
 };
 
 export default function MentorDashboard() {
