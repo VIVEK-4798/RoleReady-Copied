@@ -33,7 +33,7 @@ const EducationPopupPage = () => {
 
   const fetchEducation = async () => {
     try {
-      const res = await axios.get(`${api}/api/profile/get-education/${user_id}`);
+      const res = await axios.get(`${api}/api/profile/get-education/${user_id}?role=mentor`);
       if (res.data.education) {
         const parsedEducation = JSON.parse(res.data.education); 
         setSavedEducation(parsedEducation);
@@ -70,6 +70,7 @@ const EducationPopupPage = () => {
       const res = await axios.post(`${api}/api/profile/save-education`, {
         user_id,
         education,
+        role: 'mentor'
       });
       if (res.data.success) {
         toast.success("Education saved successfully");

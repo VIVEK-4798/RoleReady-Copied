@@ -37,8 +37,11 @@ const LoginForm = () => {
         localStorage.setItem("user", JSON.stringify(userData));
         localStorage.setItem(`${userRole}Id`, userId);
         localStorage.setItem("role", userRole);
+        console.log("userRole", userRole);
         
         sessionStorage.setItem("user", userRole);
+        console.log("userRole session", userRole);
+
         await axios.post(`${api}/api/user-activity/login-streak`, {
           userId: userId
         });        

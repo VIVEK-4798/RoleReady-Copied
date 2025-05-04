@@ -20,15 +20,29 @@ const upload = multer({ storage });
 // Get all info
 router.get('/get-profile-info/:user_id', (req, res) => {
   const userId = req.params.user_id;
-  if (!userId) return res.status(400).json({ message: 'user_id is required' });
+  const role = req.query.role || 'user';
+
+  if (!userId) {
+    return res.status(400).json({ message: 'user_id is required' });
+  }
+
+  let tableName;
+  if (role === 'user') tableName = 'profile_info';
+  else if (role === 'mentor') tableName = 'mentor_profile_info';
+  else if (role === 'admin') tableName = 'admin_profile_info';
+  else return res.status(400).json({ message: 'Invalid role' });
 
   const query = `
     SELECT about_text, skills, experience, resume_file, projects, certificate, education
-    FROM profile_info WHERE user_id = ?
+    FROM ${tableName}
+    WHERE user_id = ?
   `;
 
   db.query(query, [userId], (err, results) => {
-    if (err) return res.status(500).json({ message: 'Database error', error: err.message });
+    if (err) {
+      console.error('Error fetching profile info:', err);
+      return res.status(500).json({ message: 'Database error', error: err.message });
+    }
 
     if (results.length === 0) {
       return res.status(200).json({
@@ -42,23 +56,27 @@ router.get('/get-profile-info/:user_id', (req, res) => {
       });
     }
 
-    res.status(200).json(results[0]);
+    const result = results[0];
+    res.status(200).json({
+      about_text: result.about_text || '',
+      skills: result.skills || '',
+      experience: result.experience || '',
+      resume_file: result.resume_file || '',
+      projects: result.projects ? JSON.parse(result.projects) : '',
+      certificate: result.certificate ? JSON.parse(result.certificate) : '',
+      education: result.education ? JSON.parse(result.education) : '',
+    });
   });
 });
+
 
 // GET About info
 router.get('/get-about/:user_id', (req, res) => {
   const userId = req.params.user_id;
-  const pathParts = req.originalUrl.split('/');
-  
-  const role = pathParts.includes('mentor-dashboard')
-    ? 'mentor'
-    : pathParts.includes('admin-dashboard')
-    ? 'admin'
-    : 'user';
+  const role = req.query.role; // Now using query param for role
 
-  if (!userId) {
-    return res.status(400).json({ message: 'user_id is required' });
+  if (!userId || !role) {
+    return res.status(400).json({ message: 'user_id and role are required' });
   }
 
   let tableName;
@@ -86,19 +104,10 @@ router.get('/get-about/:user_id', (req, res) => {
 
 // POST About info
 router.post('/save-about', (req, res) => {
-  const { user_id, about_text } = req.body;
+  const { user_id, about_text, role } = req.body;
 
-  const referer = req.headers.referer || '';
-
-  // Determine role from referer URL
-  const role = referer.includes('mentor-dashboard')
-    ? 'mentor'
-    : referer.includes('admin-dashboard')
-    ? 'admin'
-    : 'user';
-
-  if (!user_id || !about_text) {
-    return res.status(400).json({ success: false, message: 'user_id and about_text are required' });
+  if (!user_id || !about_text || !role) {
+    return res.status(400).json({ success: false, message: 'user_id, about_text, and role are required' });
   }
 
   let tableName;
@@ -132,16 +141,10 @@ router.post('/save-about', (req, res) => {
 // GET Resume info
 router.get('/get-resume/:user_id', (req, res) => {
   const userId = req.params.user_id;
-  const referer = req.headers.referer || '';
+  const role = req.query.role;
 
-  const role = referer.includes('mentor-dashboard')
-    ? 'mentor'
-    : referer.includes('admin-dashboard')
-    ? 'admin'
-    : 'user';
-
-  if (!userId) {
-    return res.status(400).json({ message: 'user_id is required' });
+  if (!userId || !role) {
+    return res.status(400).json({ message: 'user_id and role are required' });
   }
 
   let tableName;
@@ -167,20 +170,15 @@ router.get('/get-resume/:user_id', (req, res) => {
 });
 
 
+
 // POST Resume info
 router.post('/upload-resume', upload.single('resume'), (req, res) => {
   const user_id = req.body.user_id;
+  const role = req.body.role;
   const resume_file = req.file?.filename;
-  const referer = req.headers.referer || '';
 
-  const role = referer.includes('mentor-dashboard')
-    ? 'mentor'
-    : referer.includes('admin-dashboard')
-    ? 'admin'
-    : 'user';
-
-  if (!user_id || !resume_file) {
-    return res.status(400).json({ message: 'user_id and resume_file are required' });
+  if (!user_id || !resume_file || !role) {
+    return res.status(400).json({ message: 'user_id, resume_file, and role are required' });
   }
 
   let tableName;
@@ -195,7 +193,7 @@ router.post('/upload-resume', upload.single('resume'), (req, res) => {
     ON DUPLICATE KEY UPDATE resume_file = VALUES(resume_file)
   `;
 
-  db.query(query, [user_id, resume_file], (err, result) => {
+  db.query(query, [user_id, resume_file], (err) => {
     if (err) {
       console.error('Error saving Resume info:', err);
       return res.status(500).json({ message: 'Database error', error: err.message });
@@ -209,13 +207,7 @@ router.post('/upload-resume', upload.single('resume'), (req, res) => {
 // GET Skills
 router.get('/get-skills/:user_id', (req, res) => {
   const userId = req.params.user_id;
-  const referer = req.headers.referer || '';
-
-  const role = referer.includes('mentor-dashboard')
-    ? 'mentor'
-    : referer.includes('admin-dashboard')
-    ? 'admin'
-    : 'user';
+  const role = req.query.role || 'user';
 
   if (!userId) {
     return res.status(400).json({ message: 'user_id is required' });
@@ -244,16 +236,10 @@ router.get('/get-skills/:user_id', (req, res) => {
 });
 
 
+
 // POST Skills
 router.post('/save-skills', (req, res) => {
-  const { user_id, skills } = req.body;
-  const referer = req.headers.referer || '';
-
-  const role = referer.includes('mentor-dashboard')
-    ? 'mentor'
-    : referer.includes('admin-dashboard')
-    ? 'admin'
-    : 'user';
+  const { user_id, skills, role = 'user' } = req.body;
 
   if (!user_id || !skills) {
     return res.status(400).json({ message: 'user_id and skills are required' });
@@ -282,16 +268,11 @@ router.post('/save-skills', (req, res) => {
 });
 
 
+
 // GET Experience Info
 router.get('/get-experience/:user_id', (req, res) => {
   const userId = req.params.user_id;
-  const referer = req.headers.referer || '';
-
-  const role = referer.includes('mentor-dashboard')
-    ? 'mentor'
-    : referer.includes('admin-dashboard')
-    ? 'admin'
-    : 'user';
+  const role = req.query.role || 'user';
 
   if (!userId) {
     return res.status(400).json({ message: 'user_id is required' });
@@ -323,16 +304,10 @@ router.get('/get-experience/:user_id', (req, res) => {
 });
 
 
+
 // POST Experience Info
 router.post('/save-experience', (req, res) => {
-  const { user_id, experience } = req.body;
-  const referer = req.headers.referer || '';
-
-  const role = referer.includes('mentor-dashboard')
-    ? 'mentor'
-    : referer.includes('admin-dashboard')
-    ? 'admin'
-    : 'user';
+  const { user_id, experience, role = 'user' } = req.body;  
 
   if (!user_id || !experience) {
     return res.status(400).json({ message: 'user_id and experience are required' });
@@ -364,13 +339,7 @@ router.post('/save-experience', (req, res) => {
 // GET Education Info
 router.get('/get-education/:user_id', (req, res) => {
   const userId = req.params.user_id;
-  const referer = req.headers.referer || '';
-
-  const role = referer.includes('mentor-dashboard')
-    ? 'mentor'
-    : referer.includes('admin-dashboard')
-    ? 'admin'
-    : 'user';
+  const role = req.query.role || 'user';
 
   if (!userId) {
     return res.status(400).json({ message: 'user_id is required' });
@@ -402,16 +371,10 @@ router.get('/get-education/:user_id', (req, res) => {
 });
 
 
+
 // POST Education Info
 router.post('/save-education', (req, res) => {
-  const { user_id, education } = req.body;
-  const referer = req.headers.referer || '';
-
-  const role = referer.includes('mentor-dashboard')
-    ? 'mentor'
-    : referer.includes('admin-dashboard')
-    ? 'admin'
-    : 'user';
+  const { user_id, education, role = 'user' } = req.body;
 
   if (!user_id || !education) {
     return res.status(400).json({ message: 'user_id and education are required' });
@@ -439,16 +402,11 @@ router.post('/save-education', (req, res) => {
   });
 });
 
+
 // GET Certificate Info
 router.get('/get-certificate/:user_id', (req, res) => {
   const userId = req.params.user_id;
-  const referer = req.headers.referer || '';
-
-  const role = referer.includes('mentor-dashboard')
-    ? 'mentor'
-    : referer.includes('admin-dashboard')
-    ? 'admin'
-    : 'user';
+  const role = req.query.role || 'user';
 
   if (!userId) {
     return res.status(400).json({ message: 'user_id is required' });
@@ -480,16 +438,10 @@ router.get('/get-certificate/:user_id', (req, res) => {
 });
 
 
+
 // POST Certificate Info
 router.post('/save-certificate', (req, res) => {
-  const { user_id, certificate } = req.body;
-  const referer = req.headers.referer || '';
-
-  const role = referer.includes('mentor-dashboard')
-    ? 'mentor'
-    : referer.includes('admin-dashboard')
-    ? 'admin'
-    : 'user';
+  const { user_id, certificate, role = 'user' } = req.body;
 
   if (!user_id || !certificate) {
     return res.status(400).json({ message: 'user_id and certificate are required' });
@@ -521,13 +473,7 @@ router.post('/save-certificate', (req, res) => {
 // GET Project Info
 router.get('/get-projects/:user_id', (req, res) => {
   const userId = req.params.user_id;
-  const referer = req.headers.referer || '';
-
-  const role = referer.includes('mentor-dashboard')
-    ? 'mentor'
-    : referer.includes('admin-dashboard')
-    ? 'admin'
-    : 'user';
+  const role = req.query.role || 'user';
 
   if (!userId) {
     return res.status(400).json({ message: 'user_id is required' });
@@ -558,16 +504,10 @@ router.get('/get-projects/:user_id', (req, res) => {
   });
 });
 
+
 // POST Project Info
 router.post('/save-projects', (req, res) => {
-  const { user_id, projects } = req.body;
-  const referer = req.headers.referer || '';
-
-  const role = referer.includes('mentor-dashboard')
-    ? 'mentor'
-    : referer.includes('admin-dashboard')
-    ? 'admin'
-    : 'user';
+  const { user_id, projects, role = 'user' } = req.body;
 
   if (!user_id || !projects) {
     return res.status(400).json({ message: 'user_id and projects are required' });
@@ -594,6 +534,7 @@ router.post('/save-projects', (req, res) => {
     res.status(200).json({ message: 'Projects info saved successfully', success: true });
   });
 });
+
 
 // GET niche or Experience 
 router.get('/get-niche-or-experience/:user_id/:role', (req, res) => {

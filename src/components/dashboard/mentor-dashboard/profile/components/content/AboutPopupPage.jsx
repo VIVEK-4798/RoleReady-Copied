@@ -12,7 +12,7 @@ const AboutPopupPage = () => {
   const [savedAboutText, setSavedAboutText] = useState('');
 
   const user = JSON.parse(localStorage.getItem("user"));
-  const user_id = user?.user_id;
+  const user_id = user?.user_id;  
   
   useEffect(() => {
     if (!user_id) {
@@ -24,7 +24,7 @@ const AboutPopupPage = () => {
 
   const fetchAbout = async () => {
     try {
-      const res = await axios.get(`${api}/api/profile/get-about/${user_id}`);
+      const res = await axios.get(`${api}/api/profile/get-about/${user_id}?role=mentor`);
       if (res.data.about_text) {
         setSavedAboutText(res.data.about_text);
       }
@@ -53,7 +53,8 @@ const AboutPopupPage = () => {
     try {
       const response = await axios.post(`${api}/api/profile/save-about`, {
         user_id,
-        about_text: aboutText
+        about_text: aboutText,
+        role: 'mentor'
       });
 
       if (response.data.success) {

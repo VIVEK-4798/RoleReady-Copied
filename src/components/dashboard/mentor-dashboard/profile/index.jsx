@@ -18,6 +18,16 @@ const index = () => {
 
         <div className="dashboard__main">
           <div className="dashboard__content bg-light-2">
+          <div className="row y-gap-20 justify-between items-end pb-30 lg:pb-40 md:pb-32">
+              <div className="col-12">
+                {/* <h1 className="text-30 lh-14 fw-600">{dashboardTitle}</h1> */}
+                <h1 className="text-30 lh-14 fw-600">Mentor Profile</h1>
+                <div className="text-15 text-light-1">
+                  View and update your personal details, skills, resume, and more.
+                </div>
+              </div>
+              {/* End .col-12 */}
+            </div>
             {/* Top Profile Section */}
             <ProfileHeader/>
 

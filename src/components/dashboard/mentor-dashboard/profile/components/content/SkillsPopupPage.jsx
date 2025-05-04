@@ -33,7 +33,7 @@ const SkillsPopupPage = () => {
 
   const fetchSkills = async () => {
     try {
-      const res = await axios.get(`${api}/api/profile/get-skills/${user_id}`);
+      const res = await axios.get(`${api}/api/profile/get-skills/${user_id}?role=mentor`);
       if (res.data.skills) {
         const skillArray = res.data.skills.split(",").map((s) => s.trim());
         setSavedSkills(skillArray);
@@ -61,6 +61,7 @@ const SkillsPopupPage = () => {
       const response = await axios.post(`${api}/api/profile/save-skills`, {
         user_id,
         skills: selectedSkills.join(", "),
+        role: 'mentor'
       });
 
       if (response.data.success) {

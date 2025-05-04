@@ -13,7 +13,7 @@ const ProfileHeader = () => {
 
     const fetchEducation = async () => {
       try {
-        const res = await fetch(`${api}/api/profile/get-education/${user?.user_id}`);
+        const res = await fetch(`${api}/api/profile/get-education/${user?.user_id}?role=mentor`);
         const data = await res.json();
         
         if (data.education) {
@@ -30,14 +30,13 @@ const ProfileHeader = () => {
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user"));
+        
     setUserData(user);
     const fetchProfileInfo = async () => {
       try {
-        const res = await fetch(`${api}/api/profile/get-profile-info/${user?.user_id}`);
+        const res = await fetch(`${api}/api/profile/get-profile-info/${user?.user_id}?role=mentor`);
         const data = await res.json();
-        setProfileInfo(data);
-        console.log(data);
-        
+        setProfileInfo(data);        
       } catch (err) {
         console.error("Failed to fetch profile info:", err);
       }

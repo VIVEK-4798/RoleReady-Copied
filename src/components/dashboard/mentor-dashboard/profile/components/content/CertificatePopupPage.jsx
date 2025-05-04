@@ -27,7 +27,7 @@ const CertificatePopupPage = () => {
 
   const fetchCertificate = async () => {
     try {
-      const res = await axios.get(`${api}/api/profile/get-certificate/${user_id}`);
+      const res = await axios.get(`${api}/api/profile/get-certificate/${user_id}?role=mentor`);
       if (res.data.certificate) {
         const parsed = JSON.parse(res.data.certificate); // Parse it here
         setSavedCertificate(parsed);
@@ -51,6 +51,7 @@ const CertificatePopupPage = () => {
       const res = await axios.post(`${api}/api/profile/save-certificate`, {
         user_id,
         certificate,
+        role: 'mentor'
       });
 
       if (res.data.success) {

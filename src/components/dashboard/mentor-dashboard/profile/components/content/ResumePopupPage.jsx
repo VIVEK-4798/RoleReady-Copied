@@ -31,7 +31,7 @@ const ResumePopupPage = () => {
 
   const fetchResume = async () => {
     try {
-      const res = await axios.get(`${api}/api/profile/get-resume/${user_id}`);
+      const res = await axios.get(`${api}/api/profile/get-resume/${user_id}?role=mentor`);
       if (res.data.resume_name) {
         setSavedResumeName(res.data.resume_name);
       }
@@ -60,11 +60,12 @@ const ResumePopupPage = () => {
       toast.error("Please select a file");
       return;
     }
-
+  
     const formData = new FormData();
     formData.append("user_id", user_id);
     formData.append("resume", resumeFile);
-
+    formData.append("role", "mentor"); 
+  
     try {
       const res = await axios.post(`${api}/api/profile/upload-resume`, formData);
       if (res.data.success) {
@@ -79,6 +80,7 @@ const ResumePopupPage = () => {
       toast.error("Server error");
     }
   };
+  
 
   const openEditPopup = () => {
     setResumeFile(null); // Reset to allow new selection

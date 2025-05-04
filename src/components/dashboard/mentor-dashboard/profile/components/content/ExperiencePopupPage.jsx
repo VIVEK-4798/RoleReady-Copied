@@ -30,9 +30,9 @@ const ExperiencePopupPage = () => {
 
   const fetchExperience = async () => {
     try {
-      const res = await axios.get(`${api}/api/profile/get-experience/${user_id}`);
+      const res = await axios.get(`${api}/api/profile/get-experience/${user_id}?role=mentor`);
       if (res.data.experience) {
-        const parsedExperience = JSON.parse(res.data.experience); // Parse the stringified JSON
+        const parsedExperience = JSON.parse(res.data.experience);
         setSavedExperience(parsedExperience);
       }
     } catch (err) {
@@ -62,7 +62,8 @@ const ExperiencePopupPage = () => {
     try {
       const res = await axios.post(`${api}/api/profile/save-experience`, {
         user_id,
-        experience, // pass as a single object, or [experience] if your backend expects an array
+        experience, 
+        role: 'mentor'
       });
   
       if (res.data.success) {

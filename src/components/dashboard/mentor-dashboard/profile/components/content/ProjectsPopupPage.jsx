@@ -25,7 +25,7 @@ const ProjectsPopupPage = () => {
 
   const fetchProject = async () => {
     try {
-      const res = await axios.get(`${api}/api/profile/get-projects/${user_id}`);
+      const res = await axios.get(`${api}/api/profile/get-projects/${user_id}?role=mentor`);
       if (res.data.projects) {
         setSavedProject(res.data.projects); 
       }
@@ -48,6 +48,7 @@ const ProjectsPopupPage = () => {
       const res = await axios.post(`${api}/api/profile/save-projects`, {
         user_id,
         projects: projectData,
+        role: 'mentor'
       });
   
       if (res.data.success) {
