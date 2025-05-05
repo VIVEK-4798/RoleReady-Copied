@@ -12,50 +12,57 @@ const StreaksSection = () => {
   useEffect(() => {
     const fetchStreakData = async () => {
       const user = JSON.parse(localStorage.getItem("user"));
-      if (!user || isPainted.current) return;
+      // if (!user || isPainted.current) return;
+      if (!user) return;
 
       try {
         const response = await axios.get(`${api}/api/user-activity/login-streak/${user.user_id}`);
         const streakData = response.data;
-        console.log(response.data);
         
         const transformedData = {};
         streakData.forEach(item => {
-          const localDate = new Date(new Date(item.date).toLocaleDateString("en-US")); 
-          const timestamp = Math.floor(localDate.getTime() / 1000);
-          console.log(item.date, timestamp, new Date(timestamp * 1000))
-          transformedData[timestamp] = item.activity_count;
+          const localDate = new Date(item.date);
+          localDate.setHours(0, 0, 0, 0); 
+          const timestamp = Math.floor(localDate.getTime() / 1000);          
+          console.log("Final mapped:", timestamp, new Date(timestamp * 1000));
+          transformedData[timestamp] = Number(item.activity_count);   
+          console.log("Transformed Data:", transformedData);       
         });
         
-
         const cal = new CalHeatmap();
         calRef.current = cal;
-
-        await cal.paint(
-          {
-            itemSelector: "#cal-heatmap",
-            domain: { type: "month", label: { position: "top" }, gutter: 10 },
-            subDomain: { type: "day", radius: 2, width: 12, height: 12 },
-            range: 12,
-            date: { start: new Date(new Date().setFullYear(new Date().getFullYear() - 1)) },
-            scale: { color: { scheme: "YlGn", domain: [0, 1, 2, 3, 4, 5] } },
-            data: {
-              source: transformedData,
-              type: "json",
-            },            
+        const maxValue = Math.max(...Object.values(transformedData));
+        const currentYear = new Date().getFullYear();
+        const start = new Date(currentYear, 0, 1);
+        
+        await cal.paint({
+          itemSelector: "#cal-heatmap",
+          domain: { type: "month", label: { position: "top" }, gutter: 10 },
+          subDomain: { type: "day", radius: 2, width: 12, height: 12 },
+          range: 12,
+          date: { start },
+          scale: {
+            color: {
+              scheme: "YlGn",
+              domain: [0, maxValue || 5],
+              type: "linear",
+            },
           },
+          data: {
+            source: transformedData,
+            type: "json",
+          },
+        }, [
           [
-            [
-              Tooltip,
-              {
-                text: function (date, value, dayjsDate) {
-                  const formattedDate = dayjsDate.format("D MMM");
-                  return `${formattedDate} | ${value ? value + " Activities" : "No Activities"}`;
-                },
+            Tooltip,
+            {
+              text: function (date, value, dayjsDate) {
+                const formattedDate = dayjsDate.format("D MMM");
+                return `${formattedDate} | ${value ? value + " Activities" : "No Activities"}`;
               },
-            ],
-          ]
-        );
+            },
+          ],
+        ]);
 
         isPainted.current = true; 
       } catch (error) {
