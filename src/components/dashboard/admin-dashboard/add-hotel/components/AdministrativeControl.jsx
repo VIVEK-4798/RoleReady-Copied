@@ -4,11 +4,10 @@ import BannerUploader from "./content/BannerUploader";
 import FeaturedUploader from "./content/FeaturedUploader";
 import GalleryUploader from "./content/GalleryUploader";
 import { useEffect, useState } from "react";
-import RegionSearch from "@/components/hero/hero-1/RegionSearch";
+// import RegionSearch from "@/components/hero/hero-1/RegionSearch";
 import LocationSearch from "@/components/hero/hero-1/LocationSearch";
 import axios from 'axios';
 import { api } from "@/utils/apiProvider";
-import { showAlert } from "@/utils/isTextMatched";
 import { debounce } from "@/utils/DOMUtils";
 
 const AdministrativeControl = ({ venueFormData = {}, handleChange = () => {}, handleDropDownChange, handleCheckBox }) => {

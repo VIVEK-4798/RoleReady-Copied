@@ -23,21 +23,21 @@ const Sidebar = () => {
     },
     {
       icon: "/img/dashboard/sidebar/house.svg",
-      title: "Venue",
+      title: "Internships",
       allowedRole: ["admin", "venue-user"],
       links: [
-        { title: "All Venues", href: "venues", allowedRole: ["admin", "venue-user"] },
-        { title: "Add Venue", href: "venue/add", allowedRole: ["admin", "venue-user"] },
+        { title: "All Internships", href: "venues", allowedRole: ["admin", "venue-user"] },
+        { title: "Add Internship", href: "venue/add", allowedRole: ["admin", "venue-user"] },
       ],
     },
     {
       icon: "/img/dashboard/sidebar/house.svg",
-      title: "Vendor",
+      title: "Jobs",
       // title: userRole === "admin" ? "Vendor" : userRole === "vendor-user" ? "Services" : "",
       allowedRole: ["admin", "vendor-user"],
       links: [
-        { title: "All Vendor", href: "vendors", allowedRole: ["admin"] },
-        { title: "Add Vendor", href: "vendor/add", allowedRole: ["admin"] },
+        { title: "All Jobs", href: "vendors", allowedRole: ["admin"] },
+        { title: "Add Job", href: "vendor/add", allowedRole: ["admin"] },
         // { title: "All Services", href: "vendors", allowedRole: ["vendor-user"] },
         // { title: "Add Sevice", href: "vendor/add", allowedRole: ["vendor-user"] },
       ],
