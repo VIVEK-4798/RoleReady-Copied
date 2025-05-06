@@ -2,8 +2,9 @@ import { useState } from "react";
 import "../../../../../../styles/modals.css";
 import axios from "axios";
 import { api } from "@/utils/apiProvider";
-// import { showAlert } from "@/utils/isTextMatched";
 import GalleryUploader from "./GalleryUploader";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const AddService = ({ refreshServices = () => {} }) => {
   const [showModal, setShowModal] = useState(false);
@@ -29,8 +30,9 @@ const AddService = ({ refreshServices = () => {} }) => {
         { ...serviceData, service_img: JSON.stringify(serviceData.service_img) }
       );
       console.log("Response:", response);
+  
       if (response.data.success === true) {
-        showAlert("Service added successfully.", "success");
+        toast.success("Service added successfully.");
         setServiceData({
           service_name: "",
           service_img: [],
@@ -39,13 +41,14 @@ const AddService = ({ refreshServices = () => {} }) => {
         setShowModal(false);
         refreshServices();
       } else {
-        showAlert("Something went wrong.", "error");
+        toast.error("Something went wrong.");
       }
     } catch (error) {
       console.error("Error submitting service data:", error);
-      showAlert(error.response?.data?.error || "An error occurred.", "error");
+      toast.error(error.response?.data?.error || "An error occurred.");
     }
   };
+  
 
   return (
     <div className="col-auto">

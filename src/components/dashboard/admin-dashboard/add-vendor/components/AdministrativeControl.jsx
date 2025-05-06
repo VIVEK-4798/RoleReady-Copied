@@ -4,7 +4,7 @@ import BannerUploader from "./content/BannerUploader";
 import FeaturedUploader from "./content/FeaturedUploader";
 import GalleryUploader from "./content/GalleryUploader";
 import { useEffect, useState } from "react";
-import RegionSearch from "@/components/hero/hero-1/RegionSearch";
+// import RegionSearch from "@/components/hero/hero-1/RegionSearch";
 import LocationSearch from "@/components/hero/hero-1/LocationSearch";
 
 const AdministrativeControl = ({vendorData, handleChange = ()=>{},handleCheckBox}) => {
@@ -28,7 +28,7 @@ const AdministrativeControl = ({vendorData, handleChange = ()=>{},handleCheckBox
                 </div>
               </div>
               <div className="text-15 lh-15 text-light-1 ml-10">
-                Do you want set this Vendor as featured.
+                Do you want set this Job as featured.
               </div>
             </div>
           </div>

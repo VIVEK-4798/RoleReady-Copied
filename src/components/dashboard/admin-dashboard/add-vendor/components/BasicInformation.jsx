@@ -66,13 +66,13 @@ const BasicInformation = ({vendorData = {}, handleChange = ()=>{}, handleDropDow
           <div className="col-12">
             <div className="form-input ">
               <input type="text" required name="vendor_name" value={vendorData?.vendor_name} onChange={handleChange}/>
-              <label className="lh-1 text-16 text-light-1">Vendor Name/ Company Name</label>
+              <label className="lh-1 text-16 text-light-1">Job Name <span style={{ color: 'red', fontWeight: '500' }}>*</span></label>
             </div>
           </div>
           <div className="col-12">
             <div className="form-input">
               <input type="text" required name="vendor_address" value={vendorData?.vendor_address} onChange={handleChange} />
-              <label className="lh-1 text-16 text-light-1">Address</label>
+              <label className="lh-1 text-16 text-light-1">Campany Address <span style={{ color: 'red', fontWeight: '500' }}>*</span></label>
             </div>
           </div>
           <div className="col-6">
@@ -145,35 +145,35 @@ const BasicInformation = ({vendorData = {}, handleChange = ()=>{}, handleDropDow
           <div className="col-6">
             <div className="form-input">
               <input type="text" required name="state" value={vendorData?.state} onChange={handleChange} />
-              <label className="lh-1 text-16 text-light-1">State/Province</label>
+              <label className="lh-1 text-16 text-light-1">State/Province <span style={{ color: 'red', fontWeight: '500' }}>*</span></label>
             </div>
           </div>
 
           <div className="col-6">
             <div className="form-input">
               <input type="text" required name="pincode" value={vendorData?.pincode} onChange={handleChange} />
-              <label className="lh-1 text-16 text-light-1">Postal Code</label>
+              <label className="lh-1 text-16 text-light-1">Postal Code <span style={{ color: 'red', fontWeight: '500' }}>*</span></label>
             </div>
           </div>
 
           <div className="col-12">
             <div className="form-input">
               <input type="text" required name="country" value={vendorData?.country} onChange={handleChange} />
-              <label className="lh-1 text-16 text-light-1">Country</label>
+              <label className="lh-1 text-16 text-light-1">Country <span style={{ color: 'red', fontWeight: '500' }}>*</span></label>
             </div>
           </div>
 
           <div className="col-6">
             <div className="form-input">
               <input type="tel" required name="contact_number" value={vendorData?.contact_number} onChange={handleChange} />
-              <label className="lh-1 text-16 text-light-1">Contact Number</label>
+              <label className="lh-1 text-16 text-light-1">Contact Number <span style={{ color: 'red', fontWeight: '500' }}>*</span></label>
             </div>
           </div>
 
           <div className="col-6">
             <div className="form-input">
               <input type="email" required name="email" value={vendorData?.email} onChange={handleChange} />
-              <label className="lh-1 text-16 text-light-1">Contact Email</label>
+              <label className="lh-1 text-16 text-light-1">Contact Email <span style={{ color: 'red', fontWeight: '500' }}>*</span></label>
             </div>
           </div>
 

@@ -190,12 +190,12 @@ const VenueTable = ({ searchParameter = "", refresh }) => {
                         />
                       </th>
                       <th>Owner Name</th>
-                      <th>Venue Name</th>
+                      <th>Internship Name</th>
                       <th>City Name</th>
-                      <th>Region Name</th>
-                      <th>Venue Rate</th>
-                      <th>Veg Package Price</th>
-                      <th>Non-Veg Package Price</th>
+                      <th>Internship Stipend</th>
+                      <th>Internship Duration</th>
+                      <th>Internship Type/Timing</th>
+                      <th> Work Detail</th>
                       <th>Status</th>
                       <th>Actions</th>
                     </tr>
@@ -213,10 +213,10 @@ const VenueTable = ({ searchParameter = "", refresh }) => {
                         <td>{venue.user_name}</td>
                         <td>{venue.venue_name}</td>
                         <td>{venue.city_name || "N/A"}</td>
-                        <td>{venue.region_name || "N/A"}</td>
-                        <td>{venue.venue_rate || "N/A"}</td>
-                        <td>{venue.veg_package_price || "N/A"}</td>
-                        <td>{venue.non_veg_package_price || "N/A"}</td>
+                        <td>{venue.stipend || "N/A"}</td>
+                        <td>{venue.duration_months || "N/A"}</td>
+                        <td>{venue.internship_type || "N/A"}</td>
+                        <td>{venue.work_detail || "N/A"}</td>
                         <td
                           className={
                             venue.is_enable

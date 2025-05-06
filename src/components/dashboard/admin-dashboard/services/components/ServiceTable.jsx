@@ -3,8 +3,9 @@ import axios from "axios";
 // import Pagination from "../../common/Pagination";
 import ActionsButton from "./ActionsButton";
 import { api } from "@/utils/apiProvider";
-// import { showAlert } from "@/utils/isTextMatched";
 import GalleryUploader from "./filter-box/GalleryUploader";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const ServiceTable = ({ searchParameter, refresh }) => {
   const [services, setServices] = useState([]);
@@ -75,27 +76,27 @@ const ServiceTable = ({ searchParameter, refresh }) => {
         ...serviceData,
         service_img: JSON.stringify(serviceData.service_img),
       });
-
-      showAlert("Service updated successfully.", "success");
+  
+      toast.success("Service updated successfully.");
       setShowModal(false);
       fetchServices(); // Refresh services list
     } catch (error) {
       console.error("Error updating service:", error);
-      showAlert(error.response?.data?.error || "An error occurred.", "error");
+      toast.error(error.response?.data?.error || "An error occurred.");
     }
   };
-
+  
   // Delete service
   const handleDelete = async (id) => {
     try {
       await axios.delete(`${api}/api/service/delete-services/${id}`);
-      showAlert("Service deleted successfully.", "success");
+      toast.success("Service deleted successfully.");
       fetchServices(); // Refresh services list
     } catch (error) {
       console.error("Error deleting service:", error);
-      showAlert(error.response?.data?.error || "An error occurred.", "error");
+      toast.error(error.response?.data?.error || "An error occurred.");
     }
-  };
+  };  
 
   // Handle new image upload
   const handleImageUpload = (e) => {

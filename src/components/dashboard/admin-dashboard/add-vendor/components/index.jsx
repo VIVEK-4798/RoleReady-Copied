@@ -8,8 +8,6 @@ import axios from "axios";
 import { api } from "@/utils/apiProvider";
 import AdministrativeControl from "./AdministrativeControl";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { showAlert } from "@/utils/isTextMatched";
-
 
 
 const Index = () => {
@@ -22,28 +20,35 @@ const Index = () => {
   const navigate = useNavigate();
 
   const [vendorData, setVendorData] = useState({
-    // service_reg_id: null,          // Auto-incremented, initially null
-    //user_id: '',                   // For storing user ID
-    vendor_name: '',              // Service name
-    vendor_rate: '',              // Rate of the service
-    vendor_package: [],           // JSON object, initialized as an empty array
-    vendor_overview: '',          // Overview of the service
-    portfolio: [],                 // Portfolio data, initialized as an empty array
-    contact_number: '',             // Contact number associated with the service
+    vendor_name: '',        
+    vendor_rate: '',            
+    vendor_package: [],         
+    vendor_overview: '',        
+    portfolio: [],              
+    contact_number: '',
     pincode: '',
     vendor_address: '',
-    city_name:'',
-    vendor_service:'',
-    country : '',
-    email : '',
-    maplink:'',
+    city_name: '',
+    vendor_service: '',
+    country: '',
+    email: '',
+    maplink: '',
     website: '',
-    state:'',
-    region_name:'',
-    is_enable: true
-    // special_lable:'',
-    // is_featured: false
+    state: '',
+    region_name: '',
+    is_enable: true,
+    special_lable: '',
+    is_featured: false,
+    responsibilities: '',     
+    requirements: '',      
+    perks: '',      
+    eligibility: '',      
+    job_type: '',               
+    work_detail: '',            
+    job_salary: '',  
+    work_experience: '',        
   });
+  
 
   const [isSaveDisabled, setIsSaveDisabled] = useState(true);
   const [isNextDisabled, setIsNextDisabled] = useState(false);
@@ -63,21 +68,33 @@ const Index = () => {
   useEffect(()=>{
     if (mode === "add") {
       setVendorData({vendor_name: '',    
-        vendor_rate: '',         
-        vendor_package: [],       
-        vendor_overview: '',    
-        portfolio: [],        
-        contact_number: '', 
+        vendor_name: '',        
+        vendor_rate: '',            
+        vendor_package: [],         
+        vendor_overview: '',        
+        portfolio: [],              
+        contact_number: '',
         pincode: '',
         vendor_address: '',
-        city_name:'',
-        vendor_service:'',
-        country : '',
-        email : '',
-        maplink:'',
+        city_name: '',
+        vendor_service: '',
+        country: '',
+        email: '',
+        maplink: '',
         website: '',
-        state:'',
-        region_name:''
+        state: '',
+        region_name: '',
+        is_enable: true,
+        special_lable: '',
+        is_featured: false,
+        responsibilities: '',     
+        requirements: '',      
+        perks: '',      
+        eligibility: '',      
+        job_type: '',               
+        work_detail: '',            
+        job_salary: '',  
+        work_experience: '',  
       })
     }
   },[mode])
@@ -109,10 +126,27 @@ const Index = () => {
   }
 
   useEffect(() => {
-      const isFormIncomplete = Object.values(vendorData).some(value => value === "" || (Array.isArray(value) && value.length === 0));
-      setIsSaveDisabled(isFormIncomplete);
-      setIsNextDisabled(false);  // Adjust this based on specific step validation if needed
-    }, [vendorData]);
+    const requiredFields = [
+      "vendor_name",
+      "vendor_package",
+      "vendor_overview",
+      "vendor_address",
+      "vendor_service",
+      "country",
+      "email",
+      "state",
+      "special_lable",
+    ];
+  
+    const isFormIncomplete = requiredFields.some(key => {
+      const value = vendorData[key];
+      return value === "" || (Array.isArray(value) && value.length === 0);
+    });
+  
+    setIsSaveDisabled(isFormIncomplete);
+    setIsNextDisabled(false); // Adjust based on step validation
+  }, [vendorData]);
+  
 
   const handleSubmitComponent = ()=>{
     let new_package = vendorData.vendor_package;
@@ -256,25 +290,33 @@ const Index = () => {
               setVendorData({
                 service_reg_id: null,          
                 user_id: '',                 
-                vendor_name: '',            
-                vendor_rate: '',              
-                vendor_package: [],        
-                vendor_overview: '',          
-                portfolio: [],                
-                label: '',                     
-                contact_number: '',            
+                vendor_name: '',        
+                vendor_rate: '',            
+                vendor_package: [],         
+                vendor_overview: '',        
+                portfolio: [],              
+                contact_number: '',
                 pincode: '',
                 vendor_address: '',
-                city_name:'',
-                vendor_service:'',
-                country : '',
-                email : '',
-                maplink:'',
+                city_name: '',
+                vendor_service: '',
+                country: '',
+                email: '',
+                maplink: '',
                 website: '',
-                state:'',
-                region_name:'',
-                special_lable:'',
-                is_featured: false
+                state: '',
+                region_name: '',
+                is_enable: true,
+                special_lable: '',
+                is_featured: false,
+                responsibilities: '',     
+                requirements: '',      
+                perks: '',      
+                eligibility: '',      
+                job_type: '',               
+                work_detail: '',            
+                job_salary: '',  
+                work_experience: '',
               });
               showAlert("Vendor Updated successfully","success")
               navigate("/admin-dashboard/vendors");
