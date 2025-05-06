@@ -7,6 +7,8 @@ import { useNavigate } from "react-router-dom";
 import { getId } from "@/utils/DOMUtils";
 import "../../../../../styles/modals.css";
 import Pagination from "@/components/hotel-list/common/Pagination";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const VendorTable = ({ searchParameter = "", refresh }) => {
   const [vendors, setVendors] = useState([]);
@@ -19,29 +21,31 @@ const VendorTable = ({ searchParameter = "", refresh }) => {
     setLoading(true);
     setError(null); 
     try {
-      const response = await axios.get(`${api}/api/vendor/get-vendors`,{
+      const response = await axios.get(`${api}/api/vendor/get-vendors`, {
         headers: {
-          id:  getId()
+          id: getId()
         },
-        params : {
+        params: {
           ...searchParams,
-          search : searchParameter
+          search: searchParameter
         }
       });
+  
       if (response.data.success) {
         setVendors(response.data);
       } else {
         setError("Failed to fetch vendors.");
-        showAlert("Failed to fetch vendors");
+        toast.error("Failed to fetch vendors");
       }
     } catch (err) {
       setError("An error occurred while fetching vendors.");
-      showAlert("An error occurred while fetching vendors");
+      toast.error("An error occurred while fetching vendors");
       console.error(err);
     } finally {
       setLoading(false);
     }
   };
+  
 
   useEffect(() => {
     fetchVendors();
@@ -57,15 +61,16 @@ const VendorTable = ({ searchParameter = "", refresh }) => {
   };
 
   const handleDelete = async (id) => {
-      try {
-        await axios.delete(`${api}/api/vendor/delete-vendor/${id}`);
-        showAlert("Vendor deleted successfully.","success");
-        fetchVendors(); // Refresh venues list
-      } catch (error) {
-        console.error("Error deleting vendor:", error);
-        showAlert(error.response?.data?.error || "An error occurred.","error");
-      }
+    try {
+      await axios.delete(`${api}/api/vendor/delete-vendor/${id}`);
+      toast.success("Vendor deleted successfully.");
+      fetchVendors(); 
+    } catch (error) {
+      console.error("Error deleting vendor:", error);
+      toast.error(error.response?.data?.error || "An error occurred.");
+    }
   };
+  
 
   return (
     <>
@@ -83,11 +88,13 @@ const VendorTable = ({ searchParameter = "", refresh }) => {
                 <table className="table-3 -border-bottom col-12">
                   <thead className="bg-light-2">
                     <tr>
-                      <th>Vendor Name</th>
+                      <th>Job Name</th>
                       <th>City Name</th>
-                      <th>Region Name</th>
-                      <th>Service Rate</th>
-                      <th>Service Category</th>
+                      <th>Job Type</th>
+                      <th>Job Salary</th>
+                      <th>Job Category</th>
+                      <th>Work Experience</th>
+                      <th>Work Detail</th>
                       <th>Status</th>
                       <th>Actions</th>
                     </tr>
@@ -97,9 +104,11 @@ const VendorTable = ({ searchParameter = "", refresh }) => {
                       <tr key={index}>
                         <td>{vendor.vendor_name} </td>
                         <td>{vendor.city_name || "N/A"}</td>
-                        <td>{vendor.region_name || "N/A"}</td>
-                        <td>{vendor.vendor_rate || "N/A"}</td>
+                        <td>{vendor.job_type || "N/A"}</td>
+                        <td>{vendor.job_salary || "N/A"}</td>
                         <td>{vendor.vendor_service || "N/A"}</td>
+                        <td>{vendor.work_experience || "N/A"}</td>
+                        <td>{vendor.work_detail || "N/A"}</td>
                         <td
                           className={
                             vendor.is_enable

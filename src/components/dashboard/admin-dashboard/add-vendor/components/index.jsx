@@ -8,7 +8,8 @@ import axios from "axios";
 import { api } from "@/utils/apiProvider";
 import AdministrativeControl from "./AdministrativeControl";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Index = () => {
   let params = useParams();
@@ -21,7 +22,6 @@ const Index = () => {
 
   const [vendorData, setVendorData] = useState({
     vendor_name: '',        
-    vendor_rate: '',            
     vendor_package: [],         
     vendor_overview: '',        
     portfolio: [],              
@@ -37,7 +37,7 @@ const Index = () => {
     state: '',
     region_name: '',
     is_enable: true,
-    special_lable: '',
+    special_label: '',
     is_featured: false,
     responsibilities: '',     
     requirements: '',      
@@ -69,7 +69,6 @@ const Index = () => {
     if (mode === "add") {
       setVendorData({vendor_name: '',    
         vendor_name: '',        
-        vendor_rate: '',            
         vendor_package: [],         
         vendor_overview: '',        
         portfolio: [],              
@@ -85,7 +84,7 @@ const Index = () => {
         state: '',
         region_name: '',
         is_enable: true,
-        special_lable: '',
+        special_label: '',
         is_featured: false,
         responsibilities: '',     
         requirements: '',      
@@ -98,6 +97,7 @@ const Index = () => {
       })
     }
   },[mode])
+
   useEffect(()=>{
     fetchService();
     if (mode === "edit") {
@@ -128,24 +128,27 @@ const Index = () => {
   useEffect(() => {
     const requiredFields = [
       "vendor_name",
-      "vendor_package",
       "vendor_overview",
       "vendor_address",
       "vendor_service",
       "country",
       "email",
       "state",
-      "special_lable",
+      "special_label", 
     ];
   
-    const isFormIncomplete = requiredFields.some(key => {
+    const isFormIncomplete = requiredFields.some((key) => {
       const value = vendorData[key];
-      return value === "" || (Array.isArray(value) && value.length === 0);
+      return (
+        value === "" ||
+        (Array.isArray(value) && value.length === 0)
+      );
     });
   
     setIsSaveDisabled(isFormIncomplete);
-    setIsNextDisabled(false); // Adjust based on step validation
+    setIsNextDisabled(false);
   }, [vendorData]);
+  
   
 
   const handleSubmitComponent = ()=>{
@@ -226,24 +229,28 @@ const Index = () => {
     }
     return defaultTabs;
   }
-
+  
   const validateFormData = (formData) => {
     const errors = [];
+  
     Object.keys(formData).forEach((key) => {
-      if (key === "is_featured") return;
+      // Skip optional fields
+      if (["is_featured", "vendor_package", "portfolio"].includes(key)) return;
+  
       const value = formData[key];
+  
       if (Array.isArray(value) && value.length === 0) {
         errors.push(`${key.replace(/_/g, ' ')} is required.`);
-      }
-      else if (typeof value === "string" && value.trim() === "") {
+      } else if (typeof value === "string" && value.trim() === "") {
         errors.push(`${key.replace(/_/g, ' ')} is required.`);
-      }
-      else if (typeof value === "number" && isNaN(value)) {
+      } else if (typeof value === "number" && isNaN(value)) {
         errors.push(`${key.replace(/_/g, ' ')} is required.`);
       }
     });
+  
     return errors;
   };
+  
 
   const getUserId = () => {
     const keys = ['adminId', 'vendor-userId', 'venue-userId'];
@@ -260,76 +267,81 @@ const Index = () => {
     e.preventDefault(); 
     const currentError = validateFormData(vendorData);
     setError(currentError);
+  
     if (currentError.length > 0) {
-      showAlert(currentError[0],"error");
-      console.error("Form validation failed:", errors);
+      toast.error(currentError[0]);
+      console.error("Form validation failed:", currentError);
     } else {
       let ApiBody = {
         ...vendorData,
         vendor_package: JSON.stringify(vendorData.vendor_package),
         portfolio: JSON.stringify(vendorData.portfolio)
-      }
+      };
+  
       if (mode === "add") {
         ApiBody = {
           ...ApiBody,
           user_id: getUserId(),
-        }
-      }
-      else if (mode === "edit") {
+        };
+      } else if (mode === "edit") {
         if (ApiBody.name) {
           delete ApiBody.name;
           delete ApiBody.mobile;
           delete ApiBody.email;
         }
       }
-      try 
-        {
-          const url = mode === "edit" ? `${api}/api/vendor/update-vendor/${state.service_reg_id}` :`${api}/api/vendor/add-vendor`;
-          const response = await axios.post(url, ApiBody);
-          if (response.data.results === true) {
-              setVendorData({
-                service_reg_id: null,          
-                user_id: '',                 
-                vendor_name: '',        
-                vendor_rate: '',            
-                vendor_package: [],         
-                vendor_overview: '',        
-                portfolio: [],              
-                contact_number: '',
-                pincode: '',
-                vendor_address: '',
-                city_name: '',
-                vendor_service: '',
-                country: '',
-                email: '',
-                maplink: '',
-                website: '',
-                state: '',
-                region_name: '',
-                is_enable: true,
-                special_lable: '',
-                is_featured: false,
-                responsibilities: '',     
-                requirements: '',      
-                perks: '',      
-                eligibility: '',      
-                job_type: '',               
-                work_detail: '',            
-                job_salary: '',  
-                work_experience: '',
-              });
-              showAlert("Vendor Updated successfully","success")
-              navigate("/admin-dashboard/vendors");
-          } else {
-            //window.alert("Something went wrong");  
-            showAlert('something went wrong', 'error');
-          }
-        } catch (error) {
-          if(error)
-            showAlert(error?.message|| "Something went wrong","danger")
-          console.error('Error:', error);
+  
+      try {
+        const url =
+          mode === "edit"
+            ? `${api}/api/vendor/update-vendor/${state.service_reg_id}`
+            : `${api}/api/vendor/add-vendor`;
+  
+        const response = await axios.post(url, ApiBody);
+  
+        if (response.data.results === true) {
+          setVendorData({
+            service_reg_id: null,
+            user_id: '',
+            vendor_name: '',
+            vendor_package: [],
+            vendor_overview: '',
+            portfolio: [],
+            contact_number: '',
+            pincode: '',
+            vendor_address: '',
+            city_name: '',
+            vendor_service: '',
+            country: '',
+            email: '',
+            maplink: '',
+            website: '',
+            state: '',
+            region_name: '',
+            is_enable: true,
+            special_label: '',
+            is_featured: false,
+            responsibilities: '',
+            requirements: '',
+            perks: '',
+            eligibility: '',
+            job_type: '',
+            work_detail: '',
+            job_salary: '',
+            work_experience: '',
+          });
+  
+          toast.success("Vendor updated successfully");
+          navigate("/admin-dashboard/vendors");
+        } else {
+          toast.error("Something went wrong");
         }
-        console.log("Form is valid, submitting data...");
+      } catch (error) {
+        toast.error(error?.message || "Something went wrong");
+        console.error("Error:", error);
+      }
+  
+      console.log("Form is valid, submitting data...");
     }
   };
 
