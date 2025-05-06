@@ -97,7 +97,7 @@ const BasicInformation = ({
                 value={venueFormData?.venue_name}
                 onChange={handleChange}
               />
-              <label className="lh-1 text-16 text-light-1">Internship Name</label>
+              <label className="lh-1 text-16 text-light-1">Internship Name <span style={{ color: 'red', fontWeight: '500' }}>*</span></label>
             </div>
           </div>
           <div className="col-12">
@@ -109,7 +109,7 @@ const BasicInformation = ({
                 value={venueFormData?.venue_address}
                 onChange={handleChange}
               />
-              <label className="lh-1 text-16 text-light-1">Internship Address</label>
+              <label className="lh-1 text-16 text-light-1">Internship Address <span style={{ color: 'red', fontWeight: '500' }}>*</span></label>
             </div>
           </div>
           <div className="col-6">
@@ -215,7 +215,7 @@ const BasicInformation = ({
                 value={venueFormData?.state}
                 onChange={handleChange}
               />
-              <label className="lh-1 text-16 text-light-1">State/Province</label>
+              <label className="lh-1 text-16 text-light-1">State/Province <span style={{ color: 'red', fontWeight: '500' }}>*</span></label>
             </div>
           </div>
 
@@ -228,7 +228,7 @@ const BasicInformation = ({
                 value={venueFormData?.pincode}
                 onChange={handleChange}
               />
-              <label className="lh-1 text-16 text-light-1">Postal Code</label>
+              <label className="lh-1 text-16 text-light-1">Postal Code <span style={{ color: 'red', fontWeight: '500' }}>*</span></label>
             </div>
           </div>
 
@@ -241,7 +241,7 @@ const BasicInformation = ({
                 value={venueFormData?.country}
                 onChange={handleChange}
               />
-              <label className="lh-1 text-16 text-light-1">Country</label>
+              <label className="lh-1 text-16 text-light-1">Country <span style={{ color: 'red', fontWeight: '500' }}>*</span></label>
             </div>
           </div>
 
@@ -254,7 +254,7 @@ const BasicInformation = ({
                 value={venueFormData?.venue_phone_no}
                 onChange={handleChange}
               />
-              <label className="lh-1 text-16 text-light-1">Contact Number</label>
+              <label className="lh-1 text-16 text-light-1">Contact Number <span style={{ color: 'red', fontWeight: '500' }}>*</span></label>
             </div>
           </div>
 
@@ -267,7 +267,7 @@ const BasicInformation = ({
                 value={venueFormData?.venue_email}
                 onChange={handleChange}
               />
-              <label className="lh-1 text-16 text-light-1">Contact Email</label>
+              <label className="lh-1 text-16 text-light-1">Contact Email <span style={{ color: 'red', fontWeight: '500' }}>*</span></label>
             </div>
           </div>
 

@@ -7,6 +7,8 @@ import AdministrativeControl from "./AdministrativeControl";
 import axios from "axios";
 import { api } from "@/utils/apiProvider";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Index = () => {
   let params = useParams();
@@ -34,12 +36,12 @@ const Index = () => {
     perks:"",
     requirements:"",
     responsibilities:"",
-    venue_rate: "",        
     venue_overview: "",    
     venue_map_url: "",     
     venue_images: [],    
     city_name:"",
     region_name:"",
+    special_label: "",
     is_enable : false
   });
 
@@ -78,12 +80,12 @@ const Index = () => {
         perks:"",
         requirements:"",
         responsibilities:"",
-        venue_rate: "",        
         venue_overview: "",    
         venue_map_url: "",     
         venue_images: [],    
         city_name:"",
         region_name:"",
+        special_label: "",
         is_enable : true})
     }
   },[mode]);
@@ -109,10 +111,27 @@ const Index = () => {
   },[]);
 
   useEffect(() => {
-    const isFormIncomplete = Object.values(venueFormData).some(value => value === "" || (Array.isArray(value) && value.length === 0));
+    const requiredFields = [
+      "venue_name",
+      "venue_address",
+      "state",
+      "pincode",
+      "country",
+      "venue_phone_no",
+      "venue_email",
+      "venue_categories",
+      "special_label"
+    ];
+  
+    const isFormIncomplete = requiredFields.some(key => {
+      const value = venueFormData[key];
+      return value === "" || (Array.isArray(value) && value.length === 0);
+    });
+  
     setIsSaveDisabled(isFormIncomplete);
-    setIsNextDisabled(false);  // Adjust this based on specific step validation if needed
+    setIsNextDisabled(false);
   }, [venueFormData]);
+  
 
   const handleCategoryDropDownChange = (category)=> {
     const {category_name, category_color_class} = category;
@@ -215,9 +234,10 @@ const Index = () => {
     e.preventDefault(); 
     const currentError = validateFormData(venueFormData);
     setError(currentError);
+  
     if (currentError.length > 0) {
-      showAlert(currentError[0], "error");
-      console.error("Form validation failed:", errors);
+      toast.error(currentError[0]);
+      console.error("Form validation failed:", currentError);
     } else {
       let ApiBody = {
         ...venueFormData,
@@ -225,64 +245,46 @@ const Index = () => {
         veg_package: JSON.stringify(venueFormData.veg_package),
         non_veg_package: JSON.stringify(venueFormData.non_veg_package),
         venue_images: JSON.stringify(venueFormData.venue_images)
-      }
+      };
+  
       if (mode === "add") {
-        ApiBody = {
-          ...ApiBody,
-          user_id: getUserId()
-        }
+        ApiBody = { ...ApiBody, user_id: getUserId() };
+      } else if (mode === "edit") {
+        delete ApiBody.name;
+        delete ApiBody.mobile;
+        delete ApiBody.email;
+        delete ApiBody.user_name;
       }
-      else if (mode === "edit") {
-        if (ApiBody.name || ApiBody.mobile || ApiBody.email || ApiBody.email || ApiBody.user_name) {
-          delete ApiBody.name;
-          delete ApiBody.mobile;
-          delete ApiBody.email;
-          delete ApiBody.user_name
-        }
-      }
+  
       try {
-        const url = mode === "edit" ? `${api}/api/venue/update-venue/${state.venue_id}` : `${api}/api/venue/add-venue`;
-        
-        console.log(mode);
-        console.log(api);
+        const url = mode === "edit"
+          ? `${api}/api/venue/update-venue/${state.venue_id}`
+          : `${api}/api/venue/add-venue`;
+  
         const response = await axios.post(url, ApiBody);
+  
         if (response.data.results === true) {
+          toast.success("Venue saved successfully!");
           setVenueFormData({
-            venue_name: "",        
-            venue_address: "",     
-            state: "",             
-            pincode: "",          
-            country: "",           
-            venue_phone_no: "",    
-            venue_email: "",       
-            website: "",           
-            venue_categories: [],  
-            duration_months: "",
-            stipend: "",
-            work_detail: "",
-            internship_type:"",
-            eligibility:"",
-            perks:"",
-            requirements:"",
-            responsibilities:"",
-            venue_rate: "",        
-            venue_overview: "",    
-            venue_map_url: "",     
-            venue_images: [],    
-            city_name:"",
-            region_name:"",
-            is_enable : true});
+            venue_name: "", venue_address: "", state: "", pincode: "",
+            country: "", venue_phone_no: "", venue_email: "", website: "",
+            venue_categories: [], duration_months: "", stipend: "",
+            work_detail: "", internship_type: "", eligibility: "",
+            perks: "", requirements: "", responsibilities: "",
+            venue_overview: "", venue_map_url: "",
+            venue_images: [], city_name: "", region_name: "", special_label:"", is_enable: true
+          });
           navigate("/admin-dashboard/venues");
         } else {
-          showAlert('something went wrong', 'error');
+          toast.error("Something went wrong.");
         }
       } catch (error) {
-        if (error) window.alert(error.response.data.error);
-        console.error('Error:', error);
+        toast.error(error?.response?.data?.error || "Server error");
+        console.error("Error:", error);
       }
-      console.log("Form is valid, submitting data...");
     }
   };
+  
 
   const handleNextStep = () => {
     setTabIndex((prev) => (prev + 1) % getTabs().length);
@@ -291,34 +293,34 @@ const Index = () => {
   return (
     <>
       <Tabs
-  className="tabs -underline-2 js-tabs"
-  selectedIndex={tabIndex}
-  onSelect={(index) => setTabIndex(index)}
->
-  <TabList className="tabs__controls row x-gap-40 y-gap-10 lg:x-gap-20">
-    {getTabs().map((tab, index) => (
-      <Tab key={index} className="col-auto">
-        <button className="tabs__button text-18 lg:text-16 text-light-1 fw-500 pb-5 lg:pb-0 js-tabs-button">
-          {tab.labelNo}. {tab.label}
-        </button>
-      </Tab>
-    ))}
-  </TabList>
-
-  <div className="tabs__content pt-30 js-tabs-content">
-    {getTabs().map((tab, index) => (
-      <TabPanel
-        key={index}
-        className={`-tab-item-${index + 1} ${
-          tabIndex === index ? "is-tab-el-active" : ""
-        }`}
+        className="tabs -underline-2 js-tabs"
+        selectedIndex={tabIndex}
+        onSelect={(index) => setTabIndex(index)}
       >
-        {tab.content}
-      </TabPanel>
-    ))}
-  </div>
-</Tabs>
+        <TabList className="tabs__controls row x-gap-40 y-gap-10 lg:x-gap-20">
+          {getTabs().map((tab, index) => (
+            <Tab key={index} className="col-auto">
+              <button className="tabs__button text-18 lg:text-16 text-light-1 fw-500 pb-5 lg:pb-0 js-tabs-button">
+                {tab.labelNo}. {tab.label}
+              </button>
+            </Tab>
+          ))}
+        </TabList>
+        
 
+        <div className="tabs__content pt-30 js-tabs-content">
+          {getTabs().map((tab, index) => (
+            <TabPanel
+              key={index}
+              className={`-tab-item-${index + 1} ${
+                tabIndex === index ? "is-tab-el-active" : ""
+              }`}
+            >
+              {tab.content}
+            </TabPanel>
+          ))}
+        </div>
+      </Tabs>
       <div className="pt-30" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
         {errors.length !== 0 && <div className="text-15 lh-15 text-light-1 ml-10">
           {errors[0]}

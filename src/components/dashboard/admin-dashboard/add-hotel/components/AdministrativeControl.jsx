@@ -61,7 +61,7 @@ const AdministrativeControl = ({ venueFormData = {}, handleChange = () => {}, ha
                 value={venueFormData?.special_label}
                 onChange={handleChange}
               />
-              <label className="lh-1 text-16 text-light-1">Special Label</label>
+              <label className="lh-1 text-16 text-light-1">Special Label <span style={{ color: 'red', fontWeight: '500' }}>*</span></label>
             </div>
           </div>
 

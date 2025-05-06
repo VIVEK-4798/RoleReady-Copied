@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { getId } from "@/utils/DOMUtils";
 import "../../../../../styles/modals.css";
 import Pagination from "@/components/hotel-list/common/Pagination";
+import { data } from "@/components/dashboard/dashboard/db-dashboard/components/ChartMain";
 
 const VenueTable = ({ searchParameter = "", refresh }) => {
   const [venues, setVenues] = useState([]);
@@ -32,6 +33,7 @@ const VenueTable = ({ searchParameter = "", refresh }) => {
       });
       if (response.data.success) {
         setVenues(response.data);
+        console.log("response.data", response.data.results);
       } else {
         setError("Failed to fetch venues.");
       }

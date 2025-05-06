@@ -6,7 +6,7 @@ const MediaAndResources = ({venueFormData, setVenueFormData}) => {
       <div className="row x-gap-20 y-gap-20">
         <div className="col-12">
           <div className="mt-30">
-            <div className="fw-500">Gallery</div>
+            <div className="fw-500">Gallery <span style={{ color: 'red', fontWeight: '500' }}>*</span></div>
             <GalleryUploader venueFormData={venueFormData} setVenueFormData={setVenueFormData}/>
           </div>
         </div>

@@ -146,7 +146,7 @@ const DetailsAndPricing = ({
                 <div className="text-14 y-gap-15 js-dropdown-list">
                   {allCategories.map((category) => (
                     <div
-                      key={category.category_id}
+                      key={category.category_id || index}
                       id={category.category_id}
                       className="js-dropdown-link"
                       style={{
