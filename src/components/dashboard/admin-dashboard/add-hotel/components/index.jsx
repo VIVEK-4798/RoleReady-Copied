@@ -14,8 +14,6 @@ const Index = () => {
   const state = useLocation()?.state || null;
   const mode = params.mode;
   const [allCategories, setAllCategories] = useState([]);
-  const [vegDish, setVegDish] = useState(null);
-  const [nonVegDish, setNonVegDish] = useState(null);
   const [errors, setError] = useState([]);
   const navigate = useNavigate();
 
@@ -109,58 +107,6 @@ const Index = () => {
     setIsNextDisabled(false);  // Adjust this based on specific step validation if needed
   }, [venueFormData]);
 
-  const handleVegChange = (e) => {
-    const {name,value} = e.target;
-    setVegDish((prevState)=>({
-      ...prevState,
-      [name]:value
-    }))
-  }
-
-  const handleSubmitVegDish = ()=>{
-    let new_veg_package = venueFormData.veg_package;
-    new_veg_package.push({...vegDish,id: Math.floor(Date.now() / 1000)});
-    setVenueFormData((prevState) => ({
-      ...prevState,
-      veg_package: new_veg_package,
-    }));
-    setVegDish({dish_name:"",dish_quantity:0});
-  }
-
-  const handleVegDishDelete = (id)=>{
-    let new_veg_package = venueFormData.veg_package.filter((dish)=>{return dish.id !== id});
-    setVenueFormData((prevState) => ({
-      ...prevState,
-      veg_package: new_veg_package,
-    }));
-  }
-
-  const handleNonVegChange = (e) => {
-    const {name,value} = e.target;
-    setNonVegDish((prevState)=>({
-      ...prevState,
-      [name]:value
-    }))
-  }
-
-  const handleSubmitNonVegDish = ()=>{
-    let new_non_veg_package = venueFormData.non_veg_package;
-    new_non_veg_package.push({...nonVegDish, id: Math.floor(Date.now() / 1000)});
-    setVenueFormData((prevState) => ({
-      ...prevState,
-      non_veg_package: new_non_veg_package,
-    }));
-    setNonVegDish({dish_name:"",dish_quantity:0});
-  }
-
-  const handleNonVegDishDelete = (id)=>{
-    let new_non_veg_package = venueFormData.non_veg_package.filter((dish)=>{return dish.id !== id});
-    setVenueFormData((prevState) => ({
-      ...prevState,
-      non_veg_package: new_non_veg_package,
-    }));
-  }
-
   const handleCategoryDropDownChange = (category)=> {
     const {category_name, category_color_class} = category;
     let new_venue_categories = [];
@@ -209,7 +155,7 @@ const Index = () => {
     {
       label: "Details & Pricing",
       labelNo: 2,
-      content: <DetailsAndPricing handleNonVegDishDelete={handleNonVegDishDelete} handleChange={handleChange} handleVegDishDelete={handleVegDishDelete} handleDropDownChange={handleDropDownChange} handleNonVegChange = {handleNonVegChange} handleSubmitNonVegDish={handleSubmitNonVegDish} venueFormData={venueFormData} allCategories={allCategories} handleCategoryDropDownChange = {handleCategoryDropDownChange}/>,
+      content: <DetailsAndPricing  handleChange={handleChange}  handleDropDownChange={handleDropDownChange}  venueFormData={venueFormData} allCategories={allCategories} handleCategoryDropDownChange = {handleCategoryDropDownChange}/>,
     },
     {
       label: "Media & Resources",

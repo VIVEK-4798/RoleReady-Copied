@@ -3,7 +3,8 @@ import "../../../../../../styles/modals.css";
 import axios from "axios";
 import { SketchPicker } from "react-color"; 
 import { api } from "@/utils/apiProvider";
-// import { showAlert } from "@/utils/isTextMatched";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const AddCategory = ({ refreshCategories = () => {} }) => {
   const [showModal, setShowModal] = useState(false);
@@ -19,26 +20,27 @@ const AddCategory = ({ refreshCategories = () => {} }) => {
     try {
       const response = await axios.post(`${api}/api/categories/create-categories`, {
         ...categoryData,
-        category_color_class: selectedColor, // Use the selected color
+        category_color_class: selectedColor,
       });
-
+  
       if (response.data.success === true) {
-        showAlert("Category added successfully.", "success");
+        toast.success("Category added successfully.");
         setCategoryData({
           category_name: "",
           category_color_class: "",
         });
-        setSelectedColor("#007bff"); // Reset color picker
+        setSelectedColor("#007bff");
         setShowModal(false);
-        refreshCategories(); // Refresh the category list after adding
+        refreshCategories();
       } else {
-        showAlert("Something went wrong.", "error");
+        toast.error("Something went wrong.");
       }
     } catch (error) {
-      showAlert(error.response?.data?.error || "An error occurred.", "error");
+      toast.error(error.response?.data?.error || "An error occurred.");
       console.error("Error:", error);
     }
   };
+  
 
   return (
     <div className="col-auto">

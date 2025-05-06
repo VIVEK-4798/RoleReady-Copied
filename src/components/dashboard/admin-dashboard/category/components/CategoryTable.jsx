@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { SketchPicker } from "react-color"; // Import SketchPicker from react-color
 import { api } from "@/utils/apiProvider";
-// import { showAlert } from "@/utils/isTextMatched";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 // import Pagination from "../../common/Pagination";
 import ActionsButton from "./ActionsButton";
 
@@ -71,26 +72,26 @@ const CategoryTable = ({ searchParameter, refresh }) => {
         `${api}/api/categories/update-categories/${categoryData.category_id}`,
         categoryData
       );
-      showAlert("Category updated successfully.", "success");
+      toast.success("Category updated successfully.");
       setShowModal(false);
       fetchCategories(); // Refresh categories list
     } catch (error) {
       console.error("Error updating category:", error);
-      showAlert(error.response?.data?.error || "An error occurred.", "error");
+      toast.error(error.response?.data?.error || "An error occurred.");
     }
-  };
+  };  
 
   // Delete category
   const handleDelete = async (id) => {
     try {
       await axios.delete(`${api}/api/categories/delete-categories/${id}`);
-      showAlert("Category deleted successfully.", "success");
+      toast.success("Category deleted successfully.");
       fetchCategories(); // Refresh categories list
     } catch (error) {
       console.error("Error deleting category:", error);
-      showAlert(error.response?.data?.error || "An error occurred.", "error");
+      toast.error(error.response?.data?.error || "An error occurred.");
     }
-  };
+  };  
 
   return (
     <>
