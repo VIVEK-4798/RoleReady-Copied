@@ -2,10 +2,11 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import ActionsButton from "./ActionsButton"; // Ensure you reuse the same ActionsButton component
 import { api } from "@/utils/apiProvider";
-// import { showAlert } from "@/utils/isTextMatched";
 import { useNavigate } from "react-router-dom";
 import { getId } from "@/utils/DOMUtils";
 import Pagination from "@/components/hotel-list/common/Pagination";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const UserTable = ({ searchParameter = "", refresh }) => {
   const [users, setUsers] = useState([]);
@@ -30,6 +31,8 @@ const UserTable = ({ searchParameter = "", refresh }) => {
       });
       if (response.status === 200) {
         setUsers(response.data);
+        console.log(response.data.results);
+        
       } else {
         setError("Failed to fetch users.");
       }
@@ -59,16 +62,13 @@ const UserTable = ({ searchParameter = "", refresh }) => {
   const handleDelete = async (id) => {
     try {
       await axios.delete(`${api}/api/user/delete-users/${id}`);
-      showAlert("User deleted successfully.", "success");
+      toast.success("User deleted successfully.");
       fetchUsers(); // Refresh user list
     } catch (error) {
       console.error("Error deleting user:", error);
-      showAlert(
-        error.response?.data?.error || "An error occurred.",
-        "error"
-      );
+      toast.error(error.response?.data?.error || "An error occurred.");
     }
-  };
+  };  
 
   return (
     <>

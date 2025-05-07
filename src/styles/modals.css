@@ -290,6 +290,12 @@
     }
   }
   
+  .icon-img {
+    width: 24px;
+    height: 24px;
+    /* No fill/stroke control here */
+  }
+  
   .font-dancing-script {
     font-family: 'Dancing Script', cursive;
   }

@@ -30,11 +30,11 @@ export const claimStateArray = [
 
 export const Roles = [
 	{
-		roleName: "Venue User",
+		roleName: "Job Seeker User",
 		roleUserName: "venue-user"
 	},
 	{
-		roleName: "Vendor User",
+		roleName: "Mentor User",
 		roleUserName: "vendor-user"
 	},
 	{

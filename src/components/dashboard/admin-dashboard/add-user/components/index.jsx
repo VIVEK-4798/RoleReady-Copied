@@ -8,8 +8,6 @@ import axios from "axios";
 import { api } from "@/utils/apiProvider";
 import AdministrativeControl from "./AdministrativeControl";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { showAlert } from "@/utils/isTextMatched";
-
 
 
 const Index = () => {

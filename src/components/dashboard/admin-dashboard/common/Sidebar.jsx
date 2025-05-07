@@ -78,14 +78,14 @@ const Sidebar = () => {
     },
     {
       icon: "/img/dashboard/sidebar/gear.svg",
-      title: "Venues Category",
+      title: "Internships Category",
       href: "categories",
       allowedRole: ["admin"],
     },
     // Individual items from Settings
     {
       icon: "/img/dashboard/sidebar/gear.svg",
-      title: "Vendors Category",
+      title: "Jobs Category",
       href: "services",
       allowedRole: ["admin"],
     },

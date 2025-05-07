@@ -1,6 +1,6 @@
 import Sidebar from "../common/Sidebar";
 import Header from "../../../header/dashboard-header";
-// import SettingsTabs from "./components/index";
+import SettingsTabs from "./components/index";
 import Footer from "../common/Footer";
 import { useParams } from "react-router-dom";
 
@@ -37,9 +37,9 @@ const index = () => {
             </div>
             {/* End .row */}
 
-            {/* <div className="py-30 px-30 rounded-4 bg-white shadow-3">
+            <div className="py-30 px-30 rounded-4 bg-white shadow-3">
               <SettingsTabs />
-            </div> */}
+            </div>
 
             <Footer />
           </div>

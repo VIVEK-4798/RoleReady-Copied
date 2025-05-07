@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { api } from "@/utils/apiProvider";
-// import { showAlert } from "@/utils/isTextMatched";
 import { getId, getUserId } from "@/utils/DOMUtils";
 import AvatarUploader from "./AvatarUploader";
 import { Roles } from "@/constant/constants";
 import { useLocation, useParams } from "react-router-dom";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const PersonalInfo = () => {
   let params = useParams();
@@ -52,49 +53,49 @@ const PersonalInfo = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     if (!passwordsMatch) {
-      showAlert("Passwords do not match", "danger");
+      toast.error("Passwords do not match");
       return;
     }
-
+  
     try {
       const apiBody = {
         ...formData,
         image: JSON.stringify(formData.image),
-        password : formData.newPassword
-      }
-      let response = null
+        password: formData.newPassword,
+      };
+      let response = null;
       setLoading(true);
+  
       if (mode === "edit") {
         response = await axios.put(`${api}/api/user/update-users/${formData.user_id}`, apiBody);
       } else {
         response = await axios.post(`${api}/api/user/create-users`, apiBody);
       }
+  
       setLoading(false);
-
+  
       if (response.status === 201 || response.status === 200) {
-        showAlert("User Added successfully", "success");
+        toast.success("User added successfully");
         setFormData({
           name: "",
           email: "",
           mobile: "",
           newPassword: "",
           confirmPassword: "",
-          image:"",
-          role:""
-        })
-      } 
-      else {
-        showAlert(response.data.message || "Update failed", "danger");
+          image: "",
+          role: "",
+        });
+      } else {
+        toast.error(response.data.message || "Update failed");
       }
     } catch (error) {
       setLoading(false);
-      showAlert(error?.response?.data?.error || "Update failed", "danger");
+      toast.error(error?.response?.data?.error || "Update failed");
       console.error("Error updating profile:", error);
     }
-    
-  };
+  };  
 
   return (
     <div>
@@ -160,7 +161,7 @@ const PersonalInfo = () => {
                   style={{border: "1px solid #dddddd", height:"70px"}}
                 >
                   <span className="js-dropdown-title">
-                    {Roles.find((role)=>{return role.roleUserName === formData.role})?.roleName || "Select Role"}
+                    {Roles.find((role)=>{return role.roleUserName === formData.role})?.roleName || "Select Role"}                    
                   </span>
                   <i className="icon icon-chevron-sm-down text-7 ml-10" />
                 </div>
