@@ -37,7 +37,7 @@ const metadata = {
 const HotelSingleV1Dynamic = () => {
   let params = useParams();
   const id = params.id;
-  console.log(id);
+
   const hotel = hotelsData.find((item) => item.id == id) || hotelsData[0];
   const [internship, setInternship] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -49,7 +49,6 @@ const HotelSingleV1Dynamic = () => {
     try {
       const response = await axios.get(`${api}/api/venue/get-venue/${id}`);
       setInternship(response.data || []);
-      console.log("Fetched internships for user:", response.data);      
     } catch (err) {
       setError("An error occurred while fetching internship data.");
       console.error(err);
@@ -186,7 +185,9 @@ const HotelSingleV1Dynamic = () => {
             {/* End .row */}
 
             <div className="row x-gap-50 y-gap-30 pt-20">
-              <HelpfulFacts />
+            {internship && Object.keys(internship).length > 0 && (
+                  <HelpfulFacts internship={internship}/>
+                )}
             </div>
             {/* End .row */}
           </div>
@@ -224,8 +225,8 @@ const HotelSingleV1Dynamic = () => {
 
       <section className="pt-40">
         <div className="container">
-          <div className="row">
-            <div className="col-xl-8 col-lg-10">
+          <div className="row border-top-light">
+            <div className="col-xl-8 col-lg-10 mt-30">
               <div className="row">
                 <div className="col-auto">
                   <h3 className="text-22 fw-500">Leave a Reply</h3>
@@ -236,7 +237,7 @@ const HotelSingleV1Dynamic = () => {
               </div>
               {/* End .row */}
 
-              <ReplyFormReview />
+              {/* <ReplyFormReview /> */}
               {/* End ReplyFormReview */}
 
               <ReplyForm />
@@ -254,16 +255,15 @@ const HotelSingleV1Dynamic = () => {
                 <div className="row x-gap-20 y-gap-20 items-center">
                   <div className="col-auto">
                     <div className="flex-center size-60 rounded-full bg-white">
-                      <img src="/img/icons/health.svg" alt="icon" />
+                      <i className="bi bi-laptop text-24 text-dark"></i>
                     </div>
                   </div>
                   <div className="col-auto">
                     <h4 className="text-18 lh-15 fw-500">
-                      Extra health &amp; safety measures
+                      Verified Internship Opportunity
                     </h4>
                     <div className="text-15 lh-15">
-                      This property has taken extra health and hygiene measures
-                      to ensure that your safety is their priority
+                      This internship is vetted by our team to ensure it provides real-world experience, mentorship, and growth opportunities for students and freshers.
                     </div>
                   </div>
                 </div>
@@ -296,7 +296,7 @@ const HotelSingleV1Dynamic = () => {
               <div className="col-lg-4">
                 <h2 className="text-22 fw-500">
                   FAQs about
-                  <br /> The Crown Hotel
+                  <br /> Startups24x7 Internships
                 </h2>
               </div>
               {/* End .row */}
@@ -320,14 +320,14 @@ const HotelSingleV1Dynamic = () => {
         <div className="container">
           <div className="row justify-center text-center">
             <div className="col-auto">
-              <div className="sectionTitle -md">
-                <h2 className="sectionTitle__title">
-                  Popular properties similar to The Crown Hotel
-                </h2>
-                <p className=" sectionTitle__text mt-5 sm:mt-0">
-                  Interdum et malesuada fames ac ante ipsum
-                </p>
-              </div>
+            <div className="sectionTitle -md">
+              <h2 className="sectionTitle__title">
+                Popular internships similar to this opportunity
+              </h2>
+              <p className=" sectionTitle__text mt-5 sm:mt-0">
+                Explore similar internships that match your skills and interests
+              </p>
+            </div>
               {/* End sectionTitle */}
             </div>
             {/* End .col */}

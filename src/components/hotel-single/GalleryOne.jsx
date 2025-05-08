@@ -83,32 +83,35 @@ export default function GalleryOne({ internship }) {
 
           <Gallery>
             <div className="galleryGrid -type-1 pt-30">
-              {internship?.venue_images &&
-                JSON.parse(internship.venue_images).map((img, index) => (
-                  <div key={index} className="galleryGrid__item relative d-flex">
-                    <Item original={img} thumbnail={img} width={660} height={660}>
-                      {({ ref, open }) => (
-                        <img
-                          src={img}
-                          ref={ref}
-                          onClick={open}
-                          alt={`venue-img-${index}`}
-                          role="button"
-                          className="rounded-4"
-                        />
-                      )}
-                    </Item>
-
-                    {/* Optional: Heart Button (only on first image) */}
-                    {index === 0 && (
-                      <div className="absolute px-20 py-20 col-12 d-flex justify-end">
-                        <button className="button -blue-1 size-40 rounded-full flex-center bg-white text-dark-1">
-                          <i className="icon-heart text-16" />
-                        </button>
-                      </div>
+              {[...(internship?.venue_images ? JSON.parse(internship.venue_images) : []), 
+                "/img/jobsCategory/Sales&BusinessDevelopment.png", 
+                "/img/jobsCategory/HumanResources.jpg",
+                "/img/jobsCategory/ContentWriting.png",
+                "/img/jobsCategory/officeInside.webp",
+              ].map((img, index) => (
+                <div key={index} className="galleryGrid__item relative d-flex">
+                  <Item original={img} thumbnail={img} width={660} height={660}>
+                    {({ ref, open }) => (
+                      <img
+                        src={img}
+                        ref={ref}
+                        onClick={open}
+                        alt={`venue-img-${index}`}
+                        role="button"
+                        className="rounded-4"
+                      />
                     )}
-                  </div>
-                ))}
+                  </Item>
+
+                  {index === 0 && (
+                    <div className="absolute px-20 py-20 col-12 d-flex justify-end">
+                      <button className="button -blue-1 size-40 rounded-full flex-center bg-white text-dark-1">
+                        <i className="icon-heart text-16" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
           </Gallery>
         </div>

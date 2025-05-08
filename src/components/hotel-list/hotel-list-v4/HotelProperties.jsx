@@ -81,7 +81,7 @@ const HotelProperties = () => {
             data-aos-delay={index * 100}
           >
             <Link
-              to={`/hotel-single-v1/${item.user_id}`}
+              to={`/hotel-single-v1/${item.venue_id}`}
               className="hotelsCard -type-1 hover-inside-slider"
             >
               <div className="hotelsCard__image">

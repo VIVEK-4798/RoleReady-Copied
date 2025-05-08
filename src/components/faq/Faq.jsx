@@ -3,44 +3,35 @@ const Faq = () => {
     {
       id: 1,
       collapseTarget: "One",
-      title: "What do I need to hire a car?",
-      content: `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-            eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-            enim ad minim veniam, quis nostrud exercitation ullamco.`,
+      title: "What qualifications are required to apply for an internship?",
+      content: `Most internships are open to students or recent graduates. Specific qualifications vary depending on the role and company, but basic communication and learning attitude are usually expected.`,
     },
     {
       id: 2,
       collapseTarget: "Two",
-      title: "How old do I have to be to rent a car?",
-      content: `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-            eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-            enim ad minim veniam, quis nostrud exercitation ullamco.`,
+      title: "Are internships paid or unpaid?",
+      content: `Internships can be either paid or unpaid depending on the company policy. Paid internships will mention the stipend in the description, while unpaid ones may offer other benefits like experience or certifications.`,
     },
     {
       id: 3,
       collapseTarget: "Three",
-      title: "Can I book a hire car for someone else?",
-      content: `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-            eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-            enim ad minim veniam, quis nostrud exercitation ullamco.`,
+      title: "Can I do an internship while studying full-time?",
+      content: `Yes, many internships are designed to be part-time or remote, allowing students to manage both their academics and work experience simultaneously.`,
     },
     {
       id: 4,
       collapseTarget: "Four",
-      title: "How do I find the cheapest car hire deal?",
-      content: `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-            eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-            enim ad minim veniam, quis nostrud exercitation ullamco.`,
+      title: "How long does an internship usually last?",
+      content: `Internship durations vary but typically range from 1 to 6 months. Some programs may offer extensions based on performance or company requirements.`,
     },
     {
       id: 5,
       collapseTarget: "Five",
-      title: "What should I look for when I'm choosing a car?",
-      content: `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-            eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-            enim ad minim veniam, quis nostrud exercitation ullamco.`,
+      title: "Will I receive a certificate or letter of recommendation?",
+      content: `Most companies provide an internship completion certificate. A letter of recommendation may be given based on performance and at the discretion of the mentor or HR.`,
     },
   ];
+
   return (
     <>
       {faqContent.map((item) => (
@@ -57,7 +48,6 @@ const Faq = () => {
               </div>
               <div className="button text-dark-1 text-start">{item.title}</div>
             </div>
-            {/* End accordion button */}
 
             <div
               className="accordion-collapse collapse"
@@ -68,7 +58,6 @@ const Faq = () => {
                 <p className="text-15">{item.content}</p>
               </div>
             </div>
-            {/* End accordion conent */}
           </div>
         </div>
       ))}

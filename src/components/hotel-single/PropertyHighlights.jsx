@@ -1,6 +1,4 @@
-const PropertyHighlights2 = ({ internship }) => {
-  console.log(internship);
-  
+const PropertyHighlights2 = ({ internship }) => {  
   const {
     city_name,
     region_name,
