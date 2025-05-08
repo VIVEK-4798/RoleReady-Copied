@@ -1,29 +1,36 @@
 import FilterBox from "../../components/hotel-single/filter-box";
 
-const SidebarRight = ({ hotel }) => {
+const SidebarRight = ({ internship }) => {
   return (
     <aside className="ml-50 lg:ml-0">
       <div className="px-30 py-30 border-light rounded-4 shadow-4">
-        <div className="d-flex items-center justify-between">
+        <div style={{ display: 'flex',flexDirection:"column", justifyContent: 'space-between' }}>
+          {/* Stipend Section */}
+          <div className="mb-20">
+            <span className="text-20 fw-500">Stipend: ₹{internship?.stipend}</span>
+            <span className="text-14 text-light-1 ml-5">per month</span>
+          </div>
+
+          {/* Internship Type */}
+          <div className="mb-20">
+            <div className="lh-15 fw-500">Internship Type: {internship?.internship_type}</div>
+          </div>
+
+          {/* Duration */}
+          <div className="mb-20">
+            <div className="lh-15 text-light-1">Duration: {internship?.duration_months} months</div>
+          </div>
+
+          {/* Work Detail */}
           <div>
-            <span className="text-20 fw-500">US${hotel?.price}</span>
-            <span className="text-14 text-light-1 ml-5">nights</span>
+            <div className="lh-15 text-light-1">Work Detail: {internship?.work_detail}</div>
           </div>
-          <div className="d-flex items-center">
-            <div className="text-14 text-right mr-10">
-              <div className="lh-15 fw-500">Exceptional</div>
-              <div className="lh-15 text-light-1">
-                {hotel?.numberOfReviews} reviews
-              </div>
-            </div>
-            <div className="size-40 flex-center bg-blue-1 rounded-4">
-              <div className="text-14 fw-600 text-white">{hotel?.ratings}</div>
-            </div>
-          </div>
+
         </div>
         {/* End d-flex */}
 
-        <div className="row y-gap-20 pt-30">
+        {/* FilterBox */}
+        <div className="row y-gap-20 ">
           <FilterBox />
         </div>
       </div>

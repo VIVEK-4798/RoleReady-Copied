@@ -131,7 +131,9 @@ const HotelSingleV1Dynamic = () => {
             {/* End .col-xl-8 */}
 
             <div className="col-xl-4">
-              <SidebarRight hotel={hotel} />
+            {internship && Object.keys(internship).length > 0 && (
+                  <SidebarRight internship={internship}/>
+                )}
             </div>
             {/* End .col-xl-4 */}
           </div>
