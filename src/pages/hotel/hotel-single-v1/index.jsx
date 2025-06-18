@@ -66,13 +66,10 @@ const HotelSingleV1Dynamic = () => {
   return (
     <>
       <MetaComponent meta={metadata} />
-      {/* End Page Title */}
 
       <div className="header-margin"></div>
-      {/* header top margin */}
 
       <Header11 />
-      {/* End Header 1 */}
         {internship && Object.keys(internship).length > 0 && (
           <TopBreadCrumb internship={internship}/>
         )}
@@ -85,7 +82,6 @@ const HotelSingleV1Dynamic = () => {
       {internship && Object.keys(internship).length > 0 && (
           <GalleryOne internship={internship} />
         )}
-      
 
       {/* End gallery grid wrapper */}
 
@@ -95,65 +91,39 @@ const HotelSingleV1Dynamic = () => {
             <div className="col-xl-8">
               <div className="row y-gap-40">
                 <div className="col-12">
-                  <h3 className="text-22 fw-500">Internship highlights</h3>
                   {internship && Object.keys(internship).length > 0 && (
                     <PropertyHighlights internship={internship} />
                   )}
                 </div>
-                {/* End .col-12 Property highlights */}
 
                 <div id="overview" className="col-12">
                 {internship && Object.keys(internship).length > 0 && (
                   <Overview internship={internship}/>
                 )}
                 </div>
-                {/* End .col-12  Overview */}
 
                 <div className="col-12">
-                  <h3 className="text-22 fw-500 pt-40 border-top-light">
-                    Intern Responsibilities
-                  </h3>
                   <div className="row y-gap-10 pt-20">
                   {internship && Object.keys(internship).length > 0 && (
                   <PopularFacilities internship={internship}/>
                 )}
                   </div>
                 </div>
-                {/* End .col-12 Most Popular Facilities */}
 
                 <div className="col-12">
                   <RatingTag />
                 </div>
-                {/* End .col-12 This property is in high demand! */}
               </div>
-              {/* End .row */}
             </div>
-            {/* End .col-xl-8 */}
 
             <div className="col-xl-4">
             {internship && Object.keys(internship).length > 0 && (
                   <SidebarRight internship={internship}/>
                 )}
             </div>
-            {/* End .col-xl-4 */}
           </div>
-          {/* End .row */}
         </div>
-        {/* End container */}
       </section>
-      {/* End single page content */}
-
-      {/* <section id="rooms" className="pt-30">
-        <div className="container">
-          <div className="row pb-20">
-            <div className="col-auto">
-              <h3 className="text-22 fw-500">Available Rooms</h3>
-            </div>
-          </div>
-          <AvailableRooms hotel={hotel} />
-        </div>
-      </section> */}
-      {/* End Available Rooms */}
 
       <section className="mt-40" id="facilities">
         <div className="container">
@@ -165,15 +135,10 @@ const HotelSingleV1Dynamic = () => {
                   <Facilities internship={internship}/>
                 )}
               </div>
-              {/* End .row */}
             </div>
-            {/* End .col-12 */}
           </div>
-          {/* End .row */}
         </div>
-        {/* End .container */}
       </section>
-      {/* End facilites section */} 
 
       <section className="pt-40">
         <div className="container">
@@ -190,39 +155,9 @@ const HotelSingleV1Dynamic = () => {
                   <HelpfulFacts internship={internship}/>
                 )}
             </div>
-            {/* End .row */}
           </div>
-          {/* End .pt-40 */}
         </div>
-        {/* End .container */}
       </section>
-      {/* End helpful facts surroundings */}
-
-      {/* <section className="pt-40" id="reviews">
-        <div className="container">
-          <div className="row">
-            <div className="col-12">
-              <h3 className="text-22 fw-500">Guest reviews</h3>
-            </div>
-          </div>
-
-          <ReviewProgress />
-
-          <div className="pt-40">
-            <DetailsReview />
-          </div>
-
-          <div className="row pt-30">
-            <div className="col-auto">
-              <a href="#" className="button -md -outline-blue-1 text-blue-1">
-                Show all 116 reviews{" "}
-                <div className="icon-arrow-top-right ml-15"></div>
-              </a>
-            </div>
-          </div>
-        </div>
-      </section> */}
-      {/* End Review section */}
 
       <section className="pt-40">
         <div className="container">
@@ -236,17 +171,11 @@ const HotelSingleV1Dynamic = () => {
                   </p>
                 </div>
               </div>
-              {/* End .row */}
-
-              {/* <ReplyFormReview /> */}
-              {/* End ReplyFormReview */}
-
               <ReplyForm />
             </div>
           </div>
         </div>
       </section>
-      {/* End Reply Comment box section */}
 
       <section className="pt-40">
         <div className="container">
@@ -273,22 +202,6 @@ const HotelSingleV1Dynamic = () => {
           </div>
         </div>
       </section>
-      {/* End health &  safety measures section */}
-
-      {/* <section className="pt-40">
-        <div className="container">
-          <div className="row">
-            <div className="col-12">
-              <h3 className="text-22 fw-500">Hotel surroundings</h3>
-            </div>
-          </div>
-
-          <div className="row x-gap-50 y-gap-30 pt-20">
-            <Surroundings />
-          </div>
-        </div>
-      </section> */}
-      {/* End hotel surroundings */}
 
       <section id="faq" className="pt-40 layout-pb-md">
         <div className="container">
@@ -300,22 +213,16 @@ const HotelSingleV1Dynamic = () => {
                   <br /> Startups24x7 Internships
                 </h2>
               </div>
-              {/* End .row */}
 
               <div className="col-lg-8">
                 <div className="accordion -simple row y-gap-20 js-accordion">
                   <Faq />
                 </div>
               </div>
-              {/* End .col */}
             </div>
-            {/* End .row */}
           </div>
-          {/* End .pt-40 */}
         </div>
-        {/* End .container */}
       </section>
-      {/* End Faq about sections */}
 
       <section className="layout-pt-md layout-pb-lg">
         <div className="container">
@@ -329,23 +236,15 @@ const HotelSingleV1Dynamic = () => {
                 Explore similar internships that match your skills and interests
               </p>
             </div>
-              {/* End sectionTitle */}
             </div>
-            {/* End .col */}
           </div>
-          {/* End .row */}
 
           <div className="pt-40 sm:pt-20 item_gap-x30">
             <Hotels2 />
           </div>
-          {/* End slide hotel */}
         </div>
-        {/* End .container */}
       </section>
-      {/* End similar hotel */}
-
       <CallToActions />
-      {/* End Call To Actions Section */}
 
       <DefaultFooter />
     </>

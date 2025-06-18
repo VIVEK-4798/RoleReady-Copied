@@ -6,7 +6,8 @@ const cors = require('cors');
 const { swaggerUi, swaggerSpec } = require("./swagger");
 
 const corsOptions = {
-  origin: 'http://localhost:5173',  //'https://startups.com', // Replace with your frontend domain
+  origin: 'http://localhost:5173',  
+  //'https://startups.com', // Replace with your frontend domain
   methods: 'GET,POST,PUT,DELETE',
   credentials: true
 };

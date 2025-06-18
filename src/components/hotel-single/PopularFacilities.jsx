@@ -2,46 +2,51 @@ const PopularFacilities = ({ internship }) => {
   const defaultResponsibilities = [
     {
       text: "Collaborate effectively with team members",
-      icon: "bi-people"
+      icon: "bi-people",
+      color: "#3b82f6"
     },
     {
       text: "Demonstrate strong time management skills",
-      icon: "bi-clock"
+      icon: "bi-clock",
+      color: "#10b981"
     },
     {
       text: "Maintain professionalism in all tasks",
-      icon: "bi-briefcase"
+      icon: "bi-briefcase",
+      color: "#f59e0b"
     },
     {
       text: "Adapt quickly to project requirements",
-      icon: "bi-arrow-repeat"
+      icon: "bi-arrow-repeat",
+      color: "#8b5cf6"
     }
   ];
 
   const customResponsibilities = internship?.responsibilities
-    ? internship.responsibilities.split(',').map((item) => item.trim())
+    ? internship.responsibilities.split(',').map((item) => ({
+        text: item.trim(),
+        icon: "bi-check-circle",
+        color: "#ec4899"
+      }))
     : [];
 
   return (
-    <>
-      {customResponsibilities.map((item, index) => (
-        <div className="col-md-5" key={`custom-${index}`}>
-          <div className="d-flex x-gap-15 y-gap-15 items-center">
-            <i className="bi bi-check-circle"></i>
-            <div className="text-15">{item}</div>
+    <div className="responsibilities-container">
+      <h3 className="section-title">Key Responsibilities</h3>
+      <div className="responsibilities-grid">
+        {[...customResponsibilities, ...defaultResponsibilities].map((item, index) => (
+          <div className="responsibility-card" key={index}>
+            <div 
+              className="responsibility-icon"
+              style={{ backgroundColor: `${item.color}20`, color: item.color }}
+            >
+              <i className={`bi ${item.icon}`} />
+            </div>
+            <div className="responsibility-text">{item.text}</div>
           </div>
-        </div>
-      ))}
-
-      {defaultResponsibilities.map((item, index) => (
-        <div className="col-md-5" key={`default-${index}`}>
-          <div className="d-flex x-gap-15 y-gap-15 items-center">
-            <i className={`bi ${item.icon}`}></i>
-            <div className="text-15">{item.text}</div>
-          </div>
-        </div>
-      ))}
-    </>
+        ))}
+      </div>
+    </div>
   );
 };
 

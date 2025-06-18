@@ -1,3 +1,5 @@
+import "../../../public/sass/components/internshipsingle.scss";
+
 const PropertyHighlights2 = ({ internship }) => {  
   const {
     city_name,
@@ -11,61 +13,59 @@ const PropertyHighlights2 = ({ internship }) => {
 
   const highlightCards = [
     {
-      title: "Internship Location(s)",
-      value: `${region_name || ""}, ${city_name || ""}`,
+      title: "Internship Location",
+      value: `${city_name || "Not specified"}${region_name ? `, ${region_name}` : ""}`,
       icon: "bi bi-geo-alt",
+      color: "#3b82f6"
     },
     {
-      title: "Internship Duration",
-      value: `${duration_months} months`,
+      title: "Duration",
+      value: `${duration_months || "N/A"} month${duration_months !== 1 ? "s" : ""}`,
       icon: "bi bi-calendar",
+      color: "#10b981"
     },
     {
-      title: "Internship Type",
-      value: stipend === "0" ? "Unpaid" : "Paid",
+      title: "Compensation",
+      value: stipend === "0" ? "Unpaid" : `₹${stipend}/month`,
       icon: "bi bi-wallet2",
+      color: "#f59e0b"
     },
     {
-      title: "Work Detail",
-      value: work_detail || "Working Days: 5 Days",
+      title: "Work Details",
+      value: work_detail || "Flexible working days",
       icon: "bi bi-clipboard",
+      color: "#8b5cf6"
     },
     {
-      title: "Internship Type/Timing",
-      value: `Type: Hybrid\nTiming: ${internship_type}`,
+      title: "Schedule",
+      value: internship_type || "Full-time",
       icon: "bi bi-clock",
+      color: "#ec4899"
     },
     {
-      title: "Perks",
-      value: perks?.split(",").join("\n") || "None",
+      title: "Perks & Benefits",
+      value: perks?.split(",").join(", ") || "Certificate, Letter of recommendation",
       icon: "bi bi-gift",
+      color: "#ef4444"
     },
   ];
-  
 
   return (
-    <div style={{ display: "flex", flexWrap: "wrap", gap: "20px", paddingTop: "30px" }}>
-      {highlightCards.map((item, index) => (
-        <div key={index} style={{ width: "100%", maxWidth: "33.33%", boxSizing: "border-box", padding: "10px" }}>
-          <div
-            style={{
-              backgroundColor: "#f8f9fa",
-              borderRadius: "8px",
-              padding: "20px",
-              height: "100%",
-              display: "flex",
-              alignItems: "flex-start",
-              gap: "15px",
-            }}
-          >
-            <i className={item.icon} style={{ fontSize: "24px", color: "#007bff", marginTop: "5px" }} />
-            <div>
-              <div style={{ fontWeight: "bold", fontSize: "16px" }}>{item.title}</div>
-              <div style={{ fontSize: "14px", marginTop: "5px", whiteSpace: "pre-line" }}>{item.value}</div>
+    <div className="property-highlights-container">
+      <h3 className="section-title">Internship Details</h3>
+      <div className="highlight-cards-grid">
+        {highlightCards.map((item, index) => (
+          <div className="highlight-card" key={index}>
+            <div className="card-icon" style={{ backgroundColor: `${item.color}20`, color: item.color }}>
+              <i className={item.icon} />
+            </div>
+            <div className="card-content">
+              <h4 className="card-title">{item.title}</h4>
+              <p className="card-value">{item.value}</p>
             </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 };

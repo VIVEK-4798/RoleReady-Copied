@@ -1,0 +1,130 @@
+.venue-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.venue-card-wrapper {
+  width: 100%;
+  padding: 12px;
+  box-sizing: border-box;
+}
+
+.venue-card {
+  display: block;
+  position: relative;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background-color: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  text-decoration: none;
+  color: #000;
+  transition: box-shadow 0.3s, border-color 0.3s;
+}
+
+.venue-card.hovered {
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  border-color: #d1d5db;
+}
+
+.venue-banner {
+  height: 80px;
+  width: 100%;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 0 16px;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+
+.venue-tags {
+  position: absolute;
+  top: 60px;
+  left: 16px;
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+}
+
+.venue-logo {
+  position: absolute;
+  top: 50px;
+  right: 16px;
+  width: 60px;
+  height: 60px;
+  background-color: #fff;
+  padding: 4px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid white;
+}
+
+.venue-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 6px;
+}
+
+.tag {
+  font-size: 12px;
+  padding: 4px 6px;
+  font-weight: 600;
+  border-radius: 4px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.tag.in-office {
+  background-color: #f3f4f6;
+  color: #1f2937;
+}
+
+.tag.hiring {
+  background-color: #f1d024;
+  color: #000;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.venue-content {
+  padding: 16px;
+  padding-top: 40px;
+}
+
+.venue-content h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 4px;
+}
+
+.venue-content p {
+  font-size: 14px;
+  color: #6b7280;
+  margin-bottom: 12px;
+}
+
+.venue-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.venue-meta .stipend {
+  background-color: #f3f4f6;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+}
