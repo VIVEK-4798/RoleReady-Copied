@@ -1,3 +1,9 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.tw-scope,
+.tw-scope * {
+  all: revert;
+  box-sizing: border-box;
+}

@@ -1,363 +1,558 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { FaUpload, FaChartLine, FaClipboardCheck, FaRoad, FaUserCheck, FaCheckCircle } from 'react-icons/fa';
 
 const steps = [
   {
     number: '01',
-    icon: <FaUpload size={28} color="#5693C1" />,
+    icon: <FaUpload size={28} color="#ffffff" />,
     title: 'Upload Resume & Select Target Role',
     desc: 'Upload your resume and choose the specific role you want to target. Our AI analyzes your current profile against role requirements.',
     features: ['Resume parsing', 'Role matching', 'Company alignment'],
     color: '#5693C1',
-    bgColor: 'rgba(86, 147, 193, 0.08)'
   },
   {
     number: '02',
-    icon: <FaChartLine size={28} color="#5693C1" />,
+    icon: <FaChartLine size={28} color="#ffffff" />,
     title: 'Skill Gap Analysis Based on Role Benchmarks',
     desc: 'Get a detailed breakdown of your strengths and weaknesses compared to industry benchmarks for your target role.',
     features: ['Technical skills gap', 'Soft skills assessment', 'Industry benchmark comparison'],
     color: '#5693C1',
-    bgColor: 'rgba(86, 147, 193, 0.08)'
   },
   {
     number: '03',
-    icon: <FaClipboardCheck size={28} color="#5693C1" />,
+    icon: <FaClipboardCheck size={28} color="#ffffff" />,
     title: 'Get a Readiness Score with Clear Explanation',
     desc: 'Receive a comprehensive readiness score with detailed explanations of what it means and how to improve.',
     features: ['Overall readiness score', 'Area-wise breakdown', 'Improvement priorities'],
     color: '#5693C1',
-    bgColor: 'rgba(86, 147, 193, 0.08)'
   },
   {
     number: '04',
-    icon: <FaRoad size={28} color="#5693C1" />,
+    icon: <FaRoad size={28} color="#ffffff" />,
     title: 'Follow a Personalized Improvement Roadmap',
     desc: 'Get a step-by-step roadmap with resources, timelines, and milestones to bridge your skill gaps effectively.',
     features: ['Weekly learning plan', 'Resource recommendations', 'Progress tracking'],
     color: '#5693C1',
-    bgColor: 'rgba(86, 147, 193, 0.08)'
   },
   {
     number: '05',
-    icon: <FaUserCheck size={28} color="#5693C1" />,
+    icon: <FaUserCheck size={28} color="#ffffff" />,
     title: 'Mentor Review & Validation',
     desc: 'Optional expert review from industry mentors to validate your progress and provide personalized guidance.',
     features: ['Expert feedback', 'Mock interviews', 'Career guidance'],
     color: '#5693C1',
-    bgColor: 'rgba(86, 147, 193, 0.08)'
   }
 ];
 
 const JoinOurBusiness = () => {
+  const [hoveredCard, setHoveredCard] = useState(null);
+
+  const sectionStyle = {
+    background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+    padding: '100px 20px',
+    position: 'relative',
+    overflow: 'hidden',
+  };
+
+  const backgroundOrbStyle = {
+    position: 'absolute',
+    borderRadius: '50%',
+    opacity: 0.08,
+    pointerEvents: 'none',
+  };
+
+  const containerStyle = {
+    maxWidth: '1200px',
+    margin: '0 auto',
+  };
+
+  const headerSectionStyle = {
+    textAlign: 'center',
+    marginBottom: '80px',
+    position: 'relative',
+    zIndex: 2,
+  };
+
+  const titleStyle = {
+    fontSize: '52px',
+    fontWeight: '800',
+    color: '#0f172a',
+    marginBottom: '24px',
+    lineHeight: '1.2',
+    letterSpacing: '-0.5px',
+  };
+
+  const subtitleStyle = {
+    fontSize: '18px',
+    color: '#64748b',
+    maxWidth: '700px',
+    margin: '0 auto',
+    lineHeight: '1.8',
+    fontWeight: '400',
+  };
+
+  const dividerStyle = {
+    width: '80px',
+    height: '4px',
+    background: 'linear-gradient(90deg, #5693C1, #427aa1)',
+    margin: '32px auto 0',
+    borderRadius: '2px',
+  };
+
+  const stepsGridStyle = {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+    gap: '28px',
+    marginBottom: '60px',
+    position: 'relative',
+    zIndex: 2,
+  };
+
+  const cardStyle = (isHovered) => ({
+    height: '100%',
+    background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.95) 100%)',
+    border: isHovered ? '1px solid #5693C1' : '1px solid rgba(86, 147, 193, 0.15)',
+    borderRadius: '16px',
+    padding: '40px 32px',
+    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+    cursor: 'pointer',
+    position: 'relative',
+    overflow: 'hidden',
+    boxShadow: isHovered 
+      ? '0 24px 48px rgba(86, 147, 193, 0.16)' 
+      : '0 4px 16px rgba(0, 0, 0, 0.04)',
+    transform: isHovered ? 'translateY(-12px)' : 'translateY(0)',
+  });
+
+  const cardNumberStyle = {
+    position: 'absolute',
+    top: '24px',
+    right: '28px',
+    fontSize: '13px',
+    fontWeight: '700',
+    color: '#5693C1',
+    background: 'rgba(86, 147, 193, 0.08)',
+    padding: '6px 14px',
+    borderRadius: '20px',
+    border: '1px solid rgba(86, 147, 193, 0.15)',
+    letterSpacing: '0.5px',
+  };
+
+  const iconContainerStyle = {
+    width: '80px',
+    height: '80px',
+    background: 'linear-gradient(135deg, #5693C1 0%, #3d7fa8 100%)',
+    borderRadius: '14px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: '28px',
+    boxShadow: '0 8px 16px rgba(86, 147, 193, 0.2)',
+    transition: 'all 0.3s ease',
+  };
+
+  const cardTitleStyle = {
+    fontSize: '20px',
+    fontWeight: '700',
+    color: '#0f172a',
+    marginBottom: '16px',
+    lineHeight: '1.35',
+    letterSpacing: '-0.2px',
+  };
+
+  const cardDescStyle = {
+    fontSize: '15px',
+    color: '#475569',
+    marginBottom: '28px',
+    lineHeight: '1.7',
+    fontWeight: '400',
+  };
+
+  const featureListStyle = {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '12px',
+  };
+
+  const featureItemStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    padding: '10px 14px',
+    background: 'rgba(86, 147, 193, 0.04)',
+    borderRadius: '8px',
+    transition: 'all 0.2s ease',
+    cursor: 'pointer',
+  };
+
+  const featureTextStyle = {
+    fontSize: '14px',
+    color: '#334155',
+    marginLeft: '10px',
+    fontWeight: '500',
+  };
+
+  const bottomLineStyle = {
+    position: 'absolute',
+    bottom: '0',
+    left: '0',
+    right: '0',
+    height: '3px',
+    background: 'linear-gradient(90deg, rgba(86, 147, 193, 0.1) 0%, #5693C1 50%, rgba(86, 147, 193, 0.1) 100%)',
+    borderRadius: '0 0 16px 16px',
+  };
+
+  const ctaCardStyle = {
+    background: 'linear-gradient(135deg, #5693C1 0%, #3d7fa8 100%)',
+    borderRadius: '16px',
+    padding: '48px 40px',
+    color: 'white',
+    position: 'relative',
+    overflow: 'hidden',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    boxShadow: '0 16px 40px rgba(86, 147, 193, 0.2)',
+    transition: 'all 0.3s ease',
+  };
+
+  const ctaBackgroundOrbStyle = {
+    position: 'absolute',
+    top: '-60px',
+    right: '-60px',
+    width: '300px',
+    height: '300px',
+    background: 'radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%)',
+    borderRadius: '50%',
+    pointerEvents: 'none',
+  };
+
+  const ctaContentStyle = {
+    position: 'relative',
+    zIndex: 1,
+  };
+
+  const ctaIconContainerStyle = {
+    width: '100px',
+    height: '100px',
+    background: 'rgba(255, 255, 255, 0.15)',
+    borderRadius: '14px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: '28px',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    backdropFilter: 'blur(10px)',
+  };
+
+  const ctaTitleStyle = {
+    fontSize: '28px',
+    fontWeight: '800',
+    marginBottom: '16px',
+    lineHeight: '1.2',
+    letterSpacing: '-0.3px',
+    textAlign: 'center',
+  };
+
+  const ctaDescStyle = {
+    fontSize: '16px',
+    marginBottom: '32px',
+    opacity: 0.95,
+    lineHeight: '1.7',
+    textAlign: 'center',
+    fontWeight: '400',
+  };
+
+  const ctaFeatureListStyle = {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '14px',
+    marginBottom: '32px',
+  };
+
+  const ctaFeatureItemStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    padding: '10px 0',
+  };
+
+  const ctaCheckIconStyle = {
+    width: '36px',
+    height: '36px',
+    background: 'white',
+    borderRadius: '50%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: '12px',
+    flexShrink: 0,
+  };
+
+  const ctaFeatureTextStyle = {
+    fontSize: '15px',
+    fontWeight: '500',
+  };
+
+  const buttonStyle = {
+    width: '100%',
+    height: '56px',
+    background: 'white',
+    color: '#5693C1',
+    border: 'none',
+    borderRadius: '10px',
+    fontSize: '16px',
+    fontWeight: '700',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    letterSpacing: '0.3px',
+    boxShadow: '0 8px 20px rgba(0, 0, 0, 0.12)',
+  };
+
+  const processVisualizationStyle = {
+    marginTop: '80px',
+    background: 'linear-gradient(135deg, rgba(86, 147, 193, 0.06) 0%, rgba(86, 147, 193, 0.02) 100%)',
+    border: '1px solid rgba(86, 147, 193, 0.12)',
+    borderRadius: '16px',
+    padding: '40px 32px',
+    position: 'relative',
+    zIndex: 2,
+  };
+
+  const processItemsContainerStyle = {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: '24px',
+  };
+
+  const processItemStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '24px',
+  };
+
+  const processNumberStyle = {
+    width: '56px',
+    height: '56px',
+    borderRadius: '50%',
+    background: 'white',
+    border: '2px solid #5693C1',
+    color: '#5693C1',
+    fontWeight: '700',
+    fontSize: '18px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    boxShadow: '0 4px 12px rgba(86, 147, 193, 0.1)',
+  };
+
+  const processLabelStyle = {
+    fontSize: '13px',
+    fontWeight: '600',
+    color: '#334155',
+    maxWidth: '100px',
+    textAlign: 'center',
+    letterSpacing: '0.3px',
+  };
+
+  const arrowStyle = {
+    width: '32px',
+    height: '2px',
+    background: 'linear-gradient(90deg, rgba(86, 147, 193, 0.3), #5693C1, rgba(86, 147, 193, 0.3))',
+    position: 'relative',
+  };
+
+  const arrowHeadStyle = {
+    position: 'absolute',
+    right: '-6px',
+    top: '-4px',
+    width: '8px',
+    height: '8px',
+    borderRight: '2px solid #5693C1',
+    borderTop: '2px solid #5693C1',
+    transform: 'rotate(45deg)',
+  };
+
   return (
-    <section className="section pt-90 pb-90">
-      <div className="container">
+    <section style={sectionStyle}>
+      {/* Background decorative orbs */}
+      <div 
+        style={{
+          ...backgroundOrbStyle,
+          top: '-150px',
+          right: '-150px',
+          width: '400px',
+          height: '400px',
+          background: 'radial-gradient(circle, #5693C1, transparent)',
+        }}
+      />
+      <div 
+        style={{
+          ...backgroundOrbStyle,
+          bottom: '-100px',
+          left: '-100px',
+          width: '300px',
+          height: '300px',
+          background: 'radial-gradient(circle, #5693C1, transparent)',
+        }}
+      />
+
+      <div style={containerStyle}>
         {/* Header Section */}
-        <div className="row justify-center text-center mb-60">
-          <div className="col-xl-8 col-lg-10">
-            <h2 
-              className="text-40 lg:text-30 md:text-26 fw-700 text-dark-1 mb-20"
-              data-aos="fade-up"
-              data-aos-delay="200"
-            >
-              How RoleReady Works
-            </h2>
-            <p 
-              className="text-18 lg:text-16 text-dark-2"
-              data-aos="fade-up"
-              data-aos-delay="300"
-              style={{
-                maxWidth: '800px',
-                margin: '0 auto',
-                lineHeight: '1.7'
-              }}
-            >
-              From resume upload to placement readiness, follow a clear 5-step process 
-              that transforms uncertainty into actionable clarity.
-            </p>
-          </div>
+        <div style={headerSectionStyle}>
+          <h2 style={titleStyle}>
+            How RoleReady Works
+          </h2>
+          <p style={subtitleStyle}>
+            From resume upload to placement readiness, follow a clear 5-step process that transforms uncertainty into actionable clarity and confidence.
+          </p>
+          <div style={dividerStyle} />
         </div>
 
         {/* Steps Grid */}
-        <div className="row y-gap-30">
+        <div style={stepsGridStyle}>
           {steps.map((step, index) => (
-            <div 
+            <div
               key={index}
-              className="col-lg-4 col-md-6"
-              data-aos="fade-up"
-              data-aos-delay={400 + (index * 100)}
+              style={cardStyle(hoveredCard === index)}
+              onMouseEnter={() => setHoveredCard(index)}
+              onMouseLeave={() => setHoveredCard(null)}
+              onMouseMove={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+              }}
             >
-              <div 
-                className="cardImage -type-1 rounded-12 p-30"
-                style={{
-                  height: '100%',
-                  border: '1px solid rgba(86, 147, 193, 0.15)',
-                  background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(249, 250, 251, 0.9) 100%)',
-                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                  cursor: 'pointer',
-                  position: 'relative',
-                  overflow: 'hidden'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-8px)';
-                  e.currentTarget.style.boxShadow = '0 20px 40px rgba(86, 147, 193, 0.12)';
-                  e.currentTarget.style.borderColor = 'rgba(86, 147, 193, 0.3)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.05)';
-                  e.currentTarget.style.borderColor = 'rgba(86, 147, 193, 0.15)';
-                }}
-              >
-                {/* Step Number Badge */}
-                <div 
-                  className="absolute top-20 right-20"
-                  style={{
-                    fontSize: '14px',
-                    fontWeight: '700',
-                    color: step.color,
-                    background: step.bgColor,
-                    padding: '4px 12px',
-                    borderRadius: '20px',
-                    border: `1px solid ${step.color}20`
-                  }}
-                >
-                  {step.number}
-                </div>
+              <div style={cardNumberStyle}>{step.number}</div>
 
-                {/* Icon */}
-                <div 
-                  className="d-flex justify-center items-center rounded-full mb-25"
-                  style={{
-                    width: '70px',
-                    height: '70px',
-                    background: 'linear-gradient(135deg, #5693C1 0%, #427aa1 100%)',
-                    color: 'white',
-                    marginTop: '10px'
-                  }}
-                >
-                  {step.icon}
-                </div>
-
-                {/* Title */}
-                <h3 
-                  className="text-22 fw-600 text-dark-1 mb-15"
-                  style={{ lineHeight: '1.3' }}
-                >
-                  {step.title}
-                </h3>
-
-                {/* Description */}
-                <p 
-                  className="text-16 text-dark-2 mb-20"
-                  style={{ lineHeight: '1.6' }}
-                >
-                  {step.desc}
-                </p>
-
-                {/* Features List */}
-                <div className="mt-20">
-                  {step.features.map((feature, featureIndex) => (
-                    <div 
-                      key={featureIndex}
-                      className="d-flex items-center mb-10"
-                      style={{
-                        padding: '8px 12px',
-                        background: 'rgba(86, 147, 193, 0.04)',
-                        borderRadius: '6px',
-                        transition: 'all 0.2s ease'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = 'rgba(86, 147, 193, 0.08)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = 'rgba(86, 147, 193, 0.04)';
-                      }}
-                    >
-                      <FaCheckCircle 
-                        size={14} 
-                        color="#5693C1" 
-                        className="mr-10" 
-                        style={{ flexShrink: 0 }}
-                      />
-                      <span className="text-14 text-dark-2">{feature}</span>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Decorative Bottom Line */}
-                <div 
-                  className="absolute bottom-0 left-0 right-0 h-3"
-                  style={{
-                    background: 'linear-gradient(90deg, rgba(86, 147, 193, 0.2) 0%, rgba(86, 147, 193, 0.8) 50%, rgba(86, 147, 193, 0.2) 100%)',
-                    borderRadius: '0 0 12px 12px',
-                    opacity: 0,
-                    transition: 'opacity 0.3s ease'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.opacity = '1';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.opacity = '0';
-                  }}
-                />
+              <div style={iconContainerStyle}>
+                {step.icon}
               </div>
+
+              <h3 style={cardTitleStyle}>
+                {step.title}
+              </h3>
+
+              <p style={cardDescStyle}>
+                {step.desc}
+              </p>
+
+              <div style={featureListStyle}>
+                {step.features.map((feature, featureIndex) => (
+                  <div
+                    key={featureIndex}
+                    style={featureItemStyle}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = 'rgba(86, 147, 193, 0.1)';
+                      e.currentTarget.style.transform = 'translateX(4px)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'rgba(86, 147, 193, 0.04)';
+                      e.currentTarget.style.transform = 'translateX(0)';
+                    }}
+                  >
+                    <FaCheckCircle 
+                      size={16} 
+                      color="#5693C1" 
+                      style={{ flexShrink: 0 }}
+                    />
+                    <span style={featureTextStyle}>{feature}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div style={bottomLineStyle} />
             </div>
           ))}
 
           {/* Final CTA Card */}
-          <div 
-            className="col-lg-4 col-md-6"
-            data-aos="fade-up"
-            data-aos-delay="900"
+          <div
+            style={ctaCardStyle}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-8px)';
+              e.currentTarget.style.boxShadow = '0 24px 48px rgba(86, 147, 193, 0.25)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 16px 40px rgba(86, 147, 193, 0.2)';
+            }}
           >
-            <div 
-              className="ctaCard -type-1 rounded-12 p-40"
-              style={{
-                height: '100%',
-                background: 'linear-gradient(135deg, #5693C1 0%, #427aa1 100%)',
-                color: 'white',
-                position: 'relative',
-                overflow: 'hidden'
-              }}
-            >
-              <div 
-                className="absolute top-0 right-0 opacity-10"
-                style={{
-                  width: '200px',
-                  height: '200px',
-                  background: 'radial-gradient(circle, white 0%, transparent 70%)'
-                }}
-              />
-              
-              <div className="relative z-1">
-                <div className="d-flex justify-center items-center rounded-full mb-25 bg-white-20 p-20">
-                  <FaCheckCircle size={40} color="white" />
-                </div>
-                
-                <h3 className="text-22 fw-600 mb-15">
-                  Start Your Journey Today
-                </h3>
-                
-                <p className="text-16 mb-30" style={{ opacity: 0.9, lineHeight: '1.6' }}>
-                  Join thousands of students who have transformed their placement journey with RoleReady.
-                </p>
+            <div style={ctaBackgroundOrbStyle} />
 
-                <div className="d-flex flex-column y-gap-15 mb-30">
-                  <div className="d-flex items-center">
-                    <div className="bg-white rounded-full p-2 mr-10">
-                      <FaCheckCircle size={12} color="#5693C1" />
-                    </div>
-                    <span className="text-14">No credit card required</span>
-                  </div>
-                  <div className="d-flex items-center">
-                    <div className="bg-white rounded-full p-2 mr-10">
-                      <FaCheckCircle size={12} color="#5693C1" />
-                    </div>
-                    <span className="text-14">Get results in minutes</span>
-                  </div>
-                  <div className="d-flex items-center">
-                    <div className="bg-white rounded-full p-2 mr-10">
-                      <FaCheckCircle size={12} color="#5693C1" />
-                    </div>
-                    <span className="text-14">Personalized guidance</span>
-                  </div>
-                </div>
-
-                <button
-                  className="button -md -blue-1 bg-white text-dark-1 fw-500 w-100"
-                  style={{
-                    height: '48px',
-                    fontSize: '16px',
-                    fontWeight: '600',
-                    border: 'none',
-                    borderRadius: '8px',
-                    transition: 'all 0.3s ease'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                    e.currentTarget.style.boxShadow = '0 8px 20px rgba(0, 0, 0, 0.15)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = 'none';
-                  }}
-                >
-                  Get Your Free Analysis
-                </button>
+            <div style={ctaContentStyle}>
+              <div style={ctaIconContainerStyle}>
+                <FaCheckCircle size={50} color="white" />
               </div>
+
+              <h3 style={ctaTitleStyle}>
+                Ready to Transform Your Career?
+              </h3>
+
+              <p style={ctaDescStyle}>
+                Join thousands of students accelerating their placement readiness with RoleReady.
+              </p>
+
+              <div style={ctaFeatureListStyle}>
+                <div style={ctaFeatureItemStyle}>
+                  <div style={ctaCheckIconStyle}>
+                    <FaCheckCircle size={16} color="#5693C1" />
+                  </div>
+                  <span style={ctaFeatureTextStyle}>No credit card required</span>
+                </div>
+                <div style={ctaFeatureItemStyle}>
+                  <div style={ctaCheckIconStyle}>
+                    <FaCheckCircle size={16} color="#5693C1" />
+                  </div>
+                  <span style={ctaFeatureTextStyle}>Get results in 5 minutes</span>
+                </div>
+                <div style={ctaFeatureItemStyle}>
+                  <div style={ctaCheckIconStyle}>
+                    <FaCheckCircle size={16} color="#5693C1" />
+                  </div>
+                  <span style={ctaFeatureTextStyle}>100% personalized guidance</span>
+                </div>
+              </div>
+
+              <button
+                style={buttonStyle}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-3px)';
+                  e.currentTarget.style.boxShadow = '0 12px 28px rgba(0, 0, 0, 0.18)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 8px 20px rgba(0, 0, 0, 0.12)';
+                }}
+              >
+                Get Your Free Analysis
+              </button>
             </div>
           </div>
         </div>
 
-        {/* Process Visualization (Optional) */}
-        <div 
-          className="row justify-center mt-60"
-          data-aos="fade-up"
-          data-aos-delay="1000"
-        >
-          <div className="col-lg-10">
-            <div 
-              className="rounded-12 p-30"
-              style={{
-                background: 'linear-gradient(135deg, rgba(86, 147, 193, 0.05) 0%, rgba(86, 147, 193, 0.02) 100%)',
-                border: '1px solid rgba(86, 147, 193, 0.1)'
-              }}
-            >
-              <div className="d-flex flex-wrap justify-center x-gap-30 y-gap-20">
-                {steps.map((step, index) => (
-                  <div key={index} className="d-flex items-center">
-                    <div className="text-center">
-                      <div 
-                        className="rounded-full d-flex justify-center items-center mx-auto mb-10"
-                        style={{
-                          width: '50px',
-                          height: '50px',
-                          background: 'white',
-                          border: `2px solid ${step.color}`,
-                          color: step.color,
-                          fontWeight: '600',
-                          fontSize: '18px'
-                        }}
-                      >
-                        {step.number}
-                      </div>
-                      <div 
-                        className="text-14 fw-500 text-dark-1"
-                        style={{ maxWidth: '120px', lineHeight: '1.3' }}
-                      >
-                        {step.title.split(' ')[0]} {step.title.split(' ')[1]}
-                      </div>
-                    </div>
-                    {index < steps.length - 1 && (
-                      <div 
-                        className="ml-20"
-                        style={{
-                          width: '40px',
-                          height: '2px',
-                          background: 'rgba(86, 147, 193, 0.3)',
-                          position: 'relative'
-                        }}
-                      >
-                        <div 
-                          className="absolute"
-                          style={{
-                            top: '-4px',
-                            right: '-4px',
-                            width: '10px',
-                            height: '10px',
-                            borderRight: '2px solid #5693C1',
-                            borderTop: '2px solid #5693C1',
-                            transform: 'rotate(45deg)'
-                          }}
-                        />
-                      </div>
-                    )}
+        {/* Process Visualization */}
+        <div style={processVisualizationStyle}>
+          <div style={processItemsContainerStyle}>
+            {steps.map((step, index) => (
+              <React.Fragment key={index}>
+                <div style={processItemStyle}>
+                  <div style={processNumberStyle}>
+                    {step.number}
                   </div>
-                ))}
-              </div>
-            </div>
+                  <div style={processLabelStyle}>
+                    {step.title.split(' ').slice(0, 2).join(' ')}
+                  </div>
+                </div>
+                {index < steps.length - 1 && (
+                  <div style={arrowStyle}>
+                    <div style={arrowHeadStyle} />
+                  </div>
+                )}
+              </React.Fragment>
+            ))}
           </div>
         </div>
       </div>
