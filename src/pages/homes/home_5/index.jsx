@@ -14,17 +14,18 @@ import DefaultHeader from "@/components/header/default-header";
 import MetaComponent from "@/components/common/MetaComponent";
 import { useEffect, useState } from "react";
 import College from "@/components/home/home-5/College";
+import Counter2 from "@/components/counter/Counter2";
+import WhoIsItFor from "@/components/home/home-5/WhoIsItFor";
 
 const metadata = {
   title: "Startups24x7",
-  description: "Startups24x7 - All-in-One Platform for Startup Services"
+  description: "Startups24x7 - All-in-One Platform for Startup Services",
 };
 
 const Home_5 = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    // Update this logic if you store user info differently
     const user = localStorage.getItem("user");
     setIsLoggedIn(!!user);
   }, []);
@@ -36,40 +37,41 @@ const Home_5 = () => {
       <DefaultHeader />
       <Hero5 />
 
-      <section className="layout-pt-md layout-pb-lg">
-        <div className="container">
-          <div className="row justify-center text-center">
-            <Counter3 />
+      {/* Counter Section */}
+      <section className="py-16">
+        <div className="container mx-auto px-4">
+          <div className="flex justify-center text-center">
+            <Counter2 />
           </div>
         </div>
       </section>
 
-      <section className="-lg md:pt-0 md:pb-60 sm:pb-40  bg-blue-1-05">
-        <BenefitsBar />
+      {/* Job Listings (currently disabled) */}
+      <section className="py-16 bg-blue-50">
+        {/* <JobListings /> */}
       </section>
 
-      <section className="-lg md:pt-0 md:pb-60 sm:pb-40  bg-blue-1-05">
-        <JobListings />
+      {/* Internship Listings (currently disabled) */}
+      <section className="py-16 bg-blue-50">
+        {/* <InternshipListings /> */}
       </section>
 
-      <section className="-lg md:pt-0 md:pb-60 sm:pb-40  bg-blue-1-05">
-        <InternshipListings />
-      </section>
-
-      {/* <section className="-lg md:pt-0 md:pb-60 sm:pb-40  bg-blue-1-05">
-        <WhyChooseUs />
-      </section> */}
-
-      <section className="section-bg layout-pt-lg md:pt-0 md:pb-60 sm:pb-40 layout-pb-lg">
+      {/* Join Our Business */}
+      <section className="py-20 bg-gray-50">
         <JoinOurBusiness />
       </section>
-      
-        <section className="layout-pt-lg layout-pb-lg bg-light" style={{ backgroundColor: "#f0f8ff" }}>
-          <College/>
-        </section>
 
+      {/* Why Choose Us */}
+      <section className="py-20 bg-blue-50">
+        <WhyChooseUs />
+      </section>
 
-      {/* ✅ Conditional CallToActions based on login status */}
+      {/* Who Is It For */}
+      <section className="py-20 bg-blue-50">
+        <WhoIsItFor />
+      </section>
+
+      {/* Conditional Call To Action */}
       {isLoggedIn ? <DefaultCallToActions /> : <GuestCallToActions />}
 
       <Footer4 />
