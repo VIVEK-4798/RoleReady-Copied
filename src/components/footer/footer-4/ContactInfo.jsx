@@ -6,15 +6,15 @@ const ContactInfo = () => {
     {
       id: 1,
       title: "Toll Free Customer Care",
-      action: "tel:+(1) 9930090487",
-      text: "+91 9930090487",
+      action: "tel:+(1) 9709009230",
+      text: "+91 9709009230",
       icon: "icon-phone"
     },
     {
       id: 2,
       title: "Need live support?",
-      action: "mailto:startups24x7@gmail.com",
-      text: "startups24x7@gmail.com",
+      action: "mailto:roleready@gmail.com",
+      text: "roleready@gmail.com",
       icon: "icon-email"
     },
   ];

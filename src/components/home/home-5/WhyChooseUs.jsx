@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { FaSearch, FaBullseye, FaChartBar, FaRoad, FaUserCheck, FaCheckCircle, FaTimes } from 'react-icons/fa';
+import DemoModal from './DemoModal';
 
 const WhyChooseUs = () => {
   const themeColor = '#5693C1';
-  const [hoveredCard, setHoveredCard] = useState(null);
+  const [showDemo, setShowDemo] = useState(false);
 
   const differences = [
     {
@@ -57,393 +58,75 @@ const WhyChooseUs = () => {
     }
   ];
 
-  const sectionStyle = {
-    padding: '120px 40px',
-    background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fc 100%)',
-    minHeight: '100vh',
-  };
-
-  const containerStyle = {
-    maxWidth: '1300px',
-    margin: '0 auto',
-  };
-
-  const headerContainerStyle = {
-    textAlign: 'center',
-    marginBottom: '80px',
-  };
-
-  const badgeStyle = {
-    background: `rgba(86, 147, 193, 0.12)`,
-    border: `2px solid rgba(86, 147, 193, 0.25)`,
-    display: 'inline-block',
-    borderRadius: '20px',
-    padding: '10px 24px',
-    marginBottom: '24px',
-  };
-
-  const badgeTextStyle = {
-    fontSize: '14px',
-    fontWeight: '700',
-    color: themeColor,
-    letterSpacing: '0.5px',
-    margin: 0,
-  };
-
-  const mainTitleStyle = {
-    fontSize: '56px',
-    fontWeight: '800',
-    color: '#0f172a',
-    marginBottom: '24px',
-    lineHeight: '1.2',
-    letterSpacing: '-1px',
-  };
-
-  const descriptionStyle = {
-    fontSize: '18px',
-    color: '#64748b',
-    maxWidth: '700px',
-    margin: '0 auto',
-    lineHeight: '1.8',
-    fontWeight: '500',
-  };
-
-  const contentGridStyle = {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    gap: '40px',
-    marginBottom: '60px',
-  };
-
-  const cardContainerStyle = {
-    padding: '48px',
-    borderRadius: '16px',
-    background: 'white',
-    border: '1px solid #e2e8f0',
-    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.04)',
-    transition: 'all 0.3s ease',
-    height: '100%',
-  };
-
-  const cardContainerHoverStyle = {
-    ...cardContainerStyle,
-    boxShadow: '0 20px 40px rgba(86, 147, 193, 0.12)',
-    borderColor: `rgba(86, 147, 193, 0.2)`,
-    transform: 'translateY(-8px)',
-  };
-
-  const cardTitleStyle = {
-    fontSize: '28px',
-    fontWeight: '700',
-    color: '#0f172a',
-    marginBottom: '32px',
-    letterSpacing: '-0.5px',
-  };
-
-  const differenceItemStyle = {
-    display: 'flex',
-    gap: '20px',
-    marginBottom: '28px',
-    alignItems: 'flex-start',
-  };
-
-  const iconBoxStyle = {
-    width: '64px',
-    height: '64px',
-    borderRadius: '12px',
-    background: `rgba(86, 147, 193, 0.15)`,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    color: themeColor,
-    flexShrink: 0,
-    boxShadow: '0 4px 12px rgba(86, 147, 193, 0.1)',
-  };
-
-  const differenceHeadingStyle = {
-    fontSize: '18px',
-    fontWeight: '700',
-    color: '#0f172a',
-    marginBottom: '8px',
-    lineHeight: '1.3',
-  };
-
-  const differenceTextStyle = {
-    fontSize: '15px',
-    color: '#64748b',
-    lineHeight: '1.7',
-    margin: 0,
-  };
-
-  const metricBoxStyle = {
-    marginTop: '40px',
-    paddingTop: '32px',
-    borderTop: '2px solid #e2e8f0',
-    textAlign: 'center',
-  };
-
-  const metricNumberStyle = {
-    fontSize: '42px',
-    fontWeight: '800',
-    color: themeColor,
-    marginBottom: '12px',
-    letterSpacing: '-1px',
-  };
-
-  const metricTextStyle = {
-    fontSize: '16px',
-    color: '#64748b',
-    lineHeight: '1.6',
-    maxWidth: '300px',
-    margin: '0 auto',
-  };
-
-  const comparisonHeaderStyle = {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    marginBottom: '28px',
-    gap: '20px',
-  };
-
-  const comparisonLabelStyle = {
-    fontSize: '14px',
-    fontWeight: '700',
-    color: '#0f172a',
-    textTransform: 'uppercase',
-    letterSpacing: '0.5px',
-  };
-
-  const comparisonItemStyle = {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    gap: '20px',
-    marginBottom: '20px',
-    alignItems: 'center',
-  };
-
-  const traditionalTextStyle = {
-    display: 'flex',
-    gap: '12px',
-    alignItems: 'center',
-  };
-
-  const traditionalLabelStyle = {
-    fontSize: '15px',
-    color: '#64748b',
-    lineHeight: '1.6',
-    margin: 0,
-  };
-
-  const rolereadyTextStyle = {
-    display: 'flex',
-    gap: '12px',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-  };
-
-  const rolereadyLabelStyle = {
-    fontSize: '15px',
-    color: '#0f172a',
-    fontWeight: '600',
-    lineHeight: '1.6',
-    margin: 0,
-  };
-
-  const statsRowStyle = {
-    marginTop: '40px',
-    paddingTop: '32px',
-    borderTop: '2px solid #e2e8f0',
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr 1fr',
-    gap: '24px',
-    textAlign: 'center',
-  };
-
-  const statItemStyle = {
-    padding: '16px',
-  };
-
-  const statNumberStyle = {
-    fontSize: '36px',
-    fontWeight: '800',
-    color: themeColor,
-    marginBottom: '8px',
-    letterSpacing: '-0.5px',
-  };
-
-  const statLabelStyle = {
-    fontSize: '14px',
-    color: '#64748b',
-    fontWeight: '600',
-  };
-
-  const ctaSectionStyle = {
-    marginTop: '80px',
-  };
-
-  const ctaCardStyle = {
-    background: `linear-gradient(135deg, rgba(86, 147, 193, 0.08) 0%, rgba(86, 147, 193, 0.04) 100%)`,
-    border: `2px solid rgba(86, 147, 193, 0.2)`,
-    borderRadius: '16px',
-    padding: '64px 48px',
-    textAlign: 'center',
-    maxWidth: '900px',
-    margin: '0 auto',
-    boxShadow: '0 4px 12px rgba(86, 147, 193, 0.08)',
-    transition: 'all 0.3s ease',
-  };
-
-  const ctaCardHoverStyle = {
-    ...ctaCardStyle,
-    boxShadow: '0 20px 40px rgba(86, 147, 193, 0.15)',
-    transform: 'translateY(-4px)',
-    borderColor: `rgba(86, 147, 193, 0.3)`,
-  };
-
-  const ctaTitleStyle = {
-    fontSize: '32px',
-    fontWeight: '800',
-    color: '#0f172a',
-    marginBottom: '20px',
-    letterSpacing: '-0.5px',
-  };
-
-  const ctaDescriptionStyle = {
-    fontSize: '17px',
-    color: '#64748b',
-    marginBottom: '32px',
-    maxWidth: '550px',
-    margin: '0 auto 32px',
-    lineHeight: '1.7',
-    fontWeight: '500',
-  };
-
-  const buttonContainerStyle = {
-    display: 'flex',
-    gap: '16px',
-    justifyContent: 'center',
-    marginBottom: '24px',
-    flexWrap: 'wrap',
-  };
-
-  const primaryButtonStyle = {
-    padding: '14px 40px',
-    fontSize: '16px',
-    fontWeight: '700',
-    background: themeColor,
-    color: 'white',
-    border: 'none',
-    borderRadius: '10px',
-    cursor: 'pointer',
-    transition: 'all 0.3s ease',
-    boxShadow: '0 4px 12px rgba(86, 147, 193, 0.3)',
-    letterSpacing: '0.3px',
-  };
-
-  const secondaryButtonStyle = {
-    padding: '14px 40px',
-    fontSize: '16px',
-    fontWeight: '700',
-    background: 'white',
-    color: themeColor,
-    border: `2px solid ${themeColor}`,
-    borderRadius: '10px',
-    cursor: 'pointer',
-    transition: 'all 0.3s ease',
-    letterSpacing: '0.3px',
-  };
-
-  const ctaSubtextStyle = {
-    fontSize: '14px',
-    color: '#94a3b8',
-    fontWeight: '500',
-  };
-
   return (
-    <section style={sectionStyle}>
-      <div style={containerStyle}>
+    <section className="why-choose-us-section">
+      <div className="why-choose-us-container">
         {/* Header Section */}
-        <div style={headerContainerStyle}>
-          <div style={badgeStyle}>
-            <p style={badgeTextStyle}>What Makes Us Different</p>
+        <div className="header-container">
+          <div className="badge">
+            <p className="badge-text">What Makes Us Different</p>
           </div>
           
-          <h2 style={mainTitleStyle}>Why RoleReady?</h2>
+          <h2 className="main-title">Why RoleReady?</h2>
           
-          <p style={descriptionStyle}>
+          <p className="description">
             We're redefining placement preparation with a focus on readiness over resumes, and clarity over confusion.
           </p>
         </div>
 
         {/* Main Content - Two Columns */}
-        <div style={contentGridStyle}>
+        <div className="content-grid">
           {/* Left Column - Key Differentiators */}
-          <div
-            style={cardContainerStyle}
-            onMouseEnter={(e) => {
-              Object.assign(e.currentTarget.style, cardContainerHoverStyle);
-            }}
-            onMouseLeave={(e) => {
-              Object.assign(e.currentTarget.style, cardContainerStyle);
-            }}
-          >
-            <h3 style={cardTitleStyle}>Our Core Differentiators</h3>
+          <div className="card-container">
+            <h3 className="card-title">Our Core Differentiators</h3>
             
             <div>
               {differences.map((item) => (
-                <div key={item.id} style={differenceItemStyle}>
-                  <div style={iconBoxStyle}>
+                <div key={item.id} className="difference-item">
+                  <div className="icon-box">
                     {item.icon}
                   </div>
                   
                   <div>
-                    <h4 style={differenceHeadingStyle}>{item.title}</h4>
-                    <p style={differenceTextStyle}>{item.text}</p>
+                    <h4 className="difference-heading">{item.title}</h4>
+                    <p className="difference-text">{item.text}</p>
                   </div>
                 </div>
               ))}
             </div>
             
             {/* Key Metric */}
-            <div style={metricBoxStyle}>
-              <div style={metricNumberStyle}>3x Higher</div>
-              <p style={metricTextStyle}>
+            <div className="metric-box">
+              <div className="metric-number">3x Higher</div>
+              <p className="metric-text">
                 interview conversion rate for students who use RoleReady vs traditional methods
               </p>
             </div>
           </div>
 
           {/* Right Column - Comparison */}
-          <div
-            style={cardContainerStyle}
-            onMouseEnter={(e) => {
-              Object.assign(e.currentTarget.style, cardContainerHoverStyle);
-            }}
-            onMouseLeave={(e) => {
-              Object.assign(e.currentTarget.style, cardContainerStyle);
-            }}
-          >
-            <h3 style={cardTitleStyle}>Traditional vs RoleReady</h3>
+          <div className="card-container">
+            <h3 className="card-title">Traditional vs RoleReady</h3>
             
-            <div style={comparisonHeaderStyle}>
+            <div className="comparison-header">
               <div>
-                <p style={comparisonLabelStyle}>Traditional Approach</p>
+                <p className="comparison-label">Traditional Approach</p>
               </div>
               <div style={{ textAlign: 'right' }}>
-                <p style={comparisonLabelStyle}>RoleReady</p>
+                <p className="comparison-label">RoleReady</p>
               </div>
             </div>
             
             <div>
               {comparisonPoints.map((item, index) => (
-                <div key={index} style={comparisonItemStyle}>
-                  <div style={traditionalTextStyle}>
+                <div key={index} className="comparison-item">
+                  <div className="traditional-text">
                     <FaTimes size={16} color="#ef4444" style={{ flexShrink: 0 }} />
-                    <p style={traditionalLabelStyle}>{item.traditional}</p>
+                    <p className="traditional-label">{item.traditional}</p>
                   </div>
                   
-                  <div style={rolereadyTextStyle}>
-                    <p style={rolereadyLabelStyle}>{item.roleready}</p>
+                  <div className="roleready-text">
+                    <p className="roleready-label">{item.roleready}</p>
                     <FaCheckCircle size={16} color={themeColor} style={{ flexShrink: 0 }} />
                   </div>
                 </div>
@@ -451,50 +134,53 @@ const WhyChooseUs = () => {
             </div>
             
             {/* Stats Row */}
-            <div style={statsRowStyle}>
-              <div style={statItemStyle}>
-                <div style={statNumberStyle}>10K+</div>
-                <div style={statLabelStyle}>Students</div>
+            <div className="stats-row">
+              <div className="stat-item">
+                <div className="stat-number">10K+</div>
+                <div className="stat-label">Students</div>
               </div>
-              <div style={statItemStyle}>
-                <div style={statNumberStyle}>92%</div>
-                <div style={statLabelStyle}>Satisfaction</div>
+              <div className="stat-item">
+                <div className="stat-number">92%</div>
+                <div className="stat-label">Satisfaction</div>
               </div>
-              <div style={statItemStyle}>
-                <div style={statNumberStyle}>50+</div>
-                <div style={statLabelStyle}>Partners</div>
+              <div className="stat-item">
+                <div className="stat-number">50+</div>
+                <div className="stat-label">Partners</div>
               </div>
             </div>
           </div>
         </div>
 
         {/* CTA Section */}
-        <div style={ctaSectionStyle}>
-          <div
-            style={ctaCardStyle}
-            onMouseEnter={(e) => {
-              Object.assign(e.currentTarget.style, ctaCardHoverStyle);
-            }}
-            onMouseLeave={(e) => {
-              Object.assign(e.currentTarget.style, ctaCardStyle);
-            }}
-          >
-            <h3 style={ctaTitleStyle}>Experience the Difference Yourself</h3>
+        <div className="cta-section">
+          <div className="cta-card">
+            <h3 className="cta-title">Experience the Difference Yourself</h3>
             
-            <p style={ctaDescriptionStyle}>
+            <p className="cta-description">
               See how RoleReady transforms your placement preparation in minutes.
             </p>
             
-            <div style={buttonContainerStyle}>
+            <div className="button-container">
               <button
-                style={primaryButtonStyle}
+                className="primary-button"
+                style={{
+                  padding: '14px 40px',
+                  fontSize: '16px',
+                  fontWeight: '700',
+                  background: themeColor,
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '10px',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  boxShadow: '0 4px 12px rgba(86, 147, 193, 0.3)',
+                  letterSpacing: '0.3px'
+                }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#427aa1';
-                  e.currentTarget.style.transform = 'translateY(-3px)';
-                  e.currentTarget.style.boxShadow = '0 8px 16px rgba(86, 147, 193, 0.4)';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 8px 20px rgba(86, 147, 193, 0.4)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = themeColor;
                   e.currentTarget.style.transform = 'translateY(0)';
                   e.currentTarget.style.boxShadow = '0 4px 12px rgba(86, 147, 193, 0.3)';
                 }}
@@ -503,10 +189,23 @@ const WhyChooseUs = () => {
               </button>
               
               <button
-                style={secondaryButtonStyle}
+                className="secondary-button"
+                style={{
+                  padding: '14px 40px',
+                  fontSize: '16px',
+                  fontWeight: '700',
+                  background: 'white',
+                  color: themeColor,
+                  border: `2px solid ${themeColor}`,
+                  borderRadius: '10px',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  letterSpacing: '0.3px'
+                }}
+                onClick={() => setShowDemo(true)}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = `rgba(86, 147, 193, 0.08)`;
-                  e.currentTarget.style.transform = 'translateY(-3px)';
+                  e.currentTarget.style.background = 'rgba(86, 147, 193, 0.1)';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.background = 'white';
@@ -517,11 +216,14 @@ const WhyChooseUs = () => {
               </button>
             </div>
             
-            <p style={ctaSubtextStyle}>
+            <p className="cta-subtext">
               No credit card required • Takes 5 minutes • Get instant results
             </p>
           </div>
         </div>
+
+        {/* Demo Modal */}
+        {showDemo && <DemoModal onClose={() => setShowDemo(false)} />}
       </div>
     </section>
   );

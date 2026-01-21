@@ -16,6 +16,7 @@ import { useEffect, useState } from "react";
 import College from "@/components/home/home-5/College";
 import Counter2 from "@/components/counter/Counter2";
 import WhoIsItFor from "@/components/home/home-5/WhoIsItFor";
+import NewCallToActions from "@/components/common/social/NewCallToActions";
 
 const metadata = {
   title: "Startups24x7",
@@ -72,7 +73,7 @@ const Home_5 = () => {
       </section>
 
       {/* Conditional Call To Action */}
-      {isLoggedIn ? <DefaultCallToActions /> : <GuestCallToActions />}
+      {isLoggedIn ? <NewCallToActions /> : <GuestCallToActions />}
 
       <Footer4 />
     </>

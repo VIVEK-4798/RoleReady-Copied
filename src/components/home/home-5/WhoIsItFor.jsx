@@ -1,11 +1,16 @@
+'use client';
+
 import React from 'react';
 import { FaGraduationCap, FaUserGraduate, FaSyncAlt, FaChalkboardTeacher, FaArrowRight } from 'react-icons/fa';
 
 const WhoIsItFor = () => {
+  const themeColor = '#5693C1';
+  const accentColors = ['#5693C1', '#4299E1', '#48BB78', '#ED8936'];
+
   const audienceCards = [
     {
       id: 1,
-      icon: <FaGraduationCap size={28} />,
+      icon: <FaGraduationCap size={32} />,
       title: "Final Year Students",
       description: "Maximize placement opportunities with precise readiness assessment and targeted preparation.",
       features: [
@@ -13,11 +18,11 @@ const WhoIsItFor = () => {
         "Role-specific gap analysis",
         "Interview readiness tracking"
       ],
-      color: "#5693C1"
+      color: accentColors[0]
     },
     {
       id: 2,
-      icon: <FaUserGraduate size={28} />,
+      icon: <FaUserGraduate size={32} />,
       title: "Pre-Final Year Students",
       description: "Get ahead of the competition with early preparation and strategic skill development.",
       features: [
@@ -25,11 +30,11 @@ const WhoIsItFor = () => {
         "Long-term preparation roadmap",
         "Summer internship optimization"
       ],
-      color: "#4299E1"
+      color: accentColors[1]
     },
     {
       id: 3,
-      icon: <FaSyncAlt size={28} />,
+      icon: <FaSyncAlt size={32} />,
       title: "Career Switchers",
       description: "Smooth transition to new roles with clear skill mapping and structured learning paths.",
       features: [
@@ -37,11 +42,11 @@ const WhoIsItFor = () => {
         "Transition strategy planning",
         "Industry validation"
       ],
-      color: "#48BB78"
+      color: accentColors[2]
     },
     {
       id: 4,
-      icon: <FaChalkboardTeacher size={28} />,
+      icon: <FaChalkboardTeacher size={32} />,
       title: "Mentors & Educators",
       description: "Track student progress, provide targeted guidance, and improve placement outcomes.",
       features: [
@@ -49,252 +54,451 @@ const WhoIsItFor = () => {
         "Data-driven interventions",
         "Curriculum alignment insights"
       ],
-      color: "#ED8936"
+      color: accentColors[3]
     }
   ];
 
+  const stats = [
+    { number: '85%', label: 'Final Year Students', color: themeColor },
+    { number: '65%', label: 'Pre-Final Year Students', color: '#4299E1' },
+    { number: '40%', label: 'Career Switchers', color: '#48BB78' },
+    { number: '200+', label: 'Mentors & Educators', color: '#ED8936' }
+  ];
+
+  const sectionStyle = {
+    padding: '120px 32px',
+    background: 'linear-gradient(135deg, #f8fafb 0%, #ffffff 100%)',
+    position: 'relative'
+  };
+
+  const containerStyle = {
+    maxWidth: '1400px',
+    margin: '0 auto',
+    width: '100%'
+  };
+
+  const headerStyle = {
+    textAlign: 'center',
+    marginBottom: '80px'
+  };
+
+  const titleStyle = {
+    fontSize: '56px',
+    fontWeight: '700',
+    color: '#1a1a1a',
+    marginBottom: '24px',
+    lineHeight: '1.2',
+    letterSpacing: '-0.5px'
+  };
+
+  const descriptionStyle = {
+    fontSize: '18px',
+    color: '#4b5563',
+    maxWidth: '700px',
+    margin: '0 auto',
+    lineHeight: '1.7',
+    fontWeight: '400'
+  };
+
+  const cardsGridStyle = {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(4, 1fr)',
+    gap: '32px',
+    marginBottom: '80px',
+    width: '100%'
+  };
+
+  const cardStyle = {
+    padding: '40px 32px',
+    borderRadius: '16px',
+    border: '1px solid #e5e7eb',
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    cursor: 'pointer',
+    position: 'relative',
+    overflow: 'hidden',
+    background: '#ffffff',
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'column'
+  };
+
+  const iconBoxStyle = (color) => ({
+    width: '80px',
+    height: '80px',
+    borderRadius: '50%',
+    background: `${color}15`,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: color,
+    marginBottom: '32px',
+    boxShadow: `0 8px 16px ${color}12`,
+    transition: 'all 0.3s ease'
+  });
+
+  const cardTitleStyle = {
+    fontSize: '24px',
+    fontWeight: '600',
+    color: '#1a1a1a',
+    marginBottom: '16px',
+    lineHeight: '1.3'
+  };
+
+  const cardDescriptionStyle = {
+    fontSize: '15px',
+    color: '#4b5563',
+    marginBottom: '24px',
+    lineHeight: '1.6'
+  };
+
+  const featureListStyle = {
+    marginTop: '24px',
+    flexGrow: 1
+  };
+
+  const featureItemStyle = {
+    display: 'flex',
+    alignItems: 'flex-start',
+    marginBottom: '12px'
+  };
+
+  const featureDotStyle = (color) => ({
+    width: '24px',
+    height: '24px',
+    borderRadius: '50%',
+    background: `${color}15`,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: color,
+    marginRight: '12px',
+    flexShrink: 0,
+    marginTop: '2px'
+  });
+
+  const featureTextStyle = {
+    fontSize: '14px',
+    color: '#4b5563',
+    lineHeight: '1.5'
+  };
+
+  const buttonStyle = (color) => ({
+    width: '100%',
+    padding: '12px 16px',
+    marginTop: 'auto',
+    paddingTop: '24px',
+    borderTop: '1px solid #f0f0f0',
+    background: 'transparent',
+    border: `2px solid ${color}`,
+    color: color,
+    fontSize: '15px',
+    fontWeight: '600',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease'
+  });
+
+  const statsContainerStyle = {
+    margin: '0 auto 80px',
+    padding: '48px 40px',
+    borderRadius: '20px',
+    background: `linear-gradient(135deg, ${themeColor}08 0%, ${themeColor}04 100%)`,
+    border: `1px solid ${themeColor}20`,
+    display: 'grid',
+    gridTemplateColumns: 'repeat(4, 1fr)',
+    gap: '40px',
+    textAlign: 'center'
+  };
+
+  const statNumberStyle = (color) => ({
+    fontSize: '48px',
+    fontWeight: '700',
+    color: color,
+    marginBottom: '12px',
+    lineHeight: '1'
+  });
+
+  const statLabelStyle = {
+    fontSize: '15px',
+    color: '#4b5563',
+    fontWeight: '500',
+    lineHeight: '1.5'
+  };
+
+  const ctaContainerStyle = {
+    maxWidth: '800px',
+    margin: '0 auto',
+    textAlign: 'center'
+  };
+
+  const ctaDescriptionStyle = {
+    fontSize: '16px',
+    color: '#4b5563',
+    marginBottom: '32px',
+    lineHeight: '1.6'
+  };
+
+  const ctaButtonsStyle = {
+    display: 'flex',
+    gap: '20px',
+    justifyContent: 'center',
+    flexWrap: 'wrap'
+  };
+
+  const primaryButtonStyle = {
+    padding: '16px 48px',
+    height: '52px',
+    fontSize: '16px',
+    fontWeight: '600',
+    background: themeColor,
+    color: 'white',
+    border: 'none',
+    borderRadius: '10px',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    boxShadow: `0 8px 24px ${themeColor}30`,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
+  };
+
+  const secondaryButtonStyle = {
+    padding: '16px 48px',
+    height: '52px',
+    fontSize: '16px',
+    fontWeight: '600',
+    background: 'transparent',
+    color: themeColor,
+    border: `2px solid ${themeColor}`,
+    borderRadius: '10px',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
+  };
+
   return (
-    <section className="section pt-90 pb-90">
-      <div className="container">
+    <section style={sectionStyle}>
+      <div style={containerStyle}>
         {/* Header Section */}
-        <div className="row justify-center text-center mb-60">
-          <div className="col-xl-7 col-lg-9">
-            <h2 
-              className="text-40 lg:text-30 md:text-26 fw-700 text-dark-1 mb-20"
-              data-aos="fade-up"
-            >
-              Who Is It For?
-            </h2>
-            
-            <p 
-              className="text-18 lg:text-16 text-dark-2"
-              data-aos="fade-up"
-              data-aos-delay="100"
-              style={{
-                maxWidth: '700px',
-                margin: '0 auto',
-                lineHeight: '1.7'
-              }}
-            >
-              RoleReady is designed for anyone serious about career advancement and placement success.
-            </p>
-          </div>
+        <div style={headerStyle}>
+          <h2 style={titleStyle}>
+            Who Is It For?
+          </h2>
+          
+          <p style={descriptionStyle}>
+            RoleReady is designed for anyone serious about career advancement and placement success. From final-year students to career switchers, we have the tools you need.
+          </p>
         </div>
 
-        {/* Audience Cards */}
-        <div className="row y-gap-30">
-          {audienceCards.map((card, index) => (
-            <div 
+        {/* Audience Cards - All in one line */}
+        <div style={cardsGridStyle}>
+          {audienceCards.map((card) => (
+            <div
               key={card.id}
-              className="col-lg-3 col-sm-6"
-              data-aos="fade-up"
-              data-aos-delay={200 + (index * 100)}
+              style={cardStyle}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-12px)';
+                e.currentTarget.style.boxShadow = `0 24px 48px rgba(0, 0, 0, 0.12)`;
+                e.currentTarget.style.borderColor = card.color;
+                const iconBox = e.currentTarget.querySelector('[data-icon-box]');
+                if (iconBox) {
+                  iconBox.style.transform = 'scale(1.1) rotateY(10deg)';
+                  iconBox.style.boxShadow = `0 12px 32px ${card.color}25`;
+                }
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = 'none';
+                e.currentTarget.style.borderColor = '#e5e7eb';
+                const iconBox = e.currentTarget.querySelector('[data-icon-box]');
+                if (iconBox) {
+                  iconBox.style.transform = 'scale(1)';
+                  iconBox.style.boxShadow = `0 8px 16px ${card.color}12`;
+                }
+              }}
             >
-              <div 
-                className="h-100 p-30 rounded-12 border-1"
+              {/* Top accent line */}
+              <div
                 style={{
-                  borderColor: 'rgba(0, 0, 0, 0.08)',
-                  transition: 'all 0.3s ease',
-                  cursor: 'pointer',
-                  position: 'relative',
-                  overflow: 'hidden'
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: '3px',
+                  background: `linear-gradient(90deg, ${card.color} 0%, ${card.color}40 100%)`
                 }}
+              />
+
+              {/* Icon */}
+              <div
+                data-icon-box="true"
+                style={iconBoxStyle(card.color)}
+              >
+                {card.icon}
+              </div>
+
+              {/* Title */}
+              <h3 style={cardTitleStyle}>
+                {card.title}
+              </h3>
+
+              {/* Description */}
+              <p style={cardDescriptionStyle}>
+                {card.description}
+              </p>
+
+              {/* Features List */}
+              <div style={featureListStyle}>
+                {card.features.map((feature, featureIndex) => (
+                  <div key={featureIndex} style={featureItemStyle}>
+                    <div style={featureDotStyle(card.color)}>
+                      <FaArrowRight size={10} />
+                    </div>
+                    <span style={featureTextStyle}>{feature}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Bottom CTA Button */}
+              <button
+                style={buttonStyle(card.color)}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-8px)';
-                  e.currentTarget.style.borderColor = card.color;
-                  e.currentTarget.style.boxShadow = '0 20px 40px rgba(0, 0, 0, 0.08)';
+                  e.currentTarget.style.background = card.color;
+                  e.currentTarget.style.color = 'white';
+                  e.currentTarget.style.boxShadow = `0 8px 16px ${card.color}30`;
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.borderColor = 'rgba(0, 0, 0, 0.08)';
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.color = card.color;
                   e.currentTarget.style.boxShadow = 'none';
                 }}
               >
-                {/* Top accent line */}
-                <div 
-                  className="absolute top-0 left-0 right-0 h-1"
-                  style={{
-                    background: `linear-gradient(90deg, ${card.color} 0%, ${card.color}80 100%)`,
-                    opacity: 0.3
-                  }}
-                />
-
-                {/* Icon */}
-                <div 
-                  className="d-flex justify-center items-center rounded-full mb-25"
-                  style={{
-                    width: '70px',
-                    height: '70px',
-                    background: `${card.color}10`,
-                    color: card.color,
-                    marginTop: '10px'
-                  }}
-                >
-                  {card.icon}
-                </div>
-
-                {/* Title */}
-                <h3 
-                  className="text-20 fw-600 text-dark-1 mb-15"
-                  style={{ lineHeight: '1.3' }}
-                >
-                  {card.title}
-                </h3>
-
-                {/* Description */}
-                <p 
-                  className="text-15 text-dark-2 mb-20"
-                  style={{ lineHeight: '1.6' }}
-                >
-                  {card.description}
-                </p>
-
-                {/* Features List */}
-                <div className="mt-25">
-                  {card.features.map((feature, featureIndex) => (
-                    <div 
-                      key={featureIndex}
-                      className="d-flex items-center mb-10"
-                    >
-                      <div 
-                        className="flex-shrink-0 mr-10 d-flex justify-center items-center rounded-full"
-                        style={{
-                          width: '20px',
-                          height: '20px',
-                          background: `${card.color}15`,
-                          color: card.color
-                        }}
-                      >
-                        <FaArrowRight size={10} />
-                      </div>
-                      <span className="text-14 text-dark-2">{feature}</span>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Bottom CTA */}
-                <div 
-                  className="mt-25 pt-20 border-top"
-                  style={{ borderColor: 'rgba(0, 0, 0, 0.05)' }}
-                >
-                  <button
-                    className="button -sm -outline-dark-1 text-dark-1 fw-500 w-100"
-                    style={{
-                      borderColor: card.color,
-                      color: card.color,
-                      transition: 'all 0.3s ease'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.target.style.background = card.color;
-                      e.target.style.color = 'white';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.target.style.background = 'transparent';
-                      e.target.style.color = card.color;
-                    }}
-                  >
-                    Get Started
-                  </button>
-                </div>
-              </div>
+                Get Started
+              </button>
             </div>
           ))}
         </div>
 
-        {/* Stats Section */}
-        <div 
-          className="row justify-center mt-60"
-          data-aos="fade-up"
-        >
-          <div className="col-lg-10">
-            <div 
-              className="rounded-12 p-40"
-              style={{
-                background: 'linear-gradient(135deg, rgba(86, 147, 193, 0.02) 0%, rgba(86, 147, 193, 0.01) 100%)',
-                border: '1px solid rgba(86, 147, 193, 0.1)'
-              }}
-            >
-              <div className="row y-gap-20">
-                <div className="col-md-3 col-sm-6 text-center">
-                  <div className="text-36 fw-700 text-dark-1 mb-5">85%</div>
-                  <div className="text-15 text-dark-2">Final Year Students</div>
-                </div>
-                <div className="col-md-3 col-sm-6 text-center">
-                  <div className="text-36 fw-700 text-dark-1 mb-5">65%</div>
-                  <div className="text-15 text-dark-2">Pre-Final Year Students</div>
-                </div>
-                <div className="col-md-3 col-sm-6 text-center">
-                  <div className="text-36 fw-700 text-dark-1 mb-5">40%</div>
-                  <div className="text-15 text-dark-2">Career Switchers</div>
-                </div>
-                <div className="col-md-3 col-sm-6 text-center">
-                  <div className="text-36 fw-700 text-dark-1 mb-5">200+</div>
-                  <div className="text-15 text-dark-2">Mentors & Educators</div>
-                </div>
-              </div>
+        {/* Stats Section - Arranged in specified order */}
+        <div style={statsContainerStyle}>
+          {stats.map((stat, index) => (
+            <div key={index}>
+              <div style={statNumberStyle(stat.color)}>{stat.number}</div>
+              <div style={statLabelStyle}>{stat.label}</div>
             </div>
-          </div>
+          ))}
         </div>
 
         {/* Unified CTA */}
-        <div 
-          className="row justify-center mt-50"
-          data-aos="fade-up"
-          data-aos-delay="100"
-        >
-          <div className="col-lg-8 text-center">
-            <p className="text-16 text-dark-2 mb-30" style={{ maxWidth: '500px', margin: '0 auto' }}>
-              No matter where you are in your career journey, RoleReady provides the clarity and structure you need to succeed.
-            </p>
+        <div style={ctaContainerStyle}>
+          <p style={ctaDescriptionStyle}>
+            No matter where you are in your career journey, RoleReady provides the clarity and structure you need to succeed.
+          </p>
+          
+          <div style={ctaButtonsStyle}>
+            <button
+              style={primaryButtonStyle}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = '#427aa1';
+                e.currentTarget.style.transform = 'translateY(-3px)';
+                e.currentTarget.style.boxShadow = `0 12px 32px ${themeColor}40`;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = themeColor;
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = `0 8px 24px ${themeColor}30`;
+              }}
+            >
+              Start Your Free Assessment
+            </button>
             
-            <div className="d-flex justify-center x-gap-15">
-              <button
-                className="button -md -blue-1 text-white fw-500 px-40"
-                style={{
-                  height: '48px',
-                  fontSize: '15px',
-                  background: '#5693C1',
-                  border: 'none',
-                  borderRadius: '8px'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#427aa1';
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = '#5693C1';
-                  e.currentTarget.style.transform = 'translateY(0)';
-                }}
-              >
-                Start Your Free Assessment
-              </button>
-              
-              <button
-                className="button -md -outline-blue-1 text-blue-1 fw-500 px-40"
-                style={{
-                  height: '48px',
-                  fontSize: '15px',
-                  border: '2px solid #5693C1',
-                  borderRadius: '8px',
-                  background: 'transparent'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#5693C1';
-                  e.currentTarget.style.color = 'white';
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'transparent';
-                  e.currentTarget.style.color = '#5693C1';
-                  e.currentTarget.style.transform = 'translateY(0)';
-                }}
-              >
-                Schedule a Demo
-              </button>
-            </div>
+            <button
+              style={secondaryButtonStyle}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = themeColor;
+                e.currentTarget.style.color = 'white';
+                e.currentTarget.style.transform = 'translateY(-3px)';
+                e.currentTarget.style.boxShadow = `0 8px 24px ${themeColor}30`;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'transparent';
+                e.currentTarget.style.color = themeColor;
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
+            >
+              Schedule a Demo
+            </button>
           </div>
         </div>
       </div>
+
+      {/* Responsive Styles */}
+      <style jsx>{`
+        @media (max-width: 1400px) {
+          .tw-scope > div {
+            max-width: 1200px;
+          }
+          
+          div[style*="gridTemplateColumns: repeat(4, 1fr)"] {
+            grid-template-columns: repeat(2, 1fr);
+          }
+          
+          div[style*="background: linear-gradient(135deg"] {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
+        
+        @media (max-width: 768px) {
+          section {
+            padding: 60px 16px !important;
+          }
+          
+          h2[style*="font-size: 56px"] {
+            font-size: 36px !important;
+          }
+          
+          p[style*="font-size: 18px"] {
+            font-size: 16px !important;
+          }
+          
+          div[style*="gridTemplateColumns: repeat(4, 1fr)"],
+          div[style*="background: linear-gradient(135deg"] {
+            grid-template-columns: 1fr !important;
+            gap: 24px !important;
+          }
+          
+          div[style*="padding: 40px 32px"] {
+            padding: 32px 24px !important;
+          }
+          
+          div[style*="width: 80px; height: 80px"] {
+            width: 60px !important;
+            height: 60px !important;
+            margin-bottom: 24px !important;
+          }
+          
+          h3[style*="font-size: 24px"] {
+            font-size: 20px !important;
+          }
+          
+          div[style*="font-size: 48px"] {
+            font-size: 36px !important;
+          }
+          
+          div[style*="display: flex; gap: 20px"] {
+            flex-direction: column;
+            align-items: center;
+          }
+          
+          button[style*="padding: 16px 48px"] {
+            width: 100% !important;
+            max-width: 300px;
+          }
+        }
+      `}</style>
     </section>
   );
 };

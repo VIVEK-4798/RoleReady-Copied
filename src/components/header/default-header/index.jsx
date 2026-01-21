@@ -72,16 +72,16 @@ const Header1 = () => {
                       Post Job
                     </Link>
                   )}
-                  <Link
+                  {/* <Link
                     to="/pricing"
                     className="button px-30 fw-400 text-14 -white h-50 text-dark-1"
                   >
                     Pricing
-                  </Link>
+                  </Link> */}
 
-                  <div className="col-auto">
+                  {/* <div className="col-auto">
                     <div className="w-1 h-20 bg-black-20" />
-                  </div>
+                  </div> */}
 
                   <Link
                     to={

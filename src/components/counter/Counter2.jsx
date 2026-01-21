@@ -32,6 +32,7 @@ const AnimatedCounter = ({ target, duration = 2000, suffix = '' }) => {
 const Counter2 = () => {
   const [inView, setInView] = useState(false);
   const themeColor = '#5693C1';
+  const accentColors = ['#4F46E5', '#0EA5E9', '#10B981', '#F59E0B'];
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -56,54 +57,59 @@ const Counter2 = () => {
       icon: '?',
       title: 'Blind Applications',
       description: 'Students apply without knowing if they\'re truly ready for the role or company requirements.',
+      color: accentColors[0]
     },
     {
       icon: '✖',
       title: 'Silent Rejections',
       description: 'Rejections come without meaningful feedback, leaving students clueless about what went wrong.',
+      color: accentColors[1]
     },
     {
       icon: '⚡',
       title: 'Hidden Skill Gaps',
       description: 'Critical skill gaps remain invisible, making improvement feel like a guessing game.',
+      color: accentColors[2]
     },
     {
       icon: '📊',
       title: 'Unstructured Efforts',
       description: 'Preparation becomes random and inefficient without a clear, personalized roadmap.',
+      color: accentColors[3]
     },
   ];
 
   const stats = [
-    { value: 85, label: 'Students apply blindly', suffix: '%' },
-    { value: 9, label: 'Get no feedback on rejections', suffix: '/10' },
-    { value: 70, label: "Don't know their skill gaps", suffix: '%' },
+    { value: 85, label: 'Students apply blindly', suffix: '%', color: accentColors[0] },
+    { value: 9, label: 'Get no feedback on rejections', suffix: '/10', color: accentColors[1] },
+    { value: 70, label: "Don't know their skill gaps", suffix: '%', color: accentColors[2] },
   ];
 
   const sectionStyle = {
     position: 'relative',
     overflow: 'hidden',
-    background: 'linear-gradient(to bottom, #f9fafb, #ffffff)',
-    padding: '80px 32px',
+    background: 'linear-gradient(to bottom, #F9FAFB, #FFFFFF)',
+    padding: '96px 32px',
   };
 
   const containerStyle = {
-    maxWidth: '1200px',
+    maxWidth: '1400px',
     margin: '0 auto',
-    padding: '0 16px',
+    width: '100%',
   };
 
   const headerStyle = {
     textAlign: 'center',
-    marginBottom: '80px',
+    marginBottom: '96px',
   };
 
   const titleStyle = {
-    fontSize: '48px',
-    fontWeight: 'bold',
+    fontSize: '64px',
+    fontWeight: '800',
     color: '#111827',
     marginBottom: '24px',
-    lineHeight: '1.2',
+    lineHeight: '1.1',
+    letterSpacing: '-0.5px',
   };
 
   const highlightStyle = {
@@ -111,109 +117,109 @@ const Counter2 = () => {
   };
 
   const descriptionStyle = {
-    fontSize: '20px',
-    color: '#374151',
-    maxWidth: '768px',
-    margin: '0 auto 32px',
-    lineHeight: '1.6',
+    fontSize: '22px',
+    color: '#4B5563',
+    maxWidth: '900px',
+    margin: '0 auto 40px',
+    lineHeight: '1.7',
+    fontWeight: '400',
   };
 
   const dividerStyle = {
     height: '4px',
-    width: '96px',
+    width: '120px',
     margin: '0 auto',
-    background: themeColor,
+    background: `linear-gradient(90deg, ${themeColor}, #A5B4FC)`,
     borderRadius: '999px',
   };
 
   const gridStyle = {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-    gap: '32px',
-    marginBottom: '80px',
+    gridTemplateColumns: 'repeat(4, 1fr)',
+    gap: '40px',
+    marginBottom: '96px',
   };
 
   const cardStyle = {
-    background: 'rgba(86, 147, 193, 0.08)',
-    borderRadius: '12px',
-    padding: '32px',
-    border: '1px solid #e5e7eb',
+    background: '#FFFFFF',
+    borderRadius: '20px',
+    padding: '48px 32px',
+    border: '1px solid #E5E7EB',
     cursor: 'pointer',
-    transition: 'all 0.3s ease',
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
     textAlign: 'center',
+    height: '100%',
   };
 
-  const cardHoverStyle = {
-    ...cardStyle,
-    boxShadow: '0 20px 25px -5px rgba(86, 147, 193, 0.15)',
-    transform: 'translateY(-8px)',
-  };
-
-  const iconBoxStyle = {
-    width: '64px',
-    height: '64px',
+  const iconBoxStyle = (color) => ({
+    width: '72px',
+    height: '72px',
     borderRadius: '50%',
-    background: themeColor,
+    background: `linear-gradient(135deg, ${color}15, ${color}05)`,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    margin: '0 auto 24px',
-    fontSize: '32px',
-    color: '#ffffff',
-    boxShadow: '0 4px 6px -1px rgba(86, 147, 193, 0.2)',
-    transition: 'transform 0.3s ease',
-  };
+    margin: '0 auto 32px',
+    fontSize: '28px',
+    color: color,
+    border: `1px solid ${color}20`,
+    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
+    transition: 'all 0.3s ease',
+  });
 
   const cardTitleStyle = {
-    fontSize: '20px',
-    fontWeight: 'bold',
+    fontSize: '24px',
+    fontWeight: '700',
     color: '#111827',
-    marginBottom: '16px',
+    marginBottom: '20px',
+    lineHeight: '1.3',
   };
 
-  const accentLineStyle = {
+  const accentLineStyle = (color) => ({
     height: '3px',
-    width: '48px',
-    margin: '0 auto 16px',
-    background: themeColor,
+    width: '64px',
+    margin: '0 auto 20px',
+    background: color,
     borderRadius: '999px',
-  };
+  });
 
   const cardDescriptionStyle = {
-    fontSize: '16px',
-    color: '#4b5563',
-    lineHeight: '1.6',
+    fontSize: '17px',
+    color: '#6B7280',
+    lineHeight: '1.7',
   };
 
   const statsContainerStyle = {
-    maxWidth: '900px',
+    maxWidth: '1100px',
     margin: '0 auto',
-    paddingTop: '64px',
-    borderTop: '1px solid #d1d5db',
+    paddingTop: '80px',
+    borderTop: '1px solid #E5E7EB',
   };
 
   const statsGridStyle = {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-    gap: '48px',
+    gridTemplateColumns: 'repeat(3, 1fr)',
+    gap: '64px',
   };
 
   const statItemStyle = {
     textAlign: 'center',
   };
 
-  const statValueStyle = {
-    fontSize: '56px',
-    fontWeight: 'bold',
-    color: themeColor,
-    marginBottom: '12px',
+  const statValueStyle = (color) => ({
+    fontSize: '72px',
+    fontWeight: '800',
+    color: color,
+    marginBottom: '16px',
     lineHeight: '1',
-  };
+    letterSpacing: '-1px',
+  });
 
   const statLabelStyle = {
-    fontSize: '18px',
-    color: '#4b5563',
+    fontSize: '20px',
+    color: '#4B5563',
     fontWeight: '500',
+    lineHeight: '1.5',
   };
 
   return (
@@ -221,7 +227,7 @@ const Counter2 = () => {
       <div style={containerStyle}>
         <div style={headerStyle}>
           <h2 style={titleStyle}>
-            The Problem <span style={highlightStyle}>Students</span> Face
+            The Problem <span style={highlightStyle}>Students</span> Face Today
           </h2>
 
           <p style={descriptionStyle}>
@@ -237,21 +243,36 @@ const Counter2 = () => {
               key={index}
               style={cardStyle}
               onMouseEnter={(e) => {
-                e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(86, 147, 193, 0.15)';
-                e.currentTarget.style.transform = 'translateY(-8px)';
+                e.currentTarget.style.boxShadow = '0 32px 48px -12px rgba(0, 0, 0, 0.12)';
+                e.currentTarget.style.transform = 'translateY(-12px)';
+                e.currentTarget.style.borderColor = problem.color + '40';
+                const iconBox = e.currentTarget.querySelector('[data-icon-box]');
+                if (iconBox) {
+                  iconBox.style.transform = 'scale(1.1)';
+                  iconBox.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.1)';
+                }
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.boxShadow = 'none';
                 e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.borderColor = '#E5E7EB';
+                const iconBox = e.currentTarget.querySelector('[data-icon-box]');
+                if (iconBox) {
+                  iconBox.style.transform = 'scale(1)';
+                  iconBox.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.05)';
+                }
               }}
             >
-              <div style={iconBoxStyle}>
+              <div 
+                data-icon-box="true"
+                style={iconBoxStyle(problem.color)}
+              >
                 {problem.icon}
               </div>
 
               <h3 style={cardTitleStyle}>{problem.title}</h3>
 
-              <div style={accentLineStyle} />
+              <div style={accentLineStyle(problem.color)} />
 
               <p style={cardDescriptionStyle}>{problem.description}</p>
             </div>
@@ -262,7 +283,7 @@ const Counter2 = () => {
           <div style={statsGridStyle}>
             {stats.map((stat, index) => (
               <div key={index} style={statItemStyle}>
-                <div style={statValueStyle}>
+                <div style={statValueStyle(stat.color)}>
                   {inView ? <AnimatedCounter target={stat.value} duration={2500} suffix={stat.suffix} /> : `0${stat.suffix}`}
                 </div>
                 <div style={statLabelStyle}>
@@ -273,6 +294,97 @@ const Counter2 = () => {
           </div>
         </div>
       </div>
+
+      <style jsx>{`
+        @media (max-width: 1200px) {
+          div[style*="gridTemplateColumns: repeat(4, 1fr)"] {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 32px !important;
+          }
+          
+          div[style*="gridTemplateColumns: repeat(3, 1fr)"] {
+            grid-template-columns: repeat(3, 1fr) !important;
+            gap: 48px !important;
+          }
+          
+          h2[style*="font-size: 64px"] {
+            font-size: 48px !important;
+          }
+          
+          p[style*="font-size: 22px"] {
+            font-size: 20px !important;
+          }
+        }
+        
+        @media (max-width: 768px) {
+          section {
+            padding: 64px 24px !important;
+          }
+          
+          h2[style*="font-size: 64px"] {
+            font-size: 36px !important;
+          }
+          
+          p[style*="font-size: 22px"] {
+            font-size: 18px !important;
+            margin-bottom: 32px !important;
+          }
+          
+          div[style*="gridTemplateColumns: repeat(4, 1fr)"],
+          div[style*="gridTemplateColumns: repeat(3, 1fr)"] {
+            grid-template-columns: 1fr !important;
+            gap: 32px !important;
+          }
+          
+          div[style*="padding: 48px 32px"] {
+            padding: 40px 24px !important;
+          }
+          
+          div[style*="font-size: 72px"] {
+            font-size: 56px !important;
+          }
+          
+          div[style*="font-size: 20px"] {
+            font-size: 18px !important;
+          }
+          
+          div[style*="margin-bottom: 96px"] {
+            margin-bottom: 64px !important;
+          }
+          
+          div[style*="padding-top: 80px"] {
+            padding-top: 64px !important;
+          }
+        }
+        
+        @media (max-width: 480px) {
+          section {
+            padding: 48px 16px !important;
+          }
+          
+          h2[style*="font-size: 64px"] {
+            font-size: 32px !important;
+          }
+          
+          p[style*="font-size: 22px"] {
+            font-size: 16px !important;
+          }
+          
+          div[style*="width: 72px; height: 72px"] {
+            width: 60px !important;
+            height: 60px !important;
+            margin-bottom: 24px !important;
+          }
+          
+          h3[style*="font-size: 24px"] {
+            font-size: 20px !important;
+          }
+          
+          div[style*="font-size: 72px"] {
+            font-size: 48px !important;
+          }
+        }
+      `}</style>
     </section>
   );
 };

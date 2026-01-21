@@ -54,7 +54,7 @@ const index = () => {
         margin: '0 auto',
         padding: '80px 20px 0'
       }}>
-        <InternshipJobTable />
+        {/* <InternshipJobTable /> */}
 
         <div style={{
           padding: '60px 0',
@@ -70,9 +70,9 @@ const index = () => {
             transition: 'all 0.5s ease',
             transform: activeHighlight === 0 ? 'translateY(-5px)' : 'none'
           }}>
-            <div style={{ transition: 'transform 0.5s ease' }}>
+            <div style={{ transition: 'transform 0.5s ease'}}>
               <img 
-                src="/img/logo/startups24x7.png" 
+                src="/img/logo/logo_resized1.png" 
                 alt="Startups 24×7 Logo" 
                 style={{ height: '60px' }} 
               />

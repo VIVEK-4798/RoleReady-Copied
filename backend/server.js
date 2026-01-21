@@ -36,6 +36,7 @@ const emailService = require('./service/emailService.js');
 const profileService = require('./service/profileService.js');
 const userActivityService = require('./service/userActivityService.js');
 const collegeService = require('./service/collegeService');
+const readinessRoutes  = require('./service/readiness.js');
 
 // routes
 app.use('/api/user', userService);
@@ -56,6 +57,7 @@ app.use("", googleAuth);
 app.use('/api/profile', profileService);
 app.use('/api/user-activity', userActivityService);
 app.use('/api/college', collegeService);
+app.use('/api/readiness', readinessRoutes);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 
