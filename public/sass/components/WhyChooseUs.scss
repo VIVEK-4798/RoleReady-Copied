@@ -567,3 +567,38 @@
     font-size: 0.75rem;
   }
 }
+
+.demo-modal-breakdown {
+  margin-top: 20px;
+  text-align: left;
+}
+
+.demo-modal-breakdown-title {
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.demo-modal-breakdown-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.demo-modal-breakdown-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+
+.demo-modal-breakdown-item.met {
+  background: rgba(16, 185, 129, 0.1);
+  color: #065f46;
+}
+
+.demo-modal-breakdown-item.missing {
+  background: rgba(239, 68, 68, 0.1);
+  color: #7f1d1d;
+}

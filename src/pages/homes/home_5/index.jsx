@@ -12,11 +12,11 @@ import InternshipListings from "@/components/home/home-5/InternshipListings";
 import JoinOurBusiness from "@/components/home/home-5/JoinOurBusiness";
 import DefaultHeader from "@/components/header/default-header";
 import MetaComponent from "@/components/common/MetaComponent";
-import { useEffect, useState } from "react";
 import College from "@/components/home/home-5/College";
 import Counter2 from "@/components/counter/Counter2";
 import WhoIsItFor from "@/components/home/home-5/WhoIsItFor";
 import NewCallToActions from "@/components/common/social/NewCallToActions";
+import { useEffect, useState, useRef } from "react";
 
 const metadata = {
   title: "Startups24x7",
@@ -24,19 +24,38 @@ const metadata = {
 };
 
 const Home_5 = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  useEffect(() => {
-    const user = localStorage.getItem("user");
-    setIsLoggedIn(!!user);
-  }, []);
+    const whyChooseUsRef = useRef(null);
+    const joinOurBusinessRef = useRef(null);
+
+    useEffect(() => {
+      const user = localStorage.getItem("user");
+      setIsLoggedIn(!!user);
+    }, []);
+
+    const handleCheckReadiness = () => {
+      whyChooseUsRef.current?.scrollToCTAAndOpenDemo();
+    };
+
+    const scrollToJoinOurBusiness = () => {
+      joinOurBusinessRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    };
+
 
   return (
     <>
       <MetaComponent meta={metadata} />
 
       <DefaultHeader />
-      <Hero5 />
+      <Hero5
+        onCheckReadiness={handleCheckReadiness}
+        onLearnMore={scrollToJoinOurBusiness}
+      />
+
 
       {/* Counter Section */}
       <section className="py-16">
@@ -58,14 +77,14 @@ const Home_5 = () => {
       </section>
 
       {/* Join Our Business */}
-      <section className="py-20 bg-gray-50">
+      <section ref={joinOurBusinessRef} className="py-20 bg-gray-50">
         <JoinOurBusiness />
       </section>
 
-      {/* Why Choose Us */}
       <section className="py-20 bg-blue-50">
-        <WhyChooseUs />
+        <WhyChooseUs ref={whyChooseUsRef} />
       </section>
+
 
       {/* Who Is It For */}
       <section className="py-20 bg-blue-50">

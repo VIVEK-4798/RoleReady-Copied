@@ -30,6 +30,31 @@ app.get('/get-categories', (req, res) => {
 	});
 });
 
+// GET skills by category
+app.get('/get-skills-by-category/:category_id', (req, res) => {
+  const { category_id } = req.params;
+
+  const query = `
+    SELECT skill_id, name
+    FROM skills
+    WHERE category_id = ?
+    ORDER BY name
+  `;
+
+  db.query(query, [category_id], (err, results) => {
+    if (err) {
+      console.error('Error fetching skills:', err);
+      return res.status(500).json({ message: 'Error fetching skills' });
+    }
+
+    res.status(200).json({
+      success: true,
+      results
+    });
+  });
+});
+
+
 // READ: Get a category by ID
 app.get('/get-categories/:category_id', (req, res) => {
 	const { category_id } = req.params;

@@ -1,78 +1,91 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-const roles = [
-  "Web Developer Intern",
-  "Backend Developer Intern",
-  "Full Stack Developer (Entry)",
-];
-
-const skillsList = [
-  "HTML",
-  "CSS",
-  "JavaScript",
-  "React",
-  "Node.js",
-  "Git",
-];
-
-// Demo-only mapping
-const ROLE_ID_MAP = {
-  "Web Developer Intern": 1,
-  "Backend Developer Intern": 2,
-  "Full Stack Developer (Entry)": 3,
-};
-
-const DEMO_USER_ID = 25; // fixed demo user
+const API_BASE = "http://localhost:5000/api";
+const DEMO_USER_ID = 25;
 
 const DemoModal = ({ onClose }) => {
-  const [selectedRole, setSelectedRole] = useState("");
-  const [selectedSkills, setSelectedSkills] = useState([]);
-  const [showResult, setShowResult] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [selectedCategoryId, setSelectedCategoryId] = useState("");
+  const [skills, setSkills] = useState([]);
+  const [selectedSkillIds, setSelectedSkillIds] = useState([]);
+
   const [loading, setLoading] = useState(false);
+  const [showResult, setShowResult] = useState(false);
   const [score, setScore] = useState(null);
+  const [breakdown, setBreakdown] = useState([]);
   const [error, setError] = useState("");
 
-  const toggleSkill = (skill) => {
-    setSelectedSkills((prev) =>
-      prev.includes(skill)
-        ? prev.filter((s) => s !== skill)
-        : [...prev, skill]
+  /* ---------------- Fetch categories ---------------- */
+  useEffect(() => {
+    fetch(`${API_BASE}/categories/get-categories`)
+      .then(res => res.json())
+      .then(data => setCategories(data.results))
+      .catch(() => setError("Failed to load categories"));
+  }, []);
+
+  /* ---------------- Category change ---------------- */
+  const handleCategoryChange = async (categoryId) => {
+    setSelectedCategoryId(categoryId);
+    setSelectedSkillIds([]);
+    setSkills([]);
+    setShowResult(false);
+
+    if (!categoryId) return;
+
+    try {
+      const res = await fetch(
+        `${API_BASE}/categories/get-skills-by-category/${categoryId}`
+      );
+      const data = await res.json();
+      setSkills(data.results);
+    } catch {
+      setError("Failed to load skills");
+    }
+  };
+
+  /* ---------------- Skill toggle ---------------- */
+  const toggleSkill = (skillId) => {
+    setSelectedSkillIds(prev =>
+      prev.includes(skillId)
+        ? prev.filter(id => id !== skillId)
+        : [...prev, skillId]
     );
   };
 
+  /* ---------------- Analyze readiness ---------------- */
   const handleAnalyze = async () => {
-    if (!selectedRole || selectedSkills.length === 0) return;
+    if (!selectedCategoryId || selectedSkillIds.length === 0) return;
 
     setLoading(true);
     setError("");
 
     try {
-      const role_id = ROLE_ID_MAP[selectedRole];
+      const res = await fetch(`${API_BASE}/readiness/calculate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: DEMO_USER_ID,
+          category_id: selectedCategoryId,
+          selected_skill_ids: selectedSkillIds,
+        }),
+      });
 
-      const response = await fetch(
-        "http://localhost:5000/readiness/calculate",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            user_id: DEMO_USER_ID,
-            role_id,
-          }),
-        }
+      if (!res.ok) throw new Error();
+
+      const data = await res.json();
+      setScore(data.total_score);
+
+      const breakdownRes = await fetch(
+        `${API_BASE}/readiness/breakdown/${data.readiness_id}`
       );
 
-      if (!response.ok) {
-        throw new Error("Failed to calculate readiness");
-      }
+      if (!breakdownRes.ok) throw new Error();
 
-      const data = await response.json();
+      const breakdownData = await breakdownRes.json();
+      setBreakdown(breakdownData);
 
-      setScore(data.total_score);
       setShowResult(true);
-    } catch (err) {
-      console.error(err);
+    } catch {
       setError("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
@@ -80,100 +93,96 @@ const DemoModal = ({ onClose }) => {
   };
 
   const isAnalyzeDisabled =
-    !selectedRole || selectedSkills.length === 0 || loading;
+    !selectedCategoryId || selectedSkillIds.length === 0 || loading;
 
+  /* ---------------- UI ---------------- */
   return (
     <div className="demo-modal-overlay">
       <div className="demo-modal-container">
-        {/* Close Button */}
-        <button onClick={onClose} className="demo-modal-close">
-          ✕
-        </button>
+        <button onClick={onClose} className="demo-modal-close">✕</button>
 
         {!showResult ? (
           <>
             <h3 className="demo-modal-title">Quick Readiness Demo</h3>
 
-            {/* Role Selection */}
-            <div>
-              <label className="demo-modal-label">Target Role</label>
-              <select
-                className="demo-modal-select"
-                value={selectedRole}
-                onChange={(e) => setSelectedRole(e.target.value)}
-              >
-                <option value="">Select a role</option>
-                {roles.map((role) => (
-                  <option key={role} value={role}>
-                    {role}
-                  </option>
-                ))}
-              </select>
-            </div>
+            {/* Category */}
+            <label className="demo-modal-label">Category</label>
+            <select
+              className="demo-modal-select"
+              value={selectedCategoryId}
+              onChange={(e) => handleCategoryChange(e.target.value)}
+            >
+              <option value="">Select category</option>
+              {categories.map(cat => (
+                <option key={cat.category_id} value={cat.category_id}>
+                  {cat.category_name}
+                </option>
+              ))}
+            </select>
 
-            {/* Skills Selection (UI only for demo trust) */}
-            <div className="demo-modal-skills-container">
-              <label className="demo-modal-label">Skills You Have</label>
-              <div className="demo-modal-skills-grid">
-                {skillsList.map((skill) => (
-                  <button
-                    key={skill}
-                    type="button"
-                    onClick={() => toggleSkill(skill)}
-                    className={`demo-modal-skill-button ${
-                      selectedSkills.includes(skill) ? "selected" : ""
-                    }`}
-                  >
-                    {skill}
-                  </button>
-                ))}
-              </div>
-            </div>
+            {/* Skills */}
+            {skills.length > 0 && (
+              <>
+                <label className="demo-modal-label mt-4">Skills You Have</label>
+                <div className="demo-modal-skills-grid">
+                  {skills.map(skill => (
+                    <button
+                      key={skill.skill_id}
+                      onClick={() => toggleSkill(skill.skill_id)}
+                      className={`demo-modal-skill-button ${
+                        selectedSkillIds.includes(skill.skill_id)
+                          ? "selected"
+                          : ""
+                      }`}
+                    >
+                      {skill.name}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
 
             {error && <p className="demo-modal-error">{error}</p>}
 
-            {/* Action Button */}
             <button
               onClick={handleAnalyze}
               disabled={isAnalyzeDisabled}
               className="demo-modal-primary-button"
-              style={{
-                opacity: isAnalyzeDisabled ? 0.5 : 1,
-                cursor: isAnalyzeDisabled ? "not-allowed" : "pointer",
-              }}
             >
               {loading ? "Analyzing..." : "Analyze Readiness"}
             </button>
           </>
         ) : (
           <>
-            {/* Result View */}
             <h3 className="demo-modal-title">Demo Result</h3>
 
-            <div className="demo-modal-result-container">
-              <p className="demo-modal-result-text">
-                <span className="demo-modal-result-label">Role:</span>{" "}
-                {selectedRole}
-              </p>
-              <p className="demo-modal-result-text">
-                <span className="demo-modal-result-label">
-                  Readiness Score:
-                </span>{" "}
-                <span className="demo-modal-result-score">
-                  {score} / 100
-                </span>
-              </p>
-            </div>
-
-            <p className="demo-modal-description">
-              This score is calculated using real role benchmarks and skill
-              comparisons.
+            <p className="demo-modal-result-text">
+              <strong>Readiness Score:</strong>{" "}
+              <span className="demo-modal-result-score">
+                {score} / 100
+              </span>
             </p>
 
-            <button
-              onClick={onClose}
-              className="demo-modal-secondary-button"
-            >
+            <div className="demo-modal-breakdown">
+              <h4 className="demo-modal-breakdown-title">
+                Skill Gap Breakdown
+              </h4>
+              <ul className="demo-modal-breakdown-list">
+                {breakdown.map(item => (
+                  <li
+                    key={item.skill}
+                    className={`demo-modal-breakdown-item ${
+                      item.status === "met" ? "met" : "missing"
+                    }`}
+                  >
+                    <span>{item.skill}</span>
+                    <span>{item.status === "met" ? "✓ Met" : "✕ Missing"}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <button onClick={onClose} className="demo-modal-secondary-button">
               Close Demo
             </button>
           </>

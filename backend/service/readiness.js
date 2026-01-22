@@ -2,93 +2,97 @@ const express = require("express");
 const router = express.Router();
 const db = require("../db");
 
-/**
- * POST /readiness/calculate
- * Calculates and stores readiness score for a user against a role
- */
-router.post("/calculate", async (req, res) => {
-  const { user_id, role_id } = req.body;
+  /**
+   * POST /readiness/calculate
+   * Calculates and stores readiness score for a user against a category
+   * INPUT SOURCE: user_skills (NOT request body)
+   */
+  router.post("/calculate", (req, res) => {
+    const { user_id, category_id } = req.body;
 
-  if (!user_id || !role_id) {
-    return res.status(400).json({ message: "user_id and role_id are required" });
-  }
+    if (!user_id || !category_id) {
+      return res.status(400).json({ message: "Invalid request data" });
+    }
 
-  try {
-    // 1️⃣ Fetch role skills
-    const roleSkillsQuery = `
-      SELECT rs.skill_id, rs.weight
-      FROM role_skills rs
-      WHERE rs.role_id = ?
+    // 1️⃣ Fetch user's skills for this category
+    const userSkillsQuery = `
+      SELECT DISTINCT us.skill_id
+      FROM user_skills us
+      JOIN skills s ON s.skill_id = us.skill_id
+      WHERE us.user_id = ?
+        AND s.category_id = ?
     `;
 
-    db.query(roleSkillsQuery, [role_id], (err, roleSkills) => {
+    db.query(userSkillsQuery, [user_id, category_id], (err, userSkills) => {
       if (err) {
         console.error(err);
-        return res.status(500).json({ message: "Error fetching role skills" });
+        return res.status(500).json({ message: "Error fetching user skills" });
       }
 
-      if (roleSkills.length === 0) {
-        return res.status(404).json({ message: "No skills defined for this role" });
-      }
+      const selectedSet = new Set(userSkills.map(s => s.skill_id));
 
-      // 2️⃣ Fetch user skills
-      const userSkillsQuery = `
-        SELECT skill_id
-        FROM user_skills
-        WHERE user_id = ?
+      // 2️⃣ Fetch benchmark skills for category (UNCHANGED)
+      const benchmarkQuery = `
+        SELECT s.skill_id, s.name, cs.weight
+        FROM category_skills cs
+        JOIN skills s ON cs.skill_id = s.skill_id
+        WHERE cs.category_id = ?
       `;
 
-      db.query(userSkillsQuery, [user_id], (err, userSkills) => {
+      db.query(benchmarkQuery, [category_id], (err, benchmarkSkills) => {
         if (err) {
           console.error(err);
-          return res.status(500).json({ message: "Error fetching user skills" });
+          return res.status(500).json({ message: "Error fetching benchmark skills" });
         }
-
-        const userSkillSet = new Set(userSkills.map(s => s.skill_id));
 
         let totalScore = 0;
         const breakdown = [];
 
-        // 3️⃣ Apply scoring logic
-        roleSkills.forEach(rs => {
-          const hasSkill = userSkillSet.has(rs.skill_id);
+        // 3️⃣ SCORING LOGIC — COMPLETELY UNCHANGED
+        benchmarkSkills.forEach(skill => {
+          const hasSkill = selectedSet.has(skill.skill_id);
 
           breakdown.push({
-            skill_id: rs.skill_id,
-            required_weight: rs.weight,
-            achieved_weight: hasSkill ? rs.weight : 0,
-            status: hasSkill ? "met" : "missing"
+            skill_id: skill.skill_id,
+            required_weight: skill.weight,
+            achieved_weight: hasSkill ? skill.weight : 0,
+            status: hasSkill ? "met" : "missing",
           });
 
-          if (hasSkill) {
-            totalScore += rs.weight;
-          }
+          if (hasSkill) totalScore += skill.weight;
         });
 
-        // 4️⃣ Store readiness score
+        // 4️⃣ Store readiness score (UNCHANGED)
         const insertScoreQuery = `
-          INSERT INTO readiness_scores (user_id, role_id, total_score)
+          INSERT INTO readiness_scores (user_id, category_id, total_score)
           VALUES (?, ?, ?)
         `;
 
         db.query(
           insertScoreQuery,
-          [user_id, role_id, totalScore],
-          (err, scoreResult) => {
+          [user_id, category_id, totalScore],
+          (err, result) => {
             if (err) {
               console.error(err);
               return res.status(500).json({ message: "Error saving readiness score" });
             }
 
-            const readiness_id = scoreResult.insertId;
+            const readiness_id = result.insertId;
 
-            // 5️⃣ Store breakdown
+            if (breakdown.length === 0) {
+              return res.status(201).json({
+                message: "Readiness score calculated successfully",
+                readiness_id,
+                total_score: totalScore,
+              });
+            }
+
             const breakdownValues = breakdown.map(b => [
               readiness_id,
               b.skill_id,
               b.required_weight,
               b.achieved_weight,
-              b.status
+              b.status,
             ]);
 
             const insertBreakdownQuery = `
@@ -97,31 +101,24 @@ router.post("/calculate", async (req, res) => {
               VALUES ?
             `;
 
-            db.query(
-              insertBreakdownQuery,
-              [breakdownValues],
-              (err) => {
-                if (err) {
-                  console.error(err);
-                  return res.status(500).json({ message: "Error saving score breakdown" });
-                }
-
-                return res.status(201).json({
-                  message: "Readiness score calculated successfully",
-                  readiness_id,
-                  total_score: totalScore
-                });
+            db.query(insertBreakdownQuery, [breakdownValues], err => {
+              if (err) {
+                console.error(err);
+                return res.status(500).json({ message: "Error saving breakdown" });
               }
-            );
+
+              res.status(201).json({
+                message: "Readiness score calculated successfully",
+                readiness_id,
+                total_score: totalScore,
+              });
+            });
           }
         );
       });
     });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Unexpected server error" });
-  }
-});
+  });
+
 
 router.get("/latest/:user_id/:role_id", (req, res) => {
   const { user_id, role_id } = req.params;
