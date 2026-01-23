@@ -9,6 +9,18 @@ const TrendsTab = ({ history, loading, formatDate }) => {
     return '#ef4444';
   };
 
+  // Calculate statistics
+  const calculateStats = () => {
+    if (history.length === 0) return null;
+    
+    const scores = history.map(h => h.total_score);
+    const average = scores.reduce((sum, score) => sum + score, 0) / scores.length;
+    const best = Math.max(...scores);
+    const worst = Math.min(...scores);
+    
+    return { average, best, worst };
+  };
+
   if (loading) {
     return (
       <div className="row y-gap-30 mt-30">
@@ -25,6 +37,8 @@ const TrendsTab = ({ history, loading, formatDate }) => {
       </div>
     );
   }
+
+  const stats = calculateStats();
 
   return (
     <div className="row y-gap-30 mt-30">
@@ -53,16 +67,55 @@ const TrendsTab = ({ history, loading, formatDate }) => {
             </div>
           ) : (
             <>
-              {/* Simple Trend Chart */}
+              {/* Improved Trend Chart */}
               <div className="mb-40">
-                <div className="trend-chart" style={{ height: '300px', position: 'relative' }}>
-                  {/* X-axis */}
-                  <div className="position-absolute bottom-0 start-0 end-0 border-top"></div>
-                  {/* Y-axis */}
-                  <div className="position-absolute top-0 bottom-0 start-0 border-end"></div>
+                <div style={{ height: '300px', position: 'relative', padding: '20px 40px' }}>
+                  {/* Y-axis labels */}
+                  <div style={{ position: 'absolute', left: '0', top: '0', bottom: '0', width: '40px' }}>
+                    {[100, 75, 50, 25, 0].map((value) => (
+                      <div 
+                        key={value} 
+                        style={{ 
+                          position: 'absolute', 
+                          left: '0', 
+                          top: `${100 - value}%`,
+                          transform: 'translateY(-50%)',
+                          fontSize: '12px',
+                          color: '#64748b'
+                        }}
+                      >
+                        {value}
+                      </div>
+                    ))}
+                  </div>
                   
-                  {/* Trend line */}
-                  <div className="position-absolute top-0 bottom-0 start-0 end-0 p-4">
+                  {/* Chart area */}
+                  <div style={{ 
+                    position: 'absolute', 
+                    left: '40px', 
+                    right: '0', 
+                    top: '0', 
+                    bottom: '0',
+                    borderLeft: '1px solid #e2e8f0',
+                    borderBottom: '1px solid #e2e8f0'
+                  }}>
+                    {/* Trend line */}
+                    <svg width="100%" height="100%" style={{ position: 'absolute', top: 0, left: 0 }}>
+                      <path
+                        d={history.map((record, index) => {
+                          const x = (index / (history.length - 1)) * 100;
+                          const y = 100 - record.total_score;
+                          return `${index === 0 ? 'M' : 'L'} ${x}% ${y}%`;
+                        }).join(' ')}
+                        fill="none"
+                        stroke="#5693C1"
+                        strokeWidth="3"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                    
+                    {/* Data points */}
                     {history.map((record, index) => {
                       const x = (index / (history.length - 1)) * 100;
                       const y = 100 - record.total_score;
@@ -70,8 +123,8 @@ const TrendsTab = ({ history, loading, formatDate }) => {
                       return (
                         <div 
                           key={record.readiness_id}
-                          className="position-absolute"
                           style={{
+                            position: 'absolute',
                             left: `${x}%`,
                             top: `${y}%`,
                             transform: 'translate(-50%, -50%)',
@@ -80,27 +133,39 @@ const TrendsTab = ({ history, loading, formatDate }) => {
                             borderRadius: '50%',
                             backgroundColor: getScoreColor(record.total_score),
                             border: '2px solid white',
-                            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                            cursor: 'pointer'
                           }}
+                          title={`${formatDate(record.calculated_at)}: ${record.total_score}`}
                         >
-                          <div className="tooltip" style={{
-                            position: 'absolute',
-                            bottom: '100%',
-                            left: '50%',
-                            transform: 'translateX(-50%)',
-                            backgroundColor: '#1f2937',
-                            color: 'white',
-                            padding: '4px 8px',
-                            borderRadius: '4px',
-                            fontSize: '12px',
-                            whiteSpace: 'nowrap',
-                            opacity: '0',
-                            transition: 'opacity 0.2s'
-                          }}>
-                            {formatDate(record.calculated_at)}: {record.total_score}
-                          </div>
                         </div>
                       );
+                    })}
+                  </div>
+                  
+                  {/* X-axis labels (dates) */}
+                  <div style={{ 
+                    marginTop: '10px', 
+                    display: 'flex', 
+                    justifyContent: 'space-between',
+                    paddingLeft: '40px'
+                  }}>
+                    {history.map((record, index) => {
+                      if (index === 0 || index === history.length - 1 || history.length <= 5 || index % Math.ceil(history.length / 5) === 0) {
+                        return (
+                          <div 
+                            key={record.readiness_id}
+                            style={{ 
+                              fontSize: '11px', 
+                              color: '#64748b',
+                              textAlign: 'center'
+                            }}
+                          >
+                            {new Date(record.calculated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                          </div>
+                        );
+                      }
+                      return null;
                     })}
                   </div>
                 </div>
@@ -115,10 +180,10 @@ const TrendsTab = ({ history, loading, formatDate }) => {
                     </div>
                     <h3 className="text-18 fw-600 text-gray-900 mb-2">Average Score</h3>
                     <div className="text-32 fw-700 text-primary mb-2">
-                      {Math.round(history.reduce((sum, record) => sum + record.total_score, 0) / history.length)}
+                      {Math.round(stats.average)}
                     </div>
                     <p className="text-13 text-gray-600">
-                      Average score across all assessments
+                      Average score across all {history.length} assessments
                     </p>
                   </div>
                 </div>
@@ -129,7 +194,7 @@ const TrendsTab = ({ history, loading, formatDate }) => {
                     </div>
                     <h3 className="text-18 fw-600 text-gray-900 mb-2">Best Score</h3>
                     <div className="text-32 fw-700 text-success mb-2">
-                      {Math.max(...history.map(h => h.total_score))}
+                      {stats.best}
                     </div>
                     <p className="text-13 text-gray-600">
                       Highest readiness score achieved
@@ -143,7 +208,7 @@ const TrendsTab = ({ history, loading, formatDate }) => {
                     </div>
                     <h3 className="text-18 fw-600 text-gray-900 mb-2">Worst Score</h3>
                     <div className="text-32 fw-700 text-danger mb-2">
-                      {Math.min(...history.map(h => h.total_score))}
+                      {stats.worst}
                     </div>
                     <p className="text-13 text-gray-600">
                       Lowest readiness score recorded

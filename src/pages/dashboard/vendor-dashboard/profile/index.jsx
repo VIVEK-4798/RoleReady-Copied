@@ -4,8 +4,8 @@ import Profile from "../../../../components/dashboard/vendor-dashboard/profile";
 import MetaComponent from "@/components/common/MetaComponent";
 
 const metadata = {
-  title: "Vendor Dashboard || GoTrip - Travel & Tour ReactJs Template",
-  description: "GoTrip - Travel & Tour ReactJs Template",
+  title: "RoleReady | Placement Readiness",
+  description: "Check your placement readiness and skill gaps."
 };
 
 export default function VendorMarketingOverview() {

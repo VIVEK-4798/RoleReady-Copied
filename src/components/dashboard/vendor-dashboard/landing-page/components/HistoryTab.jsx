@@ -9,6 +9,17 @@ const HistoryTab = ({ history, loading, formatDate }) => {
     return '#ef4444';
   };
 
+  // Helper function to calculate change
+  const calculateChange = (currentIndex) => {
+    // First row has no previous to compare with
+    if (currentIndex === 0) return null;
+    
+    const currentScore = history[currentIndex].total_score;
+    const previousScore = history[currentIndex - 1].total_score;
+    
+    return currentScore - previousScore;
+  };
+
   if (loading) {
     return (
       <div className="row y-gap-30 mt-30">
@@ -33,7 +44,7 @@ const HistoryTab = ({ history, loading, formatDate }) => {
           <div className="d-flex justify-content-between align-items-center mb-30">
             <div>
               <h2 className="text-20 fw-600 text-gray-900 mb-2">Readiness History</h2>
-              <p className="text-gray-600">Track your readiness score over time</p>
+              <p className="text-gray-600">Track your readiness score over time - Most recent first</p>
             </div>
             <button className="btn btn-primary">
               <FiRefreshCw className="me-2" />
@@ -63,8 +74,7 @@ const HistoryTab = ({ history, loading, formatDate }) => {
                 </thead>
                 <tbody>
                   {history.map((record, index) => {
-                    const prevScore = index < history.length - 1 ? history[index + 1]?.total_score : null;
-                    const delta = prevScore ? record.total_score - prevScore : null;
+                    const delta = calculateChange(index);
                     
                     return (
                       <tr key={record.readiness_id} className="border-bottom">
@@ -78,19 +88,21 @@ const HistoryTab = ({ history, loading, formatDate }) => {
                         </td>
                         <td className="py-3">
                           <div className="d-flex align-items-center gap-2">
-                            <div className={`text-16 fw-600 ${getScoreColor(record.total_score)}`}>
+                            <div style={{ color: getScoreColor(record.total_score) }} className="text-16 fw-600">
                               {record.total_score}
                             </div>
                             <div className="text-12 text-gray-500">/100</div>
                           </div>
                         </td>
                         <td className="py-3">
-                          {delta !== null ? (
-                            <div className={`text-14 fw-500 ${delta > 0 ? 'text-success' : delta < 0 ? 'text-danger' : 'text-gray-600'}`}>
+                          {delta === null ? (
+                            <div className="text-14 text-gray-400">--</div>
+                          ) : delta === 0 ? (
+                            <div className="text-14 fw-500 text-gray-600">No Change</div>
+                          ) : (
+                            <div className={`text-14 fw-500 ${delta > 0 ? 'text-success' : 'text-danger'}`}>
                               {delta > 0 ? '+' : ''}{delta}
                             </div>
-                          ) : (
-                            <div className="text-14 text-gray-400">--</div>
                           )}
                         </td>
                         <td className="py-3">

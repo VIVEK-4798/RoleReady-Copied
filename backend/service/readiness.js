@@ -54,7 +54,7 @@ router.post("/calculate", (req, res) => {
       JOIN skills s ON s.skill_id = us.skill_id
       WHERE us.user_id = ?
         AND s.category_id = ?
-        AND us.source = 'demo'
+        -- Remove the source filter to include ALL skills
     `;
 
     db.query(userSkillsQuery, [user_id, category_id], (err, userSkills) => {
@@ -240,7 +240,7 @@ router.get("/history/:user_id/:category_id", (req, res) => {
     SELECT readiness_id, total_score, calculated_at, trigger_source
     FROM readiness_scores
     WHERE user_id = ? AND category_id = ?
-    ORDER BY calculated_at ASC
+    ORDER BY calculated_at DESC  /* ✅ CHANGED FROM ASC TO DESC */
   `;
 
   db.query(query, [user_id, category_id], (err, results) => {
@@ -407,6 +407,125 @@ router.get("/progress/:user_id/:category_id", (req, res) => {
         });
       }
     );
+  });
+});
+
+/* ---------------------------------------------
+   🆕 COMPARE ENDPOINT (Phase 2 - Breakdown Comparison)
+---------------------------------------------- */
+router.get("/compare/:user_id/:category_id", (req, res) => {
+  const { user_id, category_id } = req.params;
+
+  // 1️⃣ Get latest and previous readiness IDs
+  const readinessQuery = `
+    SELECT readiness_id, calculated_at
+    FROM readiness_scores
+    WHERE user_id = ? AND category_id = ?
+    ORDER BY calculated_at DESC
+    LIMIT 2
+  `;
+
+  db.query(readinessQuery, [user_id, category_id], (err, readinessResults) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ message: "Error fetching readiness records" });
+    }
+
+    if (readinessResults.length < 2) {
+      return res.status(200).json({
+        message: "Not enough data for comparison",
+        can_compare: false,
+        improved_skills: [],
+        focus_areas: []
+      });
+    }
+
+    const latestId = readinessResults[0].readiness_id;
+    const previousId = readinessResults[1].readiness_id;
+
+    // 2️⃣ Fetch detailed breakdowns for both attempts
+    const breakdownQuery = `
+      SELECT 
+        rsb.readiness_id,
+        rsb.skill_id,
+        s.name as skill_name,
+        rsb.status,
+        cs.importance
+      FROM readiness_score_breakdown rsb
+      JOIN skills s ON s.skill_id = rsb.skill_id
+      LEFT JOIN category_skills cs ON cs.skill_id = rsb.skill_id AND cs.category_id = ?
+      WHERE rsb.readiness_id IN (?, ?)
+      ORDER BY rsb.readiness_id DESC, s.name ASC
+    `;
+
+    db.query(breakdownQuery, [category_id, latestId, previousId], (err, breakdowns) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ message: "Error fetching breakdowns" });
+      }
+
+      // Separate latest and previous breakdowns
+      const latestBreakdown = breakdowns.filter(b => b.readiness_id === latestId);
+      const previousBreakdown = breakdowns.filter(b => b.readiness_id === previousId);
+
+      // Create maps for quick lookup
+      const latestMap = {};
+      const previousMap = {};
+
+      latestBreakdown.forEach(b => {
+        latestMap[b.skill_id] = {
+          skill_name: b.skill_name,
+          status: b.status,
+          importance: b.importance
+        };
+      });
+
+      previousBreakdown.forEach(b => {
+        previousMap[b.skill_id] = {
+          skill_name: b.skill_name,
+          status: b.status,
+          importance: b.importance
+        };
+      });
+
+      // 3️⃣ Identify Improved Skills (STRICT logic)
+      const improvedSkills = [];
+      Object.keys(latestMap).forEach(skillId => {
+        const latest = latestMap[skillId];
+        const previous = previousMap[skillId];
+        
+        if (previous && 
+            previous.status === 'missing' && 
+            latest.status === 'met') {
+          improvedSkills.push(latest.skill_name);
+        }
+      });
+
+      // 4️⃣ Identify Focus Areas (STRICT logic)
+      const focusAreas = [];
+      latestBreakdown.forEach(b => {
+        // STRICT: Missing + Required skills ONLY
+        if (b.status === 'missing' && b.importance === 'required') {
+          focusAreas.push(b.skill_name);
+        }
+      });
+
+      res.status(200).json({
+        message: "Comparison completed",
+        can_compare: true,
+        latest_readiness_id: latestId,
+        previous_readiness_id: previousId,
+        improved_skills: improvedSkills,
+        focus_areas: focusAreas,
+        total_skills_compared: Object.keys(latestMap).length,
+        breakdown_summary: {
+          total_skills: latestBreakdown.length,
+          met_skills: latestBreakdown.filter(b => b.status === 'met').length,
+          missing_skills: latestBreakdown.filter(b => b.status === 'missing').length,
+          required_missing: latestBreakdown.filter(b => b.status === 'missing' && b.importance === 'required').length
+        }
+      });
+    });
   });
 });
 

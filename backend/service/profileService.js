@@ -17,7 +17,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// Get all info
+// Get all profile info including target_category_id
 router.get('/get-profile-info/:user_id', (req, res) => {
   const userId = req.params.user_id;
   const role = req.query.role || 'user';
@@ -32,8 +32,17 @@ router.get('/get-profile-info/:user_id', (req, res) => {
   else if (role === 'admin') tableName = 'admin_profile_info';
   else return res.status(400).json({ message: 'Invalid role' });
 
+  // Updated query to include target_category_id
   const query = `
-    SELECT about_text, skills, experience, resume_file, projects, certificate, education
+    SELECT 
+      about_text, 
+      experience, 
+      resume_file, 
+      projects, 
+      certificate, 
+      education,
+      niche,
+      target_category_id
     FROM ${tableName}
     WHERE user_id = ?
   `;
@@ -41,34 +50,69 @@ router.get('/get-profile-info/:user_id', (req, res) => {
   db.query(query, [userId], (err, results) => {
     if (err) {
       console.error('Error fetching profile info:', err);
-      return res.status(500).json({ message: 'Database error', error: err.message });
+      return res.status(500).json({ 
+        message: 'Database error', 
+        error: err.message 
+      });
     }
 
     if (results.length === 0) {
+      // Return default structure with null target_category_id
       return res.status(200).json({
         about_text: '',
-        skills: '',
         experience: '',
         resume_file: '',
         projects: '',
         certificate: '',
         education: '',
+        niche: '',
+        target_category_id: null
       });
     }
 
     const result = results[0];
+    
+    // Parse JSON fields safely
+    const safeParse = (jsonString, defaultValue = '') => {
+      if (!jsonString) return defaultValue;
+      try {
+        return JSON.parse(jsonString);
+      } catch (error) {
+        console.error('Error parsing JSON:', error);
+        return defaultValue;
+      }
+    };
+
     res.status(200).json({
       about_text: result.about_text || '',
-      skills: result.skills || '',
       experience: result.experience || '',
       resume_file: result.resume_file || '',
-      projects: result.projects ? JSON.parse(result.projects) : '',
-      certificate: result.certificate ? JSON.parse(result.certificate) : '',
-      education: result.education ? JSON.parse(result.education) : '',
+      projects: safeParse(result.projects, ''),
+      certificate: safeParse(result.certificate, ''),
+      education: safeParse(result.education, ''),
+      niche: result.niche || '',
+      target_category_id: result.target_category_id || null
     });
   });
 });
 
+router.post("/update-target-category", (req, res) => {
+  const { user_id, target_category_id } = req.body;
+  
+  const query = `
+    UPDATE profile_info 
+    SET target_category_id = ? 
+    WHERE user_id = ?
+  `;
+  
+  db.query(query, [target_category_id, user_id], (err) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ message: "Error updating target category" });
+    }
+    res.json({ message: "Target category updated successfully" });
+  });
+});
 
 // GET About info
 router.get('/get-about/:user_id', (req, res) => {
@@ -204,7 +248,7 @@ router.post('/upload-resume', upload.single('resume'), (req, res) => {
 });
 
 
-// GET Skills
+// GET Skills with levels from user_skills table
 router.get('/get-skills/:user_id', (req, res) => {
   const userId = req.params.user_id;
   const role = req.query.role || 'user';
@@ -213,64 +257,39 @@ router.get('/get-skills/:user_id', (req, res) => {
     return res.status(400).json({ message: 'user_id is required' });
   }
 
-  let tableName;
-  if (role === 'user') tableName = 'profile_info';
-  else if (role === 'mentor') tableName = 'mentor_profile_info';
-  else if (role === 'admin') tableName = 'admin_profile_info';
-  else return res.status(400).json({ message: 'Invalid role' });
-
-  const query = `SELECT skills FROM ${tableName} WHERE user_id = ?`;
+  // For now, we'll only handle 'user' role as per your schema
+  // You can extend for mentor/admin if they have separate user_skills tables
+  const query = `
+    SELECT 
+      us.skill_id,
+      s.name as skill_name,
+      us.level,
+      us.source,
+      us.created_at
+    FROM user_skills us
+    JOIN skills s ON us.skill_id = s.skill_id
+    WHERE us.user_id = ?
+    ORDER BY us.created_at DESC
+  `;
 
   db.query(query, [userId], (err, results) => {
     if (err) {
       console.error('Error fetching skills:', err);
-      return res.status(500).json({ message: 'Database error', error: err.message });
+      return res.status(500).json({ 
+        message: 'Database error', 
+        error: err.message 
+      });
     }
 
-    if (results.length === 0) {
-      return res.status(404).json({ message: 'No skills found', skills: '' });
-    }
-
-    res.status(200).json({ message: 'Skills retrieved successfully', skills: results[0].skills });
+    res.status(200).json({ 
+      message: 'Skills retrieved successfully', 
+      skills: results 
+    });
   });
 });
 
-
-
-// POST Skills
-router.post('/save-skills', (req, res) => {
-  const { user_id, skills, role = 'user' } = req.body;
-
-  if (!user_id || !skills) {
-    return res.status(400).json({ message: 'user_id and skills are required' });
-  }
-
-  let tableName;
-  if (role === 'user') tableName = 'profile_info';
-  else if (role === 'mentor') tableName = 'mentor_profile_info';
-  else if (role === 'admin') tableName = 'admin_profile_info';
-  else return res.status(400).json({ message: 'Invalid role' });
-
-  const query = `
-    INSERT INTO ${tableName} (user_id, skills)
-    VALUES (?, ?)
-    ON DUPLICATE KEY UPDATE skills = VALUES(skills)
-  `;
-
-  db.query(query, [user_id, skills], (err, result) => {
-    if (err) {
-      console.error('Error saving skills:', err);
-      return res.status(500).json({ message: 'Database error', error: err.message });
-    }
-
-    res.status(200).json({ message: 'Skills saved successfully', success: true });
-  });
-});
-
-
-
-// GET Experience Info
-router.get('/get-experience/:user_id', (req, res) => {
+// GET Skills with levels from user_skills table
+router.get('/get-skills/:user_id', async (req, res) => {
   const userId = req.params.user_id;
   const role = req.query.role || 'user';
 
@@ -278,31 +297,238 @@ router.get('/get-experience/:user_id', (req, res) => {
     return res.status(400).json({ message: 'user_id is required' });
   }
 
-  let tableName;
-  if (role === 'user') tableName = 'profile_info';
-  else if (role === 'mentor') tableName = 'mentor_profile_info';
-  else if (role === 'admin') tableName = 'admin_profile_info';
-  else return res.status(400).json({ message: 'Invalid role' });
+  try {
+    const query = `
+      SELECT 
+        us.skill_id,
+        s.name as skill_name,
+        us.level,
+        us.source,
+        us.created_at
+      FROM user_skills us
+      JOIN skills s ON us.skill_id = s.skill_id
+      WHERE us.user_id = ?
+      ORDER BY us.created_at DESC
+    `;
 
-  const query = `SELECT experience FROM ${tableName} WHERE user_id = ?`;
+    db.query(query, [userId], (err, results) => {
+      if (err) {
+        console.error('Error fetching skills:', err);
+        return res.status(500).json({ 
+          message: 'Database error', 
+          error: err.message 
+        });
+      }
 
-  db.query(query, [userId], (err, results) => {
+      res.status(200).json({ 
+        message: 'Skills retrieved successfully', 
+        skills: results 
+      });
+    });
+  } catch (error) {
+    console.error('Unexpected error:', error);
+    res.status(500).json({ 
+      message: 'Server error', 
+      error: error.message 
+    });
+  }
+});
+
+// POST Skills - Save skills to user_skills table
+router.post('/save-skills', async (req, res) => {
+  const { 
+    user_id, 
+    skills, 
+    role = 'user',
+    source = 'self'
+  } = req.body;
+
+  if (!user_id || !skills) {
+    return res.status(400).json({ 
+      message: 'user_id and skills are required' 
+    });
+  }
+
+  // Validate skills structure
+  if (!Array.isArray(skills)) {
+    return res.status(400).json({ 
+      message: 'Skills must be an array of objects' 
+    });
+  }
+
+  // Validate each skill object
+  for (const skill of skills) {
+    if (!skill.skill_id || !skill.skill_name) {
+      return res.status(400).json({ 
+        message: 'Each skill must have skill_id and skill_name' 
+      });
+    }
+    if (skill.level && !['beginner', 'intermediate', 'advanced'].includes(skill.level)) {
+      return res.status(400).json({ 
+        message: 'Skill level must be beginner, intermediate, or advanced' 
+      });
+    }
+  }
+
+  try {
+    // Get a connection from the pool
+    db.getConnection((err, connection) => {
+      if (err) {
+        console.error('Error getting database connection:', err);
+        return res.status(500).json({ 
+          message: 'Database connection error', 
+          error: err.message 
+        });
+      }
+
+      // Begin transaction using connection
+      connection.beginTransaction(async (beginErr) => {
+        if (beginErr) {
+          connection.release();
+          console.error('Error starting transaction:', beginErr);
+          return res.status(500).json({ 
+            message: 'Database transaction error', 
+            error: beginErr.message 
+          });
+        }
+
+        try {
+          // First, clear existing user skills with source='self'
+          const deleteQuery = `
+            DELETE FROM user_skills 
+            WHERE user_id = ? AND source = ?
+          `;
+
+          connection.query(deleteQuery, [user_id, source], (deleteErr) => {
+            if (deleteErr) {
+              return connection.rollback(() => {
+                connection.release();
+                console.error('Error deleting old skills:', deleteErr);
+                res.status(500).json({ 
+                  message: 'Database error', 
+                  error: deleteErr.message 
+                });
+              });
+            }
+
+            // If no skills to insert, commit and return
+            if (skills.length === 0) {
+              connection.commit((commitErr) => {
+                if (commitErr) {
+                  return connection.rollback(() => {
+                    connection.release();
+                    console.error('Error committing transaction:', commitErr);
+                    res.status(500).json({ 
+                      message: 'Database error', 
+                      error: commitErr.message 
+                    });
+                  });
+                }
+                connection.release();
+                res.status(200).json({ 
+                  message: 'Skills cleared successfully', 
+                  success: true 
+                });
+              });
+              return;
+            }
+
+            // Prepare values for batch insert
+            const values = skills.map(skill => [
+              user_id,
+              skill.skill_id,
+              skill.level || 'beginner',
+              source,
+              new Date()
+            ]);
+
+            const insertQuery = `
+              INSERT INTO user_skills 
+              (user_id, skill_id, level, source, created_at) 
+              VALUES ?
+            `;
+
+            connection.query(insertQuery, [values], (insertErr, result) => {
+              if (insertErr) {
+                return connection.rollback(() => {
+                  connection.release();
+                  console.error('Error inserting skills:', insertErr);
+                  res.status(500).json({ 
+                    message: 'Database error', 
+                    error: insertErr.message 
+                  });
+                });
+              }
+
+              connection.commit((commitErr) => {
+                if (commitErr) {
+                  return connection.rollback(() => {
+                    connection.release();
+                    console.error('Error committing transaction:', commitErr);
+                    res.status(500).json({ 
+                      message: 'Database error', 
+                      error: commitErr.message 
+                    });
+                  });
+                }
+
+                connection.release();
+                res.status(200).json({ 
+                  message: 'Skills saved successfully', 
+                  success: true,
+                  insertedCount: result.affectedRows 
+                });
+              });
+            });
+          });
+        } catch (error) {
+          connection.rollback(() => {
+            connection.release();
+            console.error('Unexpected error:', error);
+            res.status(500).json({ 
+              message: 'Server error', 
+              error: error.message 
+            });
+          });
+        }
+      });
+    });
+  } catch (error) {
+    console.error('Unexpected error:', error);
+    res.status(500).json({ 
+      message: 'Server error', 
+      error: error.message 
+    });
+  }
+});
+
+// GET available skills for suggestions
+router.get('/available-skills', (req, res) => {
+  const search = req.query.search || '';
+  
+  const query = `
+    SELECT skill_id, name as skill_name, category
+    FROM skills
+    WHERE name LIKE ?
+    ORDER BY name
+    LIMIT 20
+  `;
+
+  db.query(query, [`%${search}%`], (err, results) => {
     if (err) {
-      console.error('Error fetching experience info:', err);
-      return res.status(500).json({ message: 'Database error', error: err.message });
+      console.error('Error fetching available skills:', err);
+      return res.status(500).json({ 
+        message: 'Database error', 
+        error: err.message 
+      });
     }
 
-    if (results.length === 0) {
-      return res.status(404).json({ message: 'No experience info found', experience: [] });
-    }
-
-    res.status(200).json({
-      message: 'Experience info retrieved successfully',
-      experience: results[0].experience
+    res.status(200).json({ 
+      message: 'Available skills retrieved', 
+      skills: results 
     });
   });
 });
-
 
 
 // POST Experience Info
