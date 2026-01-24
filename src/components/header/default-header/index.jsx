@@ -47,8 +47,13 @@ const Header1 = () => {
             <div className="col-auto">
               <div className="d-flex items-center">
                 <div className="d-flex items-center is-menu-opened-hide md:d-none">
-
+            
                   {/* Conditionally render Post Job button */}
+                  {(user === "user" ) && (
+                    <Link to="/readiness" className="nav-link">
+                      🎯 Readiness Score
+                    </Link>
+                  )}
                   {(user === "mentor" || user === "admin") && (
                     <Link
                       to="/mentor-dashboard/vendor/add"

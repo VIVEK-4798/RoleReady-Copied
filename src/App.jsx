@@ -115,6 +115,7 @@ import MentorAddVenue from "./pages/dashboard/mentor-dashboard/add-venue";
 import MentorAddVendor from "./pages/dashboard/mentor-dashboard/add-vendor";
 import MentorVendors from "./pages/dashboard/mentor-dashboard/vendors";
 import MentorVenue from "./pages/dashboard/mentor-dashboard/venue";
+import ReadinessPage from "./pages/readiness";
 
 
 function App() {
@@ -150,6 +151,7 @@ function App() {
 
               <Route path="pricing" element={<Pricing />} />
               <Route path="collegeTPO" element={<CollegeTPO />} />
+              <Route path="readiness" element={<ReadinessPage />} />
 
               <Route path="store">
                 <Route path=":project" element={<Home />} />

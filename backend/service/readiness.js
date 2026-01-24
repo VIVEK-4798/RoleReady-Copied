@@ -3,20 +3,29 @@ const router = express.Router();
 const db = require("../db");
 
 /**
- * POST /readiness/calculate
- * Calculates and stores readiness score as a TIME-SERIES entry
- * Guardrail: cooldown between recalculations
+ * POST /readiness/explicit-calculate
+ * Dedicated endpoint for explicit user-driven readiness calculation
+ * (Cooldown temporarily DISABLED for development)
  */
-router.post("/calculate", (req, res) => {
-  const { user_id, category_id, trigger_source = "manual" } = req.body;
+router.post("/explicit-calculate", (req, res) => {
+  const { user_id, category_id } = req.body;
 
   if (!user_id || !category_id) {
-    return res.status(400).json({ message: "Invalid request data" });
+    return res.status(400).json({
+      success: false,
+      message: "user_id and category_id are required",
+    });
   }
 
+  const trigger_source = "user_explicit";
+
+  /* ======================================================
+     🚫 COOLDOWN TEMPORARILY DISABLED (COMMENTED OUT)
+     ====================================================== */
+
+  /*
   const COOLDOWN_HOURS = 24;
 
-  /* 0️⃣ COOLDOWN CHECK */
   const cooldownQuery = `
     SELECT calculated_at
     FROM readiness_scores
@@ -27,127 +36,164 @@ router.post("/calculate", (req, res) => {
 
   db.query(cooldownQuery, [user_id, category_id], (err, rows) => {
     if (err) {
-      console.error(err);
-      return res.status(500).json({ message: "Error checking cooldown" });
+      return res.status(500).json({ success: false, message: "Cooldown check failed" });
     }
 
     if (rows.length > 0) {
       const lastCalculated = new Date(rows[0].calculated_at);
-      const now = new Date();
-
-      const diffHours =
-        (now.getTime() - lastCalculated.getTime()) / (1000 * 60 * 60);
+      const diffHours = (Date.now() - lastCalculated.getTime()) / (1000 * 60 * 60);
 
       if (diffHours < COOLDOWN_HOURS) {
         return res.status(429).json({
-          message: `You can recalculate readiness after ${
-            COOLDOWN_HOURS - Math.floor(diffHours)
-          } hours.`,
+          success: false,
+          message: "Cooldown active",
+          cooldownActive: true,
         });
       }
     }
+  });
+  */
 
-    /* 1️⃣ Fetch user's skills for this category */
-    const userSkillsQuery = `
-      SELECT DISTINCT us.skill_id
-      FROM user_skills us
-      JOIN skills s ON s.skill_id = us.skill_id
-      WHERE us.user_id = ?
-        AND s.category_id = ?
-        -- Remove the source filter to include ALL skills
+  /* ======================================================
+     1️⃣ FETCH USER SKILLS (demo + self)
+     ====================================================== */
+
+  const userSkillsQuery = `
+    SELECT DISTINCT us.skill_id, us.source
+    FROM user_skills us
+    JOIN skills s ON s.skill_id = us.skill_id
+    WHERE us.user_id = ? AND s.category_id = ?
+  `;
+
+  db.query(userSkillsQuery, [user_id, category_id], (err, userSkills) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({
+        success: false,
+        message: "Error fetching user skills",
+      });
+    }
+
+    const selectedSet = new Set(userSkills.map(s => s.skill_id));
+    const demoSkills = userSkills.filter(s => s.source === "demo");
+    const selfSkills = userSkills.filter(s => s.source === "self");
+
+    /* ======================================================
+       2️⃣ FETCH BENCHMARK SKILLS
+       ====================================================== */
+
+    const benchmarkQuery = `
+      SELECT s.skill_id, s.name, cs.weight, cs.importance
+      FROM category_skills cs
+      JOIN skills s ON cs.skill_id = s.skill_id
+      WHERE cs.category_id = ?
+      ORDER BY cs.weight DESC
     `;
 
-    db.query(userSkillsQuery, [user_id, category_id], (err, userSkills) => {
+    db.query(benchmarkQuery, [category_id], (err, benchmarkSkills) => {
       if (err) {
         console.error(err);
-        return res.status(500).json({ message: "Error fetching user skills" });
+        return res.status(500).json({
+          success: false,
+          message: "Error fetching benchmark skills",
+        });
       }
 
-      const selectedSet = new Set(userSkills.map(s => s.skill_id));
+      let totalScore = 0;
+      let maxPossibleScore = 0;
+      const breakdown = [];
 
-      /* 2️⃣ Fetch benchmark skills */
-      const benchmarkQuery = `
-        SELECT s.skill_id, s.name, cs.weight
-        FROM category_skills cs
-        JOIN skills s ON cs.skill_id = s.skill_id
-        WHERE cs.category_id = ?
-      `;
+      benchmarkSkills.forEach(skill => {
+        const hasSkill = selectedSet.has(skill.skill_id);
+        const source = userSkills.find(s => s.skill_id === skill.skill_id)?.source || null;
 
-      db.query(benchmarkQuery, [category_id], (err, benchmarkSkills) => {
-        if (err) {
-          console.error(err);
-          return res.status(500).json({ message: "Error fetching benchmark skills" });
-        }
-
-        let totalScore = 0;
-        const breakdown = [];
-
-        benchmarkSkills.forEach(skill => {
-          const hasSkill = selectedSet.has(skill.skill_id);
-
-          breakdown.push({
-            skill_id: skill.skill_id,
-            required_weight: skill.weight,
-            achieved_weight: hasSkill ? skill.weight : 0,
-            status: hasSkill ? "met" : "missing",
-          });
-
-          if (hasSkill) totalScore += skill.weight;
+        breakdown.push({
+          skill_id: skill.skill_id,
+          required_weight: skill.weight,
+          achieved_weight: hasSkill ? skill.weight : 0,
+          status: hasSkill ? "met" : "missing",
+          source,
+          importance: skill.importance,
         });
 
-        /* 3️⃣ INSERT readiness score (NEVER overwrite) */
-        const insertScoreQuery = `
-          INSERT INTO readiness_scores
-          (user_id, category_id, total_score, trigger_source)
-          VALUES (?, ?, ?, ?)
-        `;
+        maxPossibleScore += skill.weight;
+        if (hasSkill) totalScore += skill.weight;
+      });
 
-        db.query(
-          insertScoreQuery,
-          [user_id, category_id, totalScore, trigger_source],
-          (err, result) => {
-            if (err) {
-              console.error(err);
-              return res.status(500).json({ message: "Error saving readiness score" });
-            }
+      /* ======================================================
+         3️⃣ INSERT READINESS SCORE (TIME-SERIES)
+         ====================================================== */
 
-            const readiness_id = result.insertId;
+      const insertScoreQuery = `
+        INSERT INTO readiness_scores
+        (user_id, category_id, total_score, trigger_source, max_possible_score)
+        VALUES (?, ?, ?, ?, ?)
+      `;
 
-            if (breakdown.length === 0) {
-              return res.status(201).json({
-                readiness_id,
-                total_score: totalScore,
-              });
-            }
-
-            const breakdownValues = breakdown.map(b => [
-              readiness_id,
-              b.skill_id,
-              b.required_weight,
-              b.achieved_weight,
-              b.status,
-            ]);
-
-            const insertBreakdownQuery = `
-              INSERT INTO readiness_score_breakdown
-              (readiness_id, skill_id, required_weight, achieved_weight, status)
-              VALUES ?
-            `;
-
-            db.query(insertBreakdownQuery, [breakdownValues], err => {
-              if (err) {
-                console.error(err);
-                return res.status(500).json({ message: "Error saving breakdown" });
-              }
-
-              res.status(201).json({
-                readiness_id,
-                total_score: totalScore,
-              });
+      db.query(
+        insertScoreQuery,
+        [user_id, category_id, totalScore, trigger_source, maxPossibleScore],
+        (err, result) => {
+          if (err) {
+            console.error(err);
+            return res.status(500).json({
+              success: false,
+              message: "Error saving readiness score",
             });
           }
-        );
-      });
+
+          const readiness_id = result.insertId;
+          const calculated_at = new Date();
+
+          /* ======================================================
+             4️⃣ INSERT BREAKDOWN SNAPSHOT
+             ====================================================== */
+
+          const breakdownValues = breakdown.map(b => [
+            readiness_id,
+            b.skill_id,
+            b.required_weight,
+            b.achieved_weight,
+            b.status,
+            b.source,
+          ]);
+
+          const insertBreakdownQuery = `
+            INSERT INTO readiness_score_breakdown
+            (readiness_id, skill_id, required_weight, achieved_weight, status, skill_source)
+            VALUES ?
+          `;
+
+          db.query(insertBreakdownQuery, [breakdownValues], err => {
+            if (err) {
+              console.error(err);
+              return res.status(500).json({
+                success: false,
+                message: "Error saving breakdown",
+              });
+            }
+
+            res.status(201).json({
+              success: true,
+              message: "Readiness calculated successfully",
+              readiness_id,
+              total_score: totalScore,
+              percentage:
+                maxPossibleScore > 0
+                  ? Math.round((totalScore / maxPossibleScore) * 100)
+                  : 0,
+              calculated_at: calculated_at.toISOString(),
+              trigger: trigger_source,
+              skill_stats: {
+                total_benchmark_skills: benchmarkSkills.length,
+                skills_met: breakdown.filter(b => b.status === "met").length,
+                demo_skills_count: demoSkills.length,
+                self_skills_count: selfSkills.length,
+              },
+            });
+          });
+        }
+      );
     });
   });
 });
