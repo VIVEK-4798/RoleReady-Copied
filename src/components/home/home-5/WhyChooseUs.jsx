@@ -160,15 +160,16 @@ const WhyChooseUs = forwardRef((props, ref) => {
             </p>
 
             <div className="button-container">
-              <button className="primary-button">
+              <a href="/register" className="primary-button">
                 Start Free Analysis
-              </button>
+              </a>
 
               <button
-                className="secondary-button"
+                className="secondary-button demo-button"
                 onClick={() => setShowDemo(true)}
               >
-                View Demo
+                <span className="demo-badge">🎭 DEMO</span>
+                Try Demo
               </button>
             </div>
 
@@ -178,7 +179,7 @@ const WhyChooseUs = forwardRef((props, ref) => {
           </div>
         </div>
 
-        {/* Demo Modal */}
+        {/* Demo Modal - STEP 6: Clearly labeled demo only */}
         {showDemo && <DemoModal onClose={() => setShowDemo(false)} />}
       </div>
     </section>

@@ -36,7 +36,7 @@ const emailService = require('./service/emailService.js');
 const profileService = require('./service/profileService.js');
 const userActivityService = require('./service/userActivityService.js');
 const collegeService = require('./service/collegeService');
-const readinessRoutes  = require('./service/readiness.js');
+const { router: readinessRoutes }  = require('./service/readiness.js');
 const rolesRoutes  = require('./service/roles.js');
 
 // routes

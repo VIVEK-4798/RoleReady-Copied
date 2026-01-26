@@ -56,30 +56,18 @@ const Index = () => {
     }
   };
 
-  // Fetch readiness data when category changes
+  /* ========================================================================
+     STEP 5: Auto-refresh when category changes or on mount
+     ========================================================================
+     
+     Dashboard always shows the LATEST data from DB.
+     When user comes back from Readiness page, this will automatically
+     show the new score without manual refresh.
+  */
   useEffect(() => {
-    if (!user?.user_id || !categoryId) return;
-
-    const fetchReadinessData = async () => {
-      setLoading(true);
-      try {
-        const [latestRes, historyRes, progressRes] = await Promise.all([
-          fetch(`${API_BASE}/readiness/latest/${user.user_id}/${categoryId}`),
-          fetch(`${API_BASE}/readiness/history/${user.user_id}/${categoryId}`),
-          fetch(`${API_BASE}/readiness/progress/${user.user_id}/${categoryId}`)
-        ]);
-
-        if (latestRes.ok) setLatest(await latestRes.json());
-        if (historyRes.ok) setHistory(await historyRes.json());
-        if (progressRes.ok) setProgress(await progressRes.json());
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchReadinessData();
+    if (user?.user_id && categoryId) {
+      refreshDashboardData();
+    }
   }, [user, categoryId]);
 
   // Handle category selection
@@ -105,36 +93,78 @@ const Index = () => {
     }
   };
 
-  // Handle retake assessment
+  /* ========================================================================
+     STEP 5: Refresh Dashboard Data
+     ========================================================================
+     
+     This function is called to refresh all readiness data from the database.
+     Dashboard is the SINGLE SOURCE OF TRUTH for progress/history.
+     
+     Called when:
+     - User clicks refresh
+     - User returns from Readiness page (auto-refresh)
+     - Category changes
+  */
+  const refreshDashboardData = async () => {
+    if (!user?.user_id || !categoryId) return;
+    
+    setLoading(true);
+    try {
+      const [latestRes, historyRes, progressRes] = await Promise.all([
+        fetch(`${API_BASE}/readiness/latest/${user.user_id}/${categoryId}`),
+        fetch(`${API_BASE}/readiness/history/${user.user_id}/${categoryId}`),
+        fetch(`${API_BASE}/readiness/progress/${user.user_id}/${categoryId}`)
+      ]);
+
+      if (latestRes.ok) setLatest(await latestRes.json());
+      else setLatest(null);
+      
+      if (historyRes.ok) setHistory(await historyRes.json());
+      else setHistory([]);
+      
+      if (progressRes.ok) setProgress(await progressRes.json());
+      else setProgress(null);
+    } catch (err) {
+      console.error("[Dashboard] Failed to refresh data:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle retake assessment (uses LOCKED endpoint from STEP 2)
   const handleRetakeAssessment = async () => {
     if (!user?.user_id || !categoryId) return;
     
     try {
-      const res = await fetch(`${API_BASE}/readiness/calculate`, {
+      // 🔒 STEP 2/5: Use locked endpoint - only user_id, category from DB
+      const res = await fetch(`${API_BASE}/readiness/explicit-calculate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           user_id: user.user_id,
-          category_id: categoryId,
+          // category_id is resolved from profile in backend
         }),
       });
 
-      if (res.ok) {
-        // Refresh data
-        const [latestRes, historyRes, progressRes] = await Promise.all([
-          fetch(`${API_BASE}/readiness/latest/${user.user_id}/${categoryId}`),
-          fetch(`${API_BASE}/readiness/history/${user.user_id}/${categoryId}`),
-          fetch(`${API_BASE}/readiness/progress/${user.user_id}/${categoryId}`)
-        ]);
-
-        if (latestRes.ok) setLatest(await latestRes.json());
-        if (historyRes.ok) setHistory(await historyRes.json());
-        if (progressRes.ok) setProgress(await progressRes.json());
-        
+      const result = await res.json();
+      
+      // 🛡️ STEP 4: Handle guard responses
+      if (res.status === 429) {
+        alert(result.message || "Please wait before recalculating.");
+        return;
+      }
+      
+      if (result.recalculated === false) {
+        alert(result.message || "No changes detected since last calculation.");
+        return;
+      }
+      
+      if (res.ok && result.success) {
+        // Refresh dashboard data
+        await refreshDashboardData();
         alert("Assessment completed successfully!");
       } else {
-        const errorData = await res.json();
-        alert(errorData.message || "Failed to calculate readiness");
+        alert(result.message || "Failed to calculate readiness");
       }
     } catch (err) {
       console.error(err);
@@ -191,6 +221,7 @@ const Index = () => {
             onCategorySelect={handleCategorySelect}
             onRetakeAssessment={handleRetakeAssessment}
             onTabChange={setActiveTab}
+            onRefresh={refreshDashboardData}
           />
           
           <Footer />

@@ -1,7 +1,21 @@
 import { useState } from "react";
+import { FiRefreshCw } from "react-icons/fi";
 import OverviewTab from "./OverviewTab";
 import HistoryTab from "./HistoryTab";
 import TrendsTab from "./TrendsTab";
+
+/* ============================================================================
+   📊 DASHBOARD CONTENT - STEP 5
+   ============================================================================
+   
+   Dashboard is the SINGLE SOURCE OF TRUTH for:
+   - Progress tracking (history)
+   - Trends visualization
+   - Score comparisons
+   
+   Readiness Page does NOT manage history - it only calculates.
+   Dashboard automatically reflects any new calculations.
+   ============================================================================ */
 
 const DashboardContent = ({
   categoryId,
@@ -16,14 +30,24 @@ const DashboardContent = ({
   onCategorySelect,
   onRetakeAssessment,
   onTabChange,
+  onRefresh,
   userId
 }) => {
   const [showCategorySelector, setShowCategorySelector] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Check if this is first assessment
   const isFirstAssessment = !latest;
   // Check if user has history for this category
   const hasHistory = history && history.length > 0;
+  
+  // Handle refresh button click
+  const handleRefresh = async () => {
+    if (isRefreshing || !onRefresh) return;
+    setIsRefreshing(true);
+    await onRefresh();
+    setIsRefreshing(false);
+  };
 
   return (
     <div className="dashboard__content bg-light-2" style={{ background: '#f8fafc' }}>
@@ -52,11 +76,23 @@ const DashboardContent = ({
                   </span>
                 </div>
               </div>
-              <div className="d-flex align-items-center gap-2">
-                <span className="text-14 text-gray-500">Updated:</span>
-                <span className="text-14 fw-500 text-gray-700">
-                  {latest ? formatDate(latest.calculated_at) : '--'}
-                </span>
+              <div className="d-flex align-items-center gap-3">
+                <div className="d-flex align-items-center gap-2">
+                  <span className="text-14 text-gray-500">Updated:</span>
+                  <span className="text-14 fw-500 text-gray-700">
+                    {latest ? formatDate(latest.calculated_at) : '--'}
+                  </span>
+                </div>
+                {/* STEP 5: Refresh button */}
+                <button
+                  onClick={handleRefresh}
+                  disabled={isRefreshing || loading}
+                  className="btn btn-sm btn-outline-primary d-flex align-items-center gap-1"
+                  title="Refresh dashboard data"
+                >
+                  <FiRefreshCw className={isRefreshing ? 'spin' : ''} />
+                  {isRefreshing ? 'Refreshing...' : 'Refresh'}
+                </button>
               </div>
             </div>
 

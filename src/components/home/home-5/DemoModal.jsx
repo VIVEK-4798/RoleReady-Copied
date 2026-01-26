@@ -1,7 +1,25 @@
 import { useEffect, useState, useRef } from "react";
 
 const API_BASE = "http://localhost:5000/api";
-const DEMO_USER_ID = 25;
+
+/* ============================================================================
+   🎭 STEP 6: DEMO MODAL (Landing Page Only)
+   ============================================================================
+   
+   This is a DEMO-ONLY component for the landing page.
+   
+   KEY CHARACTERISTICS:
+   1. Uses dedicated demo endpoints (/readiness/demo/*)
+   2. Does NOT save to real readiness history
+   3. Clearly labeled as "DEMO" throughout
+   4. Prompts users to sign up for real tracking
+   
+   REAL READINESS requires:
+   - User login
+   - Profile setup
+   - Target role selection
+   ============================================================================
+*/
 
 const DemoModal = ({ onClose }) => {
   const [categories, setCategories] = useState([]);
@@ -11,11 +29,8 @@ const DemoModal = ({ onClose }) => {
 
   const [loading, setLoading] = useState(false);
   const [showResult, setShowResult] = useState(false);
-  const [score, setScore] = useState(null);
-  const [breakdown, setBreakdown] = useState([]);
-  const [missingRequiredSkills, setMissingRequiredSkills] = useState([]);
+  const [demoResult, setDemoResult] = useState(null);
   const [error, setError] = useState("");
-  const [progress, setProgress] = useState(null);
   const [categoryName, setCategoryName] = useState("");
 
   const modalRef = useRef();
@@ -50,7 +65,7 @@ const DemoModal = ({ onClose }) => {
     setSelectedSkillIds([]);
     setSkills([]);
     setShowResult(false);
-    setProgress(null);
+    setError("");
 
     if (!categoryId) return;
 
@@ -59,8 +74,17 @@ const DemoModal = ({ onClose }) => {
         `${API_BASE}/categories/get-skills-by-category/${categoryId}`
       );
       const data = await res.json();
-      setSkills(data.results);
-    } catch {
+      
+      console.log("[DemoModal] Skills fetched for category", categoryId, ":", data);
+      
+      if (data.results && Array.isArray(data.results)) {
+        setSkills(data.results);
+      } else {
+        console.warn("[DemoModal] Unexpected response format:", data);
+        setSkills([]);
+      }
+    } catch (err) {
+      console.error("[DemoModal] Error fetching skills:", err);
       setError("Failed to load skills");
     }
   };
@@ -78,77 +102,46 @@ const DemoModal = ({ onClose }) => {
   const handleReset = () => {
     setShowResult(false);
     setSelectedSkillIds([]);
-    setProgress(null);
-    setScore(null);
-    setBreakdown([]);
-    setMissingRequiredSkills([]);
+    setDemoResult(null);
   };
 
-  /* ---------------- Analyze readiness ---------------- */
+  /* ---------------- Analyze readiness (DEMO ONLY) ---------------- */
   const handleAnalyze = async () => {
     if (!selectedCategoryId || selectedSkillIds.length === 0) return;
 
     setLoading(true);
     setError("");
-    setProgress(null);
 
     try {
-      /* 1️⃣ Save demo skills */
-      const saveRes = await fetch(`${API_BASE}/readiness/user-skills/bulk-add`, {
+      /* 1️⃣ Save demo skills (using new demo endpoint) */
+      const saveRes = await fetch(`${API_BASE}/readiness/demo/skills`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          user_id: DEMO_USER_ID,
           skill_ids: selectedSkillIds,
-          mode: "demo",
-        }),
-      });
-
-      if (!saveRes.ok) throw new Error("Failed to save skills");
-
-      /* 2️⃣ Calculate readiness */
-      const res = await fetch(`${API_BASE}/readiness/calculate`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          user_id: DEMO_USER_ID,
           category_id: selectedCategoryId,
         }),
       });
 
-      if (!res.ok) throw new Error("Failed to calculate score");
+      if (!saveRes.ok) throw new Error("Failed to save demo skills");
 
-      const data = await res.json();
-      setScore(data.total_score);
+      /* 2️⃣ Calculate demo readiness (using new demo endpoint) */
+      const calcRes = await fetch(`${API_BASE}/readiness/demo/calculate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          category_id: selectedCategoryId,
+        }),
+      });
 
-      /* 3️⃣ Fetch breakdown + roadmap stub */
-      const breakdownRes = await fetch(
-        `${API_BASE}/readiness/breakdown/${data.readiness_id}`
-      );
+      if (!calcRes.ok) throw new Error("Failed to calculate demo score");
 
-      if (!breakdownRes.ok) throw new Error("Failed to load breakdown");
-
-      const breakdownData = await breakdownRes.json();
-      setBreakdown(breakdownData.breakdown);
-      setMissingRequiredSkills(breakdownData.missing_required_skills || []);
-
-      /* 4️⃣ Fetch progress data */
-      try {
-        const progressRes = await fetch(
-          `${API_BASE}/readiness/progress/${DEMO_USER_ID}/${selectedCategoryId}`
-        );
-
-        if (progressRes.ok) {
-          const progressData = await progressRes.json();
-          setProgress(progressData);
-        }
-      } catch (progressErr) {
-        console.log("Progress fetch failed (optional):", progressErr);
-      }
-
+      const result = await calcRes.json();
+      setDemoResult(result);
       setShowResult(true);
+      
     } catch (err) {
-      console.error(err);
+      console.error("[DemoModal] Error:", err);
       setError("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
@@ -257,11 +250,23 @@ const DemoModal = ({ onClose }) => {
                 Select at least one skill to analyze your readiness
               </p>
             </div>
+            
+            {/* STEP 6: Demo disclaimer */}
+            <div className="demo-modal-disclaimer">
+              <span className="demo-modal-disclaimer-icon">ℹ️</span>
+              <span>This is a demo. <strong>Sign up</strong> to track your real progress!</span>
+            </div>
           </div>
         ) : (
           <div className="demo-modal-content">
+            {/* STEP 6: Clear DEMO badge */}
+            <div className="demo-modal-demo-badge">
+              <span className="demo-badge-icon">🎭</span>
+              <span className="demo-badge-text">DEMO RESULT</span>
+            </div>
+            
             <div className="demo-modal-header">
-              <h3 className="demo-modal-title">Demo Result</h3>
+              <h3 className="demo-modal-title">Your Demo Score</h3>
               <p className="demo-modal-category">{categoryName}</p>
             </div>
 
@@ -269,93 +274,89 @@ const DemoModal = ({ onClose }) => {
             <div className="demo-modal-score-card">
               <div className="demo-modal-score-main">
                 <span className="demo-modal-score-label">Readiness Score</span>
-                <div className="demo-modal-score-value">{score}<span>/100</span></div>
+                <div className="demo-modal-score-value">
+                  {demoResult?.percentage || 0}<span>%</span>
+                </div>
+                <div className="demo-modal-score-points">
+                  {demoResult?.total_score || 0} / {demoResult?.max_possible_score || 0} points
+                </div>
               </div>
               
-              {/* Progress Display */}
-              {progress && (
-                <div className="demo-modal-progress-card">
-                  <h4 className="demo-modal-progress-title">
-                    Progress Since Last Check
-                  </h4>
-                  
-                  <div className="demo-modal-progress-delta">
-                    {progress.score_delta > 0 && (
-                      <span className="delta-positive">⬆ Improved by {progress.score_delta} points</span>
-                    )}
-                    {progress.score_delta < 0 && (
-                      <span className="delta-negative">⬇ Dropped by {Math.abs(progress.score_delta)} points</span>
-                    )}
-                    {progress.score_delta === 0 && (
-                      <span className="delta-neutral">No score change</span>
-                    )}
-                  </div>
-
-                  {progress.newly_met_skills && progress.newly_met_skills.length > 0 && (
-                    <div className="demo-modal-new-skills">
-                      <p className="demo-modal-progress-subtitle">
-                        <strong>Newly Improved Skills:</strong>
-                      </p>
-                      <div className="demo-modal-skills-tags">
-                        {progress.newly_met_skills.map(skill => (
-                          <span key={skill} className="demo-modal-new-skill-tag">
-                            ✅ {skill}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+              {/* Skills Summary */}
+              <div className="demo-modal-skills-summary">
+                <div className="demo-modal-skill-stat demo-modal-skill-stat--met">
+                  <span className="demo-modal-skill-stat-value">{demoResult?.skills_met || 0}</span>
+                  <span className="demo-modal-skill-stat-label">Skills Met</span>
                 </div>
-              )}
+                <div className="demo-modal-skill-stat demo-modal-skill-stat--missing">
+                  <span className="demo-modal-skill-stat-value">{demoResult?.skills_missing || 0}</span>
+                  <span className="demo-modal-skill-stat-label">Skills Missing</span>
+                </div>
+              </div>
             </div>
 
             {/* Skill Gap Breakdown */}
-            <div className="demo-modal-section">
-              <h4 className="demo-modal-section-title">
-                Skill Gap Breakdown
-              </h4>
-              <div className="demo-modal-breakdown-grid">
-                {breakdown.map(item => (
-                  <div
-                    key={item.skill}
-                    className={`demo-modal-breakdown-item ${
-                      item.status === "met" ? "met" : "missing"
-                    }`}
-                  >
-                    <span className="demo-modal-breakdown-skill">{item.skill}</span>
-                    <span className={`demo-modal-breakdown-status ${
-                      item.status === "met" ? "status-met" : "status-missing"
-                    }`}>
-                      {item.status === "met" ? "✅ Met" : "❌ Missing"}
-                    </span>
-                  </div>
-                ))}
+            {demoResult?.breakdown?.length > 0 && (
+              <div className="demo-modal-section">
+                <h4 className="demo-modal-section-title">
+                  Skill Gap Breakdown
+                </h4>
+                <div className="demo-modal-breakdown-grid">
+                  {demoResult.breakdown.map(item => (
+                    <div
+                      key={item.skill_id}
+                      className={`demo-modal-breakdown-item ${
+                        item.status === "met" ? "met" : "missing"
+                      }`}
+                    >
+                      <span className="demo-modal-breakdown-skill">{item.skill_name}</span>
+                      <span className={`demo-modal-breakdown-status ${
+                        item.status === "met" ? "status-met" : "status-missing"
+                      }`}>
+                        {item.status === "met" ? "✅ Met" : "❌ Missing"}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* What to focus on next */}
-            {missingRequiredSkills.length > 0 && (
+            {demoResult?.missing_required_skills?.length > 0 && (
               <div className="demo-modal-focus-section">
                 <h4 className="demo-modal-focus-title">
-                  What to focus on next
+                  ⚠️ Missing Required Skills
                 </h4>
                 <div className="demo-modal-focus-list">
-                  {missingRequiredSkills.map(skill => (
+                  {demoResult.missing_required_skills.map(skill => (
                     <div key={skill} className="demo-modal-focus-item">
-                      <span className="demo-modal-focus-icon">✅</span>
+                      <span className="demo-modal-focus-icon">❗</span>
                       <span>{skill}</span>
                     </div>
                   ))}
                 </div>
                 <p className="demo-modal-focus-text">
-                  These skills should be prioritized to improve your readiness.
+                  Focus on these required skills to improve your readiness.
                 </p>
               </div>
             )}
+            
+            {/* STEP 6: Sign up CTA */}
+            <div className="demo-modal-signup-cta">
+              <p className="demo-modal-signup-text">
+                🚀 <strong>Want to track your real progress?</strong>
+              </p>
+              <p className="demo-modal-signup-subtext">
+                Sign up to save your skills, track improvement over time, and get personalized recommendations.
+              </p>
+              <a href="/register" className="demo-modal-signup-button">
+                Create Free Account
+              </a>
+            </div>
 
             <div className="demo-modal-actions">
               <button onClick={handleReset} className="demo-modal-secondary-button">
-                Try Another Analysis
+                Try Again
               </button>
               <button onClick={onClose} className="demo-modal-close-button">
                 Close Demo
