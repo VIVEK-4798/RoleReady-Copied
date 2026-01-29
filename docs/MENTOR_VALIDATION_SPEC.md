@@ -145,12 +145,121 @@ After mentor validation, skill sources have a trust hierarchy:
   - Can: view breakdown, validate/reject skills, add structured comments
   - Cannot: edit scores, add/remove skills, chat, override engine
   - System integrity rules defined
-- [ ] **STEP 2:** Database schema for validations
-- [ ] **STEP 3:** Mentor-user connection model
-- [ ] **STEP 4:** Validation request flow
-- [ ] **STEP 5:** Mentor validation UI
-- [ ] **STEP 6:** User-side validation display
-- [ ] **STEP 7:** Integration with readiness context
+- [x] **STEP 2:** Extend user_skills with validation metadata ✅
+  - Added columns: `validated_by`, `validated_at`, `validation_status`, `validation_note`
+  - `validation_status`: 'none' | 'pending' | 'validated' | 'rejected'
+  - Foreign key to users table for mentor reference
+  - Updated skill queries to include validation fields
+  - Migration: `backend/migrations/alter_user_skills_add_validation.sql`
+- [x] **STEP 3:** Mentor review queue (minimal) ✅
+  - Backend endpoints: `GET /queue/:mentor_id`, `POST /validate`, `POST /reject`, `GET /stats/:mentor_id`
+  - Service: `backend/service/mentorValidation.js`
+  - Frontend: Simple table with User, Skill, Source, Level, Actions
+  - Reject requires reason (min 10 chars)
+  - Self-validation blocked
+  - Route: `/mentor-dashboard/validation-queue`
+  - Sidebar link added for mentors
+- [x] **STEP 4:** Validation → Readiness Integration ✅
+  - **Validated skills:** Get 1.25x weight bonus in readiness calculation
+  - **Rejected skills:** Excluded from readiness calculation entirely
+  - **Cooldown bypass:** Users can recalculate immediately after validation review
+  - Backend endpoints:
+    - `GET /readiness/validation-updates/:user_id` - Check for pending validation reviews
+    - `POST /readiness/recalculate-after-validation` - Trigger recalculation with bypass
+  - Frontend: `ValidationUpdateBanner` component shows prompt on Readiness page
+  - User prompt: "Your skills were reviewed. Recalculate readiness?"
+  - Reuses 100% of existing readiness calculation engine
+- [x] **STEP 5:** Dashboard Trust Indicators ✅
+  - **Trust badge:** Shows "X skills mentor-validated" prominently
+  - **Skill source display:** Each skill shows source badge (🎓 validated, 📄 resume, ✋ self)
+  - **Source legend:** Clear legend explaining what each source means
+  - **Validated highlight:** Validated skills have special styling (blue border/glow)
+  - Backend: Updated `/readiness/breakdown/:readiness_id` to include:
+    - `skill_source` in each skill object
+    - `trust_indicators` summary with counts per source
+  - Frontend: Updated skill chips to show source badges with tooltips
+  - CSS: Added trust-badge, source-legend, and validated-highlight styles
+  - **Credibility boost:** Interviewers can see third-party verification at a glance
+- [x] **STEP 6:** User-Side Validation Display ✅
+  - **Profile Skills Section:** Updated `SkillsPopupPage.jsx` with full validation support
+  - **Visual indicators for each skill:**
+    - 🎓 Validated: Blue border, checkmark, special styling
+    - ⚠️ Rejected: Yellow border, warning icon, clickable for details
+    - 📄 Resume: Purple badge for resume-parsed skills
+    - ✋ Self: Default styling for self-declared skills
+  - **Stats banner:** Shows "X skills mentor-validated" when validated skills exist
+  - **Warning banner:** Shows "X skills need attention" when rejected skills exist
+  - **Validation detail modal:** Click any validated/rejected skill to see:
+    - Reviewer name (mentor who validated/rejected)
+    - Review date
+    - Rejection reason (if rejected)
+    - Validation benefits (if validated: 1.25x weight, verified badge, credibility)
+  - **Tooltip hints:** Hover shows quick source/status info
+  - **No code duplication:** Reuses existing skill fetching logic (already includes validation fields)
+- [x] **STEP 7:** Integration with readiness context ✅
+  - **Context endpoint enhanced:** `/readiness/context` now returns full validation stats
+  - **Validation data in context:**
+    - `validated_count`: Number of validated skills
+    - `rejected_count`: Number of rejected skills  
+    - `pending_count`: Number of pending validations
+    - `has_updates_since_last_calc`: Boolean flag for UI prompt
+    - `updates_summary`: Formatted string ("X validated, Y rejected since last calculation")
+    - `show_recalculate_prompt`: Boolean to show recalculation banner
+  - **Validation Status Card:** Added to readiness page context grid
+    - Shows 🎓 validated count and ⚠ rejected count
+    - "New" badge pulses when updates available since last calculation
+    - Amber styling when updates need attention
+  - **CSS:** Added validation card styles with pulse animation
+  - **Integration:** Works seamlessly with existing ValidationUpdateBanner component
+  - **No additional API calls:** All validation info included in single context request
+
+---
+
+## 🔍 Enhancement: Evidence Context (No-Chat Validation)
+
+**Problem Solved:** How can mentors make informed validation decisions without chat?
+
+**Solution:** Add "Evidence Context" panel to mentor review UI that shows all relevant context.
+
+### Evidence Context Panel Contents
+
+| Evidence Type | Description | Why It Helps |
+|---------------|-------------|--------------|
+| **📋 Source Info** | Skill source (self/resume), level, date added | Shows how user claimed the skill |
+| **📄 Resume Context** | Excerpt where skill was found (if from resume) | Direct proof from user's document |
+| **🎯 Role Importance** | Required/Optional for user's target role | Helps prioritize validation |
+| **🔗 Related Skills** | Other skills in same category (up to 5) | Shows skill cluster context |
+
+### Implementation Details
+
+- **Backend:** New endpoint `GET /mentor-validation/evidence/:user_id/:skill_id`
+  - Returns: source info, resume context, role importance, related skills
+  - Queries: `user_skills`, `resume_skill_suggestions`, `benchmark_skills`
+  - No privacy violation: Only shows skill-related data, not personal info
+
+- **Frontend:** Expandable "Evidence" button on each skill row
+  - Click to expand/collapse evidence panel
+  - Lazy-loaded (only fetches when expanded)
+  - Cached (doesn't re-fetch if already loaded)
+
+### Why This Works (No Chat Needed)
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                   MENTOR'S INTERNAL QUESTION                     │
+├─────────────────────────────────────────────────────────────────┤
+│  "Why does the system think this skill is relevant?"            │
+│                                                                  │
+│  Evidence Context answers this:                                  │
+│  • Resume says "5 years of Python development"                   │
+│  • Skill is REQUIRED for target role (Software Engineer)        │
+│  • User has 4 related skills in same category (all validated)   │
+│                                                                  │
+│  Decision: ✓ Validate (strong evidence, fits role)              │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Key Principle:** No interaction needed. Mentors get context, make decision, move on.
 
 ---
 

@@ -32,7 +32,7 @@ const Sidebar = () => {
     <>
       <div className="sidebar -dashboard" id="vendorSidebarMenu">
         <div className="sidebar__item ">
-          <Link
+          {/* <Link
             to="/mentor-dashboard/dashboard"
             className="sidebar__button d-flex items-center text-15 lh-1 fw-500"
           >
@@ -42,7 +42,7 @@ const Sidebar = () => {
               className="mr-15"
             />
             Dashboard
-          </Link>
+          </Link> */}
         </div>
         <div className="sidebar__item ">
           <Link
@@ -60,6 +60,23 @@ const Sidebar = () => {
         </div>
         {/* End accordion__item */}
 
+        {/* Mentor Validation Queue */}
+        <div className="sidebar__item ">
+          <Link
+            to="/mentor-dashboard/validation-queue"
+            className="sidebar__button d-flex items-center text-15 lh-1 fw-500"
+          >
+            <span style={{ 
+              marginRight: "15px", 
+              fontSize: "1.2rem",
+              width: "26px",
+              textAlign: "center"
+            }}>🎓</span>
+            Skill Validation
+          </Link>
+        </div>
+        {/* End validation queue */}
+
         {/* <div className="sidebar__item ">
           <a
             href="/mentor-dashboard/booking"
@@ -75,12 +92,11 @@ const Sidebar = () => {
         </div> */}
         {/* End accordion__item */}
 
-        <div className="sidebar__item ">
+        {/* <div className="sidebar__item ">
           <a
             href="/mentor-dashboard/webpage"
             className="sidebar__button d-flex items-center text-15 lh-1 fw-500"
           >
-            {/* <i class="bi bi-instagram mr-10 text-20 text-primary"></i> */}
             <img
               src="/img/dashboard/sidebar/gear.svg"
               className="h-auto w-auto mr-10 "
@@ -89,7 +105,7 @@ const Sidebar = () => {
             />
             Manage Webpage
           </a>
-        </div>
+        </div> */}
 
         {sidebarData.map((item, index) => (
           <div className="sidebar__item" key={index}>
@@ -128,12 +144,11 @@ const Sidebar = () => {
           </div>
         ))}
 
-        <div className="sidebar__item ">
+        {/* <div className="sidebar__item ">
           <a
             href="/mentor-dashboard/instagram"
             className="sidebar__button d-flex items-center text-15 lh-1 fw-500"
           >
-            {/* <i class="bi bi-instagram mr-10 text-20 text-primary"></i> */}
             <img
               src="/img/dashboard/icons/instagram.svg"
               className="h-auto w-auto mr-10 "
@@ -142,14 +157,13 @@ const Sidebar = () => {
             />
             Instagram
           </a>
-        </div>
+        </div> */}
 
-        <div className="sidebar__item ">
+        {/* <div className="sidebar__item ">
           <a
             href="/mentor-dashboard/facebook"
             className="sidebar__button d-flex items-center text-15 lh-1 fw-500"
           >
-            {/* <i class="bi bi-facebook mr-10 text-20 text-primary"></i> */}
             <img
               src="/img/dashboard/icons/facebook.svg"
               className="h-auto w-auto mr-10 "
@@ -158,7 +172,7 @@ const Sidebar = () => {
             />
             Facebook
           </a>
-        </div>
+        </div> */}
 
         <div className="sidebar__item ">
           <a

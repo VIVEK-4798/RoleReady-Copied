@@ -318,15 +318,22 @@ router.get('/get-skills/:user_id', (req, res) => {
 
   // For now, we'll only handle 'user' role as per your schema
   // You can extend for mentor/admin if they have separate user_skills tables
+  // STEP 2: Include validation metadata in skill queries
   const query = `
     SELECT 
       us.skill_id,
       s.name as skill_name,
       us.level,
       us.source,
-      us.created_at
+      us.created_at,
+      us.validated_by,
+      us.validated_at,
+      us.validation_status,
+      us.validation_note,
+      v.name as validator_name
     FROM user_skills us
     JOIN skills s ON us.skill_id = s.skill_id
+    LEFT JOIN user v ON us.validated_by = v.user_id
     WHERE us.user_id = ?
     ORDER BY us.created_at DESC
   `;
@@ -357,15 +364,22 @@ router.get('/get-skills/:user_id', async (req, res) => {
   }
 
   try {
+    // STEP 2: Include validation metadata in skill queries
     const query = `
       SELECT 
         us.skill_id,
         s.name as skill_name,
         us.level,
         us.source,
-        us.created_at
+        us.created_at,
+        us.validated_by,
+        us.validated_at,
+        us.validation_status,
+        us.validation_note,
+        v.name as validator_name
       FROM user_skills us
       JOIN skills s ON us.skill_id = s.skill_id
+      LEFT JOIN user v ON us.validated_by = v.user_id
       WHERE us.user_id = ?
       ORDER BY us.created_at DESC
     `;

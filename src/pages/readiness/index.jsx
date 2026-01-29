@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import DefaultHeader from '@/components/header/default-header';
 import Footer4 from '@/components/footer/footer-4';
+import ValidationUpdateBanner from '@/components/readiness/ValidationUpdateBanner';
 
 /* ============================================================================
    📋 READINESS PAGE - STEP 6: LOGIN-ONLY, PROFILE-DRIVEN
@@ -340,6 +341,35 @@ const ReadinessPage = () => {
         setIsFromResumeSync(false); // Reset the flag
       }
       
+      // 🛣️ STEP 6: Show roadmap update notification
+      if (result.roadmap_updated) {
+        toast.info(
+          <div>
+            <span>🛣️ Your roadmap has been updated based on your new readiness score.</span>
+            <button 
+              onClick={() => navigate('/roadmap')}
+              style={{
+                display: 'block',
+                marginTop: '8px',
+                padding: '4px 12px',
+                fontSize: '12px',
+                backgroundColor: '#3b82f6',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer'
+              }}
+            >
+              View Updated Roadmap →
+            </button>
+          </div>,
+          {
+            autoClose: 8000,
+            closeOnClick: false
+          }
+        );
+      }
+      
       // Refresh context to get updated last_calculated_at
       const contextResponse = await fetch(`${API_BASE}/readiness/context/${user_id}`);
       const contextData = await contextResponse.json();
@@ -669,6 +699,33 @@ const ReadinessPage = () => {
           </div>
           
           {/* ============================================================
+              VALIDATION UPDATE BANNER (STEP 4 - Mentor Validation)
+              ============================================================
+              
+              Shows when mentor has validated/rejected skills since last
+              readiness calculation. Prompts user to recalculate.
+          */}
+          {context?.has_target_role && (
+            <ValidationUpdateBanner
+              user_id={user_id}
+              apiBase={API_BASE}
+              onRecalculationComplete={(result) => {
+                // Update state with new calculation result
+                setCalculationResult({
+                  ...result,
+                  _type: "success",
+                  _fromValidation: true,
+                });
+                // Refresh context
+                fetch(`${API_BASE}/readiness/context/${user_id}`)
+                  .then(res => res.json())
+                  .then(data => setContext(data))
+                  .catch(err => console.error('Failed to refresh context:', err));
+              }}
+            />
+          )}
+          
+          {/* ============================================================
               SECTION A: CONTEXT (STEP 3 - What is being evaluated)
               ============================================================ 
               
@@ -751,6 +808,36 @@ const ReadinessPage = () => {
                   )}
                 </div>
               </div>
+              
+              {/* 🎓 STEP 7: Validation Status Card */}
+              {context.validation && (context.validation.validated_count > 0 || context.validation.rejected_count > 0) && (
+                <div className={`readiness-context__card readiness-context__card--validation ${context.validation.has_updates_since_last_calc ? 'readiness-context__card--has-updates' : ''}`}>
+                  <div className="readiness-context__card-icon">🎓</div>
+                  <div className="readiness-context__card-content">
+                    <span className="readiness-context__card-label">Mentor Validation</span>
+                    <span className="readiness-context__card-value">
+                      {context.validation.validated_count > 0 && (
+                        <span className="readiness-context__validation-stat readiness-context__validation-stat--validated">
+                          ✓ {context.validation.validated_count} validated
+                        </span>
+                      )}
+                      {context.validation.rejected_count > 0 && (
+                        <span className="readiness-context__validation-stat readiness-context__validation-stat--rejected">
+                          ⚠ {context.validation.rejected_count} rejected
+                        </span>
+                      )}
+                    </span>
+                    {context.validation.has_updates_since_last_calc && (
+                      <div className="readiness-context__validation-update">
+                        <span className="readiness-context__validation-update-badge">New</span>
+                        <span className="readiness-context__validation-update-text">
+                          Review updates available
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
               
               {/* Last Calculated Card */}
               <div className="readiness-context__card readiness-context__card--date">
@@ -1080,6 +1167,38 @@ const ReadinessPage = () => {
                     </div>
                   )}
                   
+                  {/* ========== 🎓 TRUST INDICATORS - STEP 5 ========== */}
+                  {skillBreakdown.trust_indicators && skillBreakdown.trust_indicators.validated_count > 0 && (
+                    <div className="readiness-breakdown__trust-badge">
+                      <div className="readiness-breakdown__trust-icon">🎓</div>
+                      <div className="readiness-breakdown__trust-content">
+                        <span className="readiness-breakdown__trust-title">
+                          {skillBreakdown.trust_indicators.validated_count} skill{skillBreakdown.trust_indicators.validated_count > 1 ? 's' : ''} mentor-validated
+                        </span>
+                        <span className="readiness-breakdown__trust-subtitle">
+                          Third-party verified skills receive 1.25× weight bonus
+                        </span>
+                      </div>
+                      <div className="readiness-breakdown__trust-badge-icon">✓</div>
+                    </div>
+                  )}
+                  
+                  {/* ========== SKILL SOURCE LEGEND ========== */}
+                  <div className="readiness-breakdown__source-legend">
+                    <span className="readiness-breakdown__source-legend-title">Skill Sources:</span>
+                    <div className="readiness-breakdown__source-legend-items">
+                      <span className="readiness-breakdown__source-tag readiness-breakdown__source-tag--validated">
+                        🎓 Validated
+                      </span>
+                      <span className="readiness-breakdown__source-tag readiness-breakdown__source-tag--resume">
+                        📄 Resume
+                      </span>
+                      <span className="readiness-breakdown__source-tag readiness-breakdown__source-tag--self">
+                        ✋ Self-declared
+                      </span>
+                    </div>
+                  </div>
+                  
                   {/* ========== REQUIRED SKILLS LIST ========== */}
                   {skillBreakdown.required_skills?.total > 0 && (
                     <div className="readiness-breakdown__category">
@@ -1087,13 +1206,26 @@ const ReadinessPage = () => {
                         ⭐ Required Skills ({skillBreakdown.required_skills.met}/{skillBreakdown.required_skills.total} met)
                       </h4>
                       <div className="readiness-breakdown__skills-grid">
-                        {/* Met Required Skills */}
-                        {skillBreakdown.required_skills.met_skills?.map((skill, index) => (
-                          <div key={`req-met-${index}`} className="readiness-breakdown__skill-chip readiness-breakdown__skill-chip--met">
-                            <span className="readiness-breakdown__skill-icon">✅</span>
-                            {skill}
-                          </div>
-                        ))}
+                        {/* Met Required Skills - Now with source badges */}
+                        {skillBreakdown.required_skills.met_skills?.map((skill, index) => {
+                          // Handle both old string format and new object format
+                          const skillName = typeof skill === 'string' ? skill : skill.name;
+                          const skillSource = typeof skill === 'object' ? skill.source : null;
+                          
+                          return (
+                            <div key={`req-met-${index}`} className={`readiness-breakdown__skill-chip readiness-breakdown__skill-chip--met ${skillSource === 'validated' ? 'readiness-breakdown__skill-chip--validated' : ''}`}>
+                              <span className="readiness-breakdown__skill-icon">✅</span>
+                              <span className="readiness-breakdown__skill-name">{skillName}</span>
+                              {skillSource && (
+                                <span className={`readiness-breakdown__skill-source readiness-breakdown__skill-source--${skillSource}`}>
+                                  {skillSource === 'validated' && '🎓'}
+                                  {skillSource === 'resume' && '📄'}
+                                  {skillSource === 'self' && '✋'}
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })}
                         {/* Missing Required Skills */}
                         {skillBreakdown.required_skills.missing_skills?.map((skill, index) => (
                           <div key={`req-miss-${index}`} className="readiness-breakdown__skill-chip readiness-breakdown__skill-chip--missing-required">
@@ -1112,13 +1244,26 @@ const ReadinessPage = () => {
                         📚 Optional Skills ({skillBreakdown.optional_skills.met}/{skillBreakdown.optional_skills.total} met)
                       </h4>
                       <div className="readiness-breakdown__skills-grid">
-                        {/* Met Optional Skills */}
-                        {skillBreakdown.optional_skills.met_skills?.map((skill, index) => (
-                          <div key={`opt-met-${index}`} className="readiness-breakdown__skill-chip readiness-breakdown__skill-chip--met">
-                            <span className="readiness-breakdown__skill-icon">✅</span>
-                            {skill}
-                          </div>
-                        ))}
+                        {/* Met Optional Skills - Now with source badges */}
+                        {skillBreakdown.optional_skills.met_skills?.map((skill, index) => {
+                          // Handle both old string format and new object format
+                          const skillName = typeof skill === 'string' ? skill : skill.name;
+                          const skillSource = typeof skill === 'object' ? skill.source : null;
+                          
+                          return (
+                            <div key={`opt-met-${index}`} className={`readiness-breakdown__skill-chip readiness-breakdown__skill-chip--met ${skillSource === 'validated' ? 'readiness-breakdown__skill-chip--validated' : ''}`}>
+                              <span className="readiness-breakdown__skill-icon">✅</span>
+                              <span className="readiness-breakdown__skill-name">{skillName}</span>
+                              {skillSource && (
+                                <span className={`readiness-breakdown__skill-source readiness-breakdown__skill-source--${skillSource}`}>
+                                  {skillSource === 'validated' && '🎓'}
+                                  {skillSource === 'resume' && '📄'}
+                                  {skillSource === 'self' && '✋'}
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })}
                         {/* Missing Optional Skills */}
                         {skillBreakdown.optional_skills.missing_skills?.map((skill, index) => (
                           <div key={`opt-miss-${index}`} className="readiness-breakdown__skill-chip readiness-breakdown__skill-chip--missing">

@@ -168,8 +168,8 @@ const WhyChooseUs = forwardRef((props, ref) => {
                 className="secondary-button demo-button"
                 onClick={() => setShowDemo(true)}
               >
-                <span className="demo-badge">🎭 DEMO</span>
-                Try Demo
+                Try <span className="demo-badge">🎭 DEMO</span>
+                {/* Try Demo */}
               </button>
             </div>
 

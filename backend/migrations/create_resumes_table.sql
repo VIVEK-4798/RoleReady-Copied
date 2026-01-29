@@ -23,8 +23,8 @@ CREATE TABLE IF NOT EXISTS resumes (
   parsed_at TIMESTAMP NULL,                  -- When text was extracted
   is_active TINYINT(1) DEFAULT 1,            -- Soft delete / active flag
   
-  -- Foreign key to users table
-  FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+  -- Foreign key to user table
+  FOREIGN KEY (user_id) REFERENCES user(user_id) ON DELETE CASCADE,
   
   -- Index for fast lookups
   INDEX idx_resumes_user_active (user_id, is_active)

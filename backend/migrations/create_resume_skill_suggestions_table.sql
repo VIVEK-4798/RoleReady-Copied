@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS resume_skill_suggestions (
   reviewed_at TIMESTAMP NULL,
   
   -- Foreign keys
-  FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES user(user_id) ON DELETE CASCADE,
   FOREIGN KEY (resume_id) REFERENCES resumes(resume_id) ON DELETE CASCADE,
   FOREIGN KEY (skill_id) REFERENCES skills(skill_id) ON DELETE CASCADE,
   

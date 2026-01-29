@@ -115,7 +115,9 @@ import MentorAddVenue from "./pages/dashboard/mentor-dashboard/add-venue";
 import MentorAddVendor from "./pages/dashboard/mentor-dashboard/add-vendor";
 import MentorVendors from "./pages/dashboard/mentor-dashboard/vendors";
 import MentorVenue from "./pages/dashboard/mentor-dashboard/venue";
+import MentorValidationQueue from "./pages/dashboard/mentor-dashboard/validation-queue";
 import ReadinessPage from "./pages/readiness";
+import RoadmapPage from "./pages/roadmap";
 
 
 function App() {
@@ -152,6 +154,7 @@ function App() {
               <Route path="pricing" element={<Pricing />} />
               <Route path="collegeTPO" element={<CollegeTPO />} />
               <Route path="readiness" element={<ReadinessPage />} />
+              <Route path="roadmap" element={<RoadmapPage />} />
 
               <Route path="store">
                 <Route path=":project" element={<Home />} />
@@ -233,6 +236,7 @@ function App() {
               <Route path="mentor-dashboard">
                 <Route path="dashboard" element={<MentorDashboard />} />
                 <Route path="profile" element={<MentorProfile />} />
+                <Route path="validation-queue" element={<MentorValidationQueue />} />
                 <Route path="venues" element={<MentorVenue />} />
                 <Route path="venue/:mode" element={<MentorAddVenue />} />
                 <Route path="vendor/:mode" element={<MentorAddVendor />} />

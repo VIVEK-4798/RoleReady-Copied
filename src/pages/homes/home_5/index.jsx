@@ -19,8 +19,8 @@ import NewCallToActions from "@/components/common/social/NewCallToActions";
 import { useEffect, useState, useRef } from "react";
 
 const metadata = {
-  title: "Startups24x7",
-  description: "Startups24x7 - All-in-One Platform for Startup Services",
+  title: "RoleReady",
+  description: "RoleReady - Placement Readiness",
 };
 
 const Home_5 = () => {

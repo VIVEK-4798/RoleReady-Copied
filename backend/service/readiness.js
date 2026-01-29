@@ -2,6 +2,13 @@ const express = require("express");
 const router = express.Router();
 const db = require("../db");
 
+// 🛣️ STEP 6: Import roadmap functions for lifecycle integration
+const { 
+  fetchRoadmapInputData, 
+  generateRoadmap, 
+  saveRoadmapSnapshot 
+} = require("./roadmapService");
+
 /* ============================================================================
    🔒 STEP 2: LOCKED INPUT CONTRACT - CORE READINESS ENGINE
    ============================================================================
@@ -38,13 +45,184 @@ const db = require("../db");
    ============================================================================ */
 
 const RECALCULATION_COOLDOWN_MINUTES = 5;
+const VALIDATED_SKILL_WEIGHT_MULTIPLIER = 1.25; // 25% bonus for mentor-validated skills
+
+/* ============================================================================
+   🛣️ STEP 6: Roadmap Lifecycle Integration
+   ============================================================================
+   
+   After every readiness recalculation, we automatically regenerate the roadmap.
+   This ensures the roadmap always reflects the latest readiness state.
+   
+   RULES:
+   - Roadmap is regenerated only after readiness recalculation
+   - Old roadmaps remain read-only (snapshot design)
+   - Latest roadmap is shown by default
+   - UI shows "Your roadmap has been updated based on your new readiness score"
+   
+   ============================================================================ */
+
+/**
+ * 🛣️ STEP 6: Auto-regenerate roadmap after readiness calculation
+ * 
+ * This function is called internally after each successful readiness calculation.
+ * It fetches the fresh breakdown, generates a new roadmap, and saves it.
+ * 
+ * @param {number} user_id - The user ID
+ * @param {number} readiness_id - The newly created readiness_id
+ * @returns {Promise<Object>} - Result with roadmap_id and summary, or null on failure
+ */
+async function regenerateRoadmapAfterCalculation(user_id, readiness_id) {
+  try {
+    console.log(`[regenerateRoadmap] Starting for user_id=${user_id}, readiness_id=${readiness_id}`);
+    
+    // 1️⃣ Fetch fresh input data from the new readiness calculation
+    const inputData = await fetchRoadmapInputData(user_id, readiness_id);
+    
+    // 2️⃣ Generate the roadmap using the 5 priority rules
+    const roadmap = generateRoadmap(inputData);
+    
+    // 3️⃣ Save the roadmap snapshot
+    const roadmap_id = await saveRoadmapSnapshot(roadmap);
+    
+    console.log(`[regenerateRoadmap] Saved roadmap_id=${roadmap_id} with ${roadmap.items.length} items`);
+    
+    return {
+      roadmap_id,
+      total_items: roadmap.items.length,
+      high_priority_count: roadmap.summary.by_priority.high,
+      medium_priority_count: roadmap.summary.by_priority.medium,
+      low_priority_count: roadmap.summary.by_priority.low
+    };
+    
+  } catch (error) {
+    // Log but don't fail the overall calculation
+    console.error(`[regenerateRoadmap] Error (non-fatal):`, error);
+    return null;
+  }
+}
+
+/* ============================================================================
+   🎓 STEP 4 ADDITIONS: Mentor Validation → Readiness Integration
+   ============================================================================
+   
+   This section handles the integration between mentor validation and readiness:
+   - Validated skills get 1.25x weight bonus
+   - Rejected skills are excluded from calculation
+   - Cooldown is bypassed if skills were recently validated/rejected
+   - User can request recalculation after validation review
+   
+   ============================================================================ */
+
+/**
+ * 🎓 Check if user has validation updates since last readiness calculation
+ * Returns true if any skills were validated or rejected after the last calc
+ */
+function checkValidationUpdatesSinceLastCalc(user_id, category_id) {
+  return new Promise((resolve, reject) => {
+    // Get last readiness calculation time
+    const query = `
+      SELECT rs.calculated_at
+      FROM readiness_scores rs
+      WHERE rs.user_id = ? AND rs.category_id = ?
+      ORDER BY rs.calculated_at DESC
+      LIMIT 1
+    `;
+    
+    db.query(query, [user_id, category_id], (err, lastCalcResults) => {
+      if (err) {
+        console.error("[checkValidationUpdates] DB error:", err);
+        return reject(err);
+      }
+      
+      // If no previous calculation, no validation updates to check
+      if (lastCalcResults.length === 0) {
+        return resolve({
+          hasUpdates: false,
+          reason: "NO_PREVIOUS_CALCULATION"
+        });
+      }
+      
+      const lastCalcTime = lastCalcResults[0].calculated_at;
+      
+      // Check if any skills were validated/rejected after last calculation
+      const validationQuery = `
+        SELECT 
+          us.skill_id,
+          s.name as skill_name,
+          us.validation_status,
+          us.validated_at,
+          u.name as mentor_name
+        FROM user_skills us
+        JOIN skills s ON s.skill_id = us.skill_id
+        LEFT JOIN user u ON us.validated_by = u.user_id
+        WHERE us.user_id = ?
+          AND s.category_id = ?
+          AND us.validated_at > ?
+          AND us.validation_status IN ('validated', 'rejected')
+        ORDER BY us.validated_at DESC
+      `;
+      
+      db.query(validationQuery, [user_id, category_id, lastCalcTime], (err, validatedSkills) => {
+        if (err) {
+          console.error("[checkValidationUpdates] Validation check error:", err);
+          return reject(err);
+        }
+        
+        if (validatedSkills.length === 0) {
+          return resolve({
+            hasUpdates: false,
+            reason: "NO_NEW_VALIDATIONS",
+            lastCalculation: lastCalcTime
+          });
+        }
+        
+        // Group by validation status
+        const validated = validatedSkills.filter(s => s.validation_status === 'validated');
+        const rejected = validatedSkills.filter(s => s.validation_status === 'rejected');
+        
+        resolve({
+          hasUpdates: true,
+          reason: "VALIDATION_UPDATES_AVAILABLE",
+          lastCalculation: lastCalcTime,
+          validated_count: validated.length,
+          rejected_count: rejected.length,
+          validated_skills: validated.map(s => ({
+            skill_id: s.skill_id,
+            skill_name: s.skill_name,
+            validated_at: s.validated_at,
+            mentor_name: s.mentor_name
+          })),
+          rejected_skills: rejected.map(s => ({
+            skill_id: s.skill_id,
+            skill_name: s.skill_name,
+            validated_at: s.validated_at,
+            mentor_name: s.mentor_name
+          })),
+          message: `${validated.length} skill(s) validated, ${rejected.length} skill(s) rejected since your last readiness check.`
+        });
+      });
+    });
+  });
+}
 
 /**
  * 🛡️ STEP 4.1: Check recalculation cooldown
  * Returns time remaining if cooldown active, null if allowed
+ * Now supports bypass_reason for validation updates
  */
-function checkRecalculationCooldown(user_id, category_id) {
+function checkRecalculationCooldown(user_id, category_id, bypass_reason = null) {
   return new Promise((resolve, reject) => {
+    // If bypass_reason is provided (e.g., 'validation_update'), skip cooldown check
+    if (bypass_reason === 'validation_update') {
+      return resolve({ 
+        allowed: true, 
+        bypassed: true,
+        bypass_reason: 'validation_update',
+        message: 'Cooldown bypassed due to mentor validation updates'
+      });
+    }
+    
     const query = `
       SELECT calculated_at 
       FROM readiness_scores 
@@ -209,14 +387,17 @@ function calculateReadiness(user_id, category_id, trigger_source = "user_explici
        ====================================================== 
        IMPORTANT: Only 'self', 'resume', 'validated' sources
        ❌ 'demo' is EXCLUDED from real calculations
+       ❌ 'rejected' validation_status skills are EXCLUDED
+       ✅ 'validated' skills get ${VALIDATED_SKILL_WEIGHT_MULTIPLIER}x weight bonus
     */
     const userSkillsQuery = `
-      SELECT DISTINCT us.skill_id, us.source
+      SELECT DISTINCT us.skill_id, us.source, us.validation_status
       FROM user_skills us
       JOIN skills s ON s.skill_id = us.skill_id
       WHERE us.user_id = ? 
         AND s.category_id = ?
         AND us.source IN ('self', 'resume', 'validated')
+        AND (us.validation_status IS NULL OR us.validation_status != 'rejected')
     `;
 
     db.query(userSkillsQuery, [user_id, category_id], (err, userSkills) => {
@@ -275,21 +456,31 @@ function calculateReadiness(user_id, category_id, trigger_source = "user_explici
 
         benchmarkSkills.forEach(skill => {
           const hasSkill = selectedSet.has(skill.skill_id);
-          const skillSource = userSkills.find(s => s.skill_id === skill.skill_id)?.source || null;
+          const userSkill = userSkills.find(s => s.skill_id === skill.skill_id);
+          const skillSource = userSkill?.source || null;
+          const validationStatus = userSkill?.validation_status || null;
+          
+          // Apply validation bonus: validated skills get 1.25x weight
+          const isValidated = skillSource === 'validated' || validationStatus === 'validated';
+          const achievedWeight = hasSkill 
+            ? (isValidated ? Math.round(skill.weight * VALIDATED_SKILL_WEIGHT_MULTIPLIER) : skill.weight) 
+            : 0;
 
           breakdown.push({
             skill_id: skill.skill_id,
             skill_name: skill.name,
             required_weight: skill.weight,
-            achieved_weight: hasSkill ? skill.weight : 0,
+            achieved_weight: achievedWeight,
             status: hasSkill ? "met" : "missing",
             source: skillSource,
             importance: skill.importance,
+            is_validated: isValidated,
+            validation_bonus: isValidated ? Math.round(skill.weight * (VALIDATED_SKILL_WEIGHT_MULTIPLIER - 1)) : 0,
           });
 
           maxPossibleScore += skill.weight;
           if (hasSkill) {
-            totalScore += skill.weight;
+            totalScore += achievedWeight;
           } else if (skill.importance === "required") {
             missingRequiredSkills.push(skill.name);
           }
@@ -405,6 +596,136 @@ function getTargetCategoryFromProfile(user_id) {
     });
   });
 }
+
+/* ============================================================================
+   🎓 STEP 4 ROUTE: Check Validation Updates
+   ============================================================================
+   
+   GET /readiness/validation-updates/:user_id
+   
+   Returns information about skills that were validated/rejected since
+   the user's last readiness calculation. Used to prompt user for recalculation.
+   ============================================================================ */
+router.get("/validation-updates/:user_id", async (req, res) => {
+  const { user_id } = req.params;
+  
+  if (!user_id) {
+    return res.status(400).json({
+      success: false,
+      error: "MISSING_USER_ID",
+      message: "user_id is required"
+    });
+  }
+  
+  try {
+    // Get user's target category
+    const category_id = await getTargetCategoryFromProfile(user_id);
+    
+    if (!category_id) {
+      return res.status(200).json({
+        success: true,
+        hasUpdates: false,
+        reason: "NO_TARGET_ROLE",
+        message: "No target role selected"
+      });
+    }
+    
+    // Check for validation updates
+    const updates = await checkValidationUpdatesSinceLastCalc(user_id, category_id);
+    
+    return res.status(200).json({
+      success: true,
+      user_id: parseInt(user_id),
+      category_id,
+      ...updates
+    });
+    
+  } catch (error) {
+    console.error("[validation-updates] Error:", error);
+    return res.status(500).json({
+      success: false,
+      error: "INTERNAL_ERROR",
+      message: "Failed to check validation updates"
+    });
+  }
+});
+
+/* ============================================================================
+   🎓 STEP 4 ROUTE: Recalculate After Validation
+   ============================================================================
+   
+   POST /readiness/recalculate-after-validation
+   
+   Triggered when user accepts the prompt to recalculate after mentor review.
+   Bypasses cooldown restriction since validation is a legitimate trigger.
+   ============================================================================ */
+router.post("/recalculate-after-validation", async (req, res) => {
+  const { user_id } = req.body;
+  
+  if (!user_id) {
+    return res.status(400).json({
+      success: false,
+      error: "MISSING_USER_ID",
+      message: "user_id is required"
+    });
+  }
+  
+  try {
+    // Get user's target category
+    const category_id = await getTargetCategoryFromProfile(user_id);
+    
+    if (!category_id) {
+      return res.status(400).json({
+        success: false,
+        error: "NO_TARGET_ROLE",
+        message: "Please select a target role first"
+      });
+    }
+    
+    // Check if there actually are validation updates (prevents abuse)
+    const updates = await checkValidationUpdatesSinceLastCalc(user_id, category_id);
+    
+    if (!updates.hasUpdates) {
+      return res.status(400).json({
+        success: false,
+        error: "NO_VALIDATION_UPDATES",
+        message: "No validation updates found since your last calculation",
+        hint: "Use /readiness/explicit-calculate for regular recalculation"
+      });
+    }
+    
+    // Calculate with validation bypass (no cooldown restriction)
+    const result = await calculateReadiness(user_id, category_id, "validation_review");
+    
+    // 🛣️ STEP 6: Auto-regenerate roadmap after successful calculation
+    let roadmapUpdate = null;
+    if (result.success && result.readiness_id) {
+      roadmapUpdate = await regenerateRoadmapAfterCalculation(user_id, result.readiness_id);
+    }
+    
+    return res.status(200).json({
+      success: true,
+      message: "Readiness recalculated with validation updates",
+      validation_applied: {
+        validated_skills: updates.validated_count,
+        rejected_skills: updates.rejected_count,
+        weight_bonus: "Validated skills received 1.25x weight bonus",
+        rejected_excluded: "Rejected skills were excluded from calculation"
+      },
+      roadmap_updated: !!roadmapUpdate,
+      roadmap_summary: roadmapUpdate || null,
+      ...result
+    });
+    
+  } catch (error) {
+    console.error("[recalculate-after-validation] Error:", error);
+    return res.status(500).json({
+      success: false,
+      error: "INTERNAL_ERROR",
+      message: "Failed to recalculate readiness"
+    });
+  }
+});
 
 /**
  * POST /readiness/explicit-calculate
@@ -540,9 +861,17 @@ router.post("/explicit-calculate", async (req, res) => {
        ====================================================== */
     const result = await calculateReadiness(user_id, category_id, "user_explicit");
     
+    // 🛣️ STEP 6: Auto-regenerate roadmap after successful calculation
+    let roadmapUpdate = null;
+    if (result.success && result.readiness_id) {
+      roadmapUpdate = await regenerateRoadmapAfterCalculation(user_id, result.readiness_id);
+    }
+    
     return res.status(201).json({
       ...result,
       recalculated: true,
+      roadmap_updated: !!roadmapUpdate,
+      roadmap_summary: roadmapUpdate || null
     });
     
   } catch (error) {
@@ -818,7 +1147,18 @@ router.post("/calculate", async (req, res) => {
     }
 
     const result = await calculateReadiness(user_id, category_id, trigger_source);
-    return res.status(201).json(result);
+    
+    // 🛣️ STEP 6: Auto-regenerate roadmap after successful calculation
+    let roadmapUpdate = null;
+    if (result.success && result.readiness_id) {
+      roadmapUpdate = await regenerateRoadmapAfterCalculation(user_id, result.readiness_id);
+    }
+    
+    return res.status(201).json({
+      ...result,
+      roadmap_updated: !!roadmapUpdate,
+      roadmap_summary: roadmapUpdate || null
+    });
     
   } catch (error) {
     console.error("[calculate] Error:", error);
@@ -939,14 +1279,19 @@ router.get("/context/:user_id", async (req, res) => {
     }
 
     // 4️⃣ Get user skills count (only real skills, no demo)
+    // 🎓 STEP 7: Now also includes validation status counts
     const userSkillsQuery = `
-      SELECT us.source, COUNT(*) as count
+      SELECT 
+        us.source, 
+        us.validation_status,
+        COUNT(*) as count
       FROM user_skills us
       JOIN skills s ON s.skill_id = us.skill_id
       WHERE us.user_id = ? 
         AND s.category_id = ?
         AND us.source IN ('self', 'resume', 'validated')
-      GROUP BY us.source
+        AND (us.validation_status IS NULL OR us.validation_status != 'rejected')
+      GROUP BY us.source, us.validation_status
     `;
 
     const userSkillsResult = await new Promise((resolve, reject) => {
@@ -959,12 +1304,46 @@ router.get("/context/:user_id", async (req, res) => {
     // Build skills by source breakdown
     const userSkillsBySource = {};
     let totalUserSkills = 0;
+    let validatedCount = 0;
+    let pendingValidationCount = 0;
+    
     userSkillsResult.forEach(row => {
-      userSkillsBySource[row.source] = row.count;
+      // Count by source
+      if (!userSkillsBySource[row.source]) {
+        userSkillsBySource[row.source] = 0;
+      }
+      userSkillsBySource[row.source] += row.count;
       totalUserSkills += row.count;
+      
+      // 🎓 STEP 7: Track validation stats
+      if (row.source === 'validated' || row.validation_status === 'validated') {
+        validatedCount += row.count;
+      }
+      if (row.validation_status === 'pending') {
+        pendingValidationCount += row.count;
+      }
     });
 
-    // 5️⃣ Get last calculated date
+    // 🎓 STEP 7: Get rejected skills count (separate query since they're excluded above)
+    const rejectedQuery = `
+      SELECT COUNT(*) as count
+      FROM user_skills us
+      JOIN skills s ON s.skill_id = us.skill_id
+      WHERE us.user_id = ? 
+        AND s.category_id = ?
+        AND us.validation_status = 'rejected'
+    `;
+    
+    const rejectedResult = await new Promise((resolve, reject) => {
+      db.query(rejectedQuery, [user_id, category_id], (err, results) => {
+        if (err) reject(err);
+        else resolve(results);
+      });
+    });
+    
+    const rejectedCount = rejectedResult[0]?.count || 0;
+
+    // 5️⃣ Get last calculated date (moved up for validation check)
     const lastCalcQuery = `
       SELECT calculated_at
       FROM readiness_scores
@@ -984,6 +1363,43 @@ router.get("/context/:user_id", async (req, res) => {
       ? lastCalcResult[0].calculated_at 
       : null;
 
+    // 🎓 STEP 7: Check for validation updates since last calculation
+    let hasValidationUpdates = false;
+    let validationUpdatesSummary = null;
+    
+    if (lastCalculatedAt) {
+      const validationUpdatesQuery = `
+        SELECT 
+          us.validation_status,
+          COUNT(*) as count
+        FROM user_skills us
+        JOIN skills s ON s.skill_id = us.skill_id
+        WHERE us.user_id = ?
+          AND s.category_id = ?
+          AND us.validated_at > ?
+          AND us.validation_status IN ('validated', 'rejected')
+        GROUP BY us.validation_status
+      `;
+      
+      const validationUpdatesResult = await new Promise((resolve, reject) => {
+        db.query(validationUpdatesQuery, [user_id, category_id, lastCalculatedAt], (err, results) => {
+          if (err) reject(err);
+          else resolve(results);
+        });
+      });
+      
+      if (validationUpdatesResult.length > 0) {
+        hasValidationUpdates = true;
+        validationUpdatesSummary = {
+          validated: 0,
+          rejected: 0
+        };
+        validationUpdatesResult.forEach(row => {
+          validationUpdatesSummary[row.validation_status] = row.count;
+        });
+      }
+    }
+
     /* ======================================================
        🛡️ STEP 7: Edge Case 2 - User has no skills
        ====================================================== */
@@ -1000,6 +1416,7 @@ router.get("/context/:user_id", async (req, res) => {
     }
 
     // 6️⃣ Return context response (locked contract)
+    // 🎓 STEP 7: Now includes validation stats and updates
     return res.status(200).json({
       success: true,
       has_target_role: true,
@@ -1017,6 +1434,22 @@ router.get("/context/:user_id", async (req, res) => {
       user_skills_count: totalUserSkills,
       user_skills_by_source: userSkillsBySource,
       last_calculated_at: lastCalculatedAt,
+      // 🎓 STEP 7: Validation context
+      validation: {
+        validated_count: validatedCount,
+        rejected_count: rejectedCount,
+        pending_count: pendingValidationCount,
+        has_updates_since_last_calc: hasValidationUpdates,
+        updates_summary: validationUpdatesSummary,
+        // Generate contextual message
+        message: hasValidationUpdates 
+          ? `${validationUpdatesSummary?.validated || 0} skill(s) validated, ${validationUpdatesSummary?.rejected || 0} skill(s) rejected since your last readiness check.`
+          : validatedCount > 0
+          ? `${validatedCount} of your skills are mentor-validated.`
+          : null,
+        // Should we show recalculate prompt?
+        show_recalculate_prompt: hasValidationUpdates,
+      },
     });
 
   } catch (error) {
@@ -1145,7 +1578,7 @@ router.get("/history/:user_id/:category_id", (req, res) => {
 router.get("/breakdown/:readiness_id", (req, res) => {
   const { readiness_id } = req.params;
 
-  // Get breakdown with importance (required vs optional)
+  // Get breakdown with importance (required vs optional) and skill source for trust indicators
   const breakdownQuery = `
     SELECT 
       s.name AS skill,
@@ -1153,6 +1586,7 @@ router.get("/breakdown/:readiness_id", (req, res) => {
       rsb.status,
       rsb.required_weight,
       rsb.achieved_weight,
+      rsb.skill_source,
       COALESCE(cs.importance, 'optional') AS importance
     FROM readiness_score_breakdown rsb
     JOIN skills s ON s.skill_id = rsb.skill_id
@@ -1183,25 +1617,31 @@ router.get("/breakdown/:readiness_id", (req, res) => {
     const totalOptionalWeight = optionalSkills.reduce((sum, s) => sum + s.required_weight, 0);
     const achievedOptionalWeight = optionalMet.reduce((sum, s) => sum + s.achieved_weight, 0);
 
+    // 🎓 STEP 5: Trust indicators - count skills by source
+    const allMetSkills = [...requiredMet, ...optionalMet];
+    const validatedSkillsCount = allMetSkills.filter(s => s.skill_source === 'validated').length;
+    const resumeSkillsCount = allMetSkills.filter(s => s.skill_source === 'resume').length;
+    const selfSkillsCount = allMetSkills.filter(s => s.skill_source === 'self').length;
+
     res.json({
-      // Full breakdown for table display
+      // Full breakdown for table display (now includes skill_source)
       breakdown: breakdownResults,
       
-      // Required skills summary
+      // Required skills summary (now includes source info)
       required_skills: {
         total: requiredSkills.length,
         met: requiredMet.length,
         missing: requiredMissing.length,
-        met_skills: requiredMet.map(s => s.skill),
+        met_skills: requiredMet.map(s => ({ name: s.skill, source: s.skill_source })),
         missing_skills: requiredMissing.map(s => s.skill),
       },
       
-      // Optional skills summary
+      // Optional skills summary (now includes source info)
       optional_skills: {
         total: optionalSkills.length,
         met: optionalMet.length,
         missing: optionalMissing.length,
-        met_skills: optionalMet.map(s => s.skill),
+        met_skills: optionalMet.map(s => ({ name: s.skill, source: s.skill_source })),
         missing_skills: optionalMissing.map(s => s.skill),
       },
       
@@ -1213,6 +1653,17 @@ router.get("/breakdown/:readiness_id", (req, res) => {
         required_weight_achieved: achievedRequiredWeight,
         optional_weight_total: totalOptionalWeight,
         optional_weight_achieved: achievedOptionalWeight,
+      },
+      
+      // 🎓 STEP 5: Trust indicators summary
+      trust_indicators: {
+        validated_count: validatedSkillsCount,
+        resume_count: resumeSkillsCount,
+        self_count: selfSkillsCount,
+        total_met: allMetSkills.length,
+        validation_percentage: allMetSkills.length > 0 
+          ? Math.round((validatedSkillsCount / allMetSkills.length) * 100) 
+          : 0,
       },
       
       // Legacy field for backward compatibility

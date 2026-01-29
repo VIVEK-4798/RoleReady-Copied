@@ -349,7 +349,7 @@ const DemoModal = ({ onClose }) => {
               <p className="demo-modal-signup-subtext">
                 Sign up to save your skills, track improvement over time, and get personalized recommendations.
               </p>
-              <a href="/register" className="demo-modal-signup-button">
+              <a href="/signup" className="demo-modal-signup-button">
                 Create Free Account
               </a>
             </div>
