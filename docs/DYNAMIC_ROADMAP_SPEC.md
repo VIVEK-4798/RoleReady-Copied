@@ -12,7 +12,120 @@ This document defines the **locked rules** for the Dynamic Roadmap feature befor
 
 ---
 
-## 🔒 LOCKED PRINCIPLES (NON-NEGOTIABLE)
+## �️ Simple Data Flow Explanation
+
+### How Roadmap Generation Works (Step by Step)
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    ROADMAP DATA FLOW                             │
+└─────────────────────────────────────────────────────────────────┘
+
+  User clicks "Recalculate Readiness" on /readiness page
+                          ↓
+  ┌─────────────────────────────────────────────────────────────┐
+  │  1. READINESS CALCULATION (readiness.js)                    │
+  │     - Compares user's skills with target role requirements  │
+  │     - Saves score to: readiness_scores table                │
+  │     - Saves breakdown to: readiness_score_breakdown table   │
+  └─────────────────────────────────────────────────────────────┘
+                          ↓
+  ┌─────────────────────────────────────────────────────────────┐
+  │  2. ROADMAP AUTO-GENERATION (triggered automatically)       │
+  │     - Reads from readiness_score_breakdown                  │
+  │     - Gets skill weights from category_skills               │
+  │     - Gets validation status from user_skills               │
+  │     - Applies 5 priority rules (see below)                  │
+  └─────────────────────────────────────────────────────────────┘
+                          ↓
+  ┌─────────────────────────────────────────────────────────────┐
+  │  3. ROADMAP SAVED (roadmapService.js)                       │
+  │     - Parent record → roadmaps table                        │
+  │     - Individual items → roadmap_items table                │
+  └─────────────────────────────────────────────────────────────┘
+                          ↓
+  ┌─────────────────────────────────────────────────────────────┐
+  │  4. FRONTEND DISPLAYS (/roadmap page)                       │
+  │     - Fetches latest roadmap from roadmaps table            │
+  │     - Groups items by priority (HIGH/MEDIUM/LOW)            │
+  │     - Shows edge case banners if applicable                 │
+  └─────────────────────────────────────────────────────────────┘
+```
+
+### Tables Involved
+
+| Table | Purpose | When Written |
+|-------|---------|--------------|
+| `readiness_scores` | Stores each readiness calculation (score, timestamp) | When user calculates readiness |
+| `readiness_score_breakdown` | Stores skill-by-skill details (met/missing, weights) | When user calculates readiness |
+| `category_skills` | Role requirements (which skills, importance, weight) | Admin setup (pre-existing) |
+| `user_skills` | User's claimed/parsed skills + validation status | When user adds skills or uploads resume |
+| `roadmaps` | Parent record for each roadmap snapshot | After readiness calculation |
+| `roadmap_items` | Individual skill items with priority/reason | After readiness calculation |
+
+### The 5 Priority Rules (Applied to Each Skill)
+
+```
+RULE 1: Missing REQUIRED skill     → HIGH priority (score 80+)
+        "React is required but you don't have it"
+
+RULE 2: Rejected skill             → HIGH priority (score 100)
+        "Git was rejected by mentor — needs improvement"
+
+RULE 3: Unvalidated REQUIRED skill → MEDIUM priority (score 50+)
+        "JavaScript meets requirements but isn't mentor-validated"
+
+RULE 4: Optional missing skill     → LOW priority (score 20+)
+        "TypeScript is optional for this role"
+
+RULE 5: Validated & met skill      → EXCLUDED (not in roadmap)
+        "Don't tell users to work on skills they've mastered"
+```
+
+### Example Flow for User ID 13
+
+```
+1. User 13 clicks "Recalculate" for role "Frontend Intern"
+   
+2. readiness.js calculates:
+   - 8 skills in role benchmark
+   - User has 5 (3 validated, 2 self-claimed)
+   - Score: 65%
+   
+3. Saves to DB:
+   - readiness_scores: {readiness_id: 57, user_id: 13, score: 65%}
+   - readiness_score_breakdown: 8 rows (one per skill)
+   
+4. roadmapService.js generates roadmap:
+   - Reads breakdown for readiness_id 57
+   - Applies rules:
+     - 2 missing required → HIGH (RULE 1)
+     - 1 rejected → HIGH (RULE 2)  
+     - 2 unvalidated required → MEDIUM (RULE 3)
+     - 1 optional missing → LOW (RULE 4)
+     - 2 validated met → EXCLUDED (RULE 5)
+   
+5. Saves to DB:
+   - roadmaps: {roadmap_id: 5, user_id: 13, readiness_id: 57, ...}
+   - roadmap_items: 6 rows (one per item, sorted by priority_score)
+   
+6. Frontend fetches roadmap_id 5 and displays:
+   - 🔥 High Priority: 3 items
+   - 📈 Medium Priority: 2 items
+   - 📋 Low Priority: 1 item
+```
+
+### Key Files
+
+| File | Role |
+|------|------|
+| `backend/service/readiness.js` | Calculates readiness, triggers roadmap generation |
+| `backend/service/roadmapService.js` | Fetches input, applies rules, saves roadmap |
+| `src/pages/roadmap/index.jsx` | Frontend display with priority sections |
+
+---
+
+## �🔒 LOCKED PRINCIPLES (NON-NEGOTIABLE)
 
 These rules **cannot be violated** in any implementation step:
 

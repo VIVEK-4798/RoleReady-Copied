@@ -69,15 +69,16 @@ const VALIDATED_SKILL_WEIGHT_MULTIPLIER = 1.25; // 25% bonus for mentor-validate
  * It fetches the fresh breakdown, generates a new roadmap, and saves it.
  * 
  * @param {number} user_id - The user ID
- * @param {number} readiness_id - The newly created readiness_id
+ * @param {number} category_id - The category/role ID for this readiness calculation
  * @returns {Promise<Object>} - Result with roadmap_id and summary, or null on failure
  */
-async function regenerateRoadmapAfterCalculation(user_id, readiness_id) {
+async function regenerateRoadmapAfterCalculation(user_id, category_id) {
   try {
-    console.log(`[regenerateRoadmap] Starting for user_id=${user_id}, readiness_id=${readiness_id}`);
+    console.log(`[regenerateRoadmap] Starting for user_id=${user_id}, category_id=${category_id}`);
     
-    // 1️⃣ Fetch fresh input data from the new readiness calculation
-    const inputData = await fetchRoadmapInputData(user_id, readiness_id);
+    // 1️⃣ Fetch fresh input data using category_id (role_id)
+    // This will get the latest readiness for this user+category combo
+    const inputData = await fetchRoadmapInputData(user_id, category_id);
     
     // 2️⃣ Generate the roadmap using the 5 priority rules
     const roadmap = generateRoadmap(inputData);
@@ -700,7 +701,7 @@ router.post("/recalculate-after-validation", async (req, res) => {
     // 🛣️ STEP 6: Auto-regenerate roadmap after successful calculation
     let roadmapUpdate = null;
     if (result.success && result.readiness_id) {
-      roadmapUpdate = await regenerateRoadmapAfterCalculation(user_id, result.readiness_id);
+      roadmapUpdate = await regenerateRoadmapAfterCalculation(user_id, category_id);
     }
     
     return res.status(200).json({
@@ -864,7 +865,7 @@ router.post("/explicit-calculate", async (req, res) => {
     // 🛣️ STEP 6: Auto-regenerate roadmap after successful calculation
     let roadmapUpdate = null;
     if (result.success && result.readiness_id) {
-      roadmapUpdate = await regenerateRoadmapAfterCalculation(user_id, result.readiness_id);
+      roadmapUpdate = await regenerateRoadmapAfterCalculation(user_id, category_id);
     }
     
     return res.status(201).json({
@@ -1151,7 +1152,7 @@ router.post("/calculate", async (req, res) => {
     // 🛣️ STEP 6: Auto-regenerate roadmap after successful calculation
     let roadmapUpdate = null;
     if (result.success && result.readiness_id) {
-      roadmapUpdate = await regenerateRoadmapAfterCalculation(user_id, result.readiness_id);
+      roadmapUpdate = await regenerateRoadmapAfterCalculation(user_id, category_id);
     }
     
     return res.status(201).json({
@@ -1578,26 +1579,44 @@ router.get("/history/:user_id/:category_id", (req, res) => {
 router.get("/breakdown/:readiness_id", (req, res) => {
   const { readiness_id } = req.params;
 
-  // Get breakdown with importance (required vs optional) and skill source for trust indicators
-  const breakdownQuery = `
-    SELECT 
-      s.name AS skill,
-      rsb.skill_id,
-      rsb.status,
-      rsb.required_weight,
-      rsb.achieved_weight,
-      rsb.skill_source,
-      COALESCE(cs.importance, 'optional') AS importance
-    FROM readiness_score_breakdown rsb
-    JOIN skills s ON s.skill_id = rsb.skill_id
-    LEFT JOIN category_skills cs ON cs.skill_id = rsb.skill_id
-    WHERE rsb.readiness_id = ?
-    ORDER BY cs.importance DESC, rsb.required_weight DESC
+  // First, get the category_id for this readiness score
+  const getCategoryQuery = `
+    SELECT category_id FROM readiness_scores WHERE readiness_id = ?
   `;
+  
+  db.query(getCategoryQuery, [readiness_id], (catErr, catResults) => {
+    if (catErr) {
+      console.error(catErr);
+      return res.status(500).json({ message: "Error fetching category" });
+    }
+    
+    if (catResults.length === 0) {
+      return res.status(404).json({ message: "Readiness score not found" });
+    }
+    
+    const category_id = catResults[0].category_id;
 
-  db.query(breakdownQuery, [readiness_id], (err, breakdownResults) => {
-    if (err) {
-      console.error(err);
+    // Get breakdown with importance (required vs optional) and skill source for trust indicators
+    // Fix: Join category_skills with BOTH skill_id AND category_id to avoid duplicates
+    const breakdownQuery = `
+      SELECT 
+        s.name AS skill,
+        rsb.skill_id,
+        rsb.status,
+        rsb.required_weight,
+        rsb.achieved_weight,
+        rsb.skill_source,
+        COALESCE(cs.importance, 'optional') AS importance
+      FROM readiness_score_breakdown rsb
+      JOIN skills s ON s.skill_id = rsb.skill_id
+      LEFT JOIN category_skills cs ON cs.skill_id = rsb.skill_id AND cs.category_id = ?
+      WHERE rsb.readiness_id = ?
+      ORDER BY cs.importance DESC, rsb.required_weight DESC
+    `;
+
+    db.query(breakdownQuery, [category_id, readiness_id], (err, breakdownResults) => {
+      if (err) {
+        console.error(err);
       return res.status(500).json({ message: "Error fetching breakdown" });
     }
 
@@ -1670,6 +1689,7 @@ router.get("/breakdown/:readiness_id", (req, res) => {
       missing_required_skills: requiredMissing.map(s => s.skill),
     });
   });
+  }); // Close getCategoryQuery callback
 });
 
 router.get("/progress/:user_id/:category_id", (req, res) => {

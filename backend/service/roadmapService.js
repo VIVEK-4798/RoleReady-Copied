@@ -296,11 +296,16 @@ const generateRoadmapItem = (skill) => {
 const generateRoadmap = (inputContract) => {
   const items = [];
   
+  console.log(`[generateRoadmap] Processing ${inputContract.skills.length} skills from input contract`);
+  
   // Process each skill from the breakdown
   for (const skill of inputContract.skills) {
     const item = generateRoadmapItem(skill);
     if (item) {
       items.push(item);
+      console.log(`[generateRoadmap] Skill '${skill.skill_name}' → ${item.rule_applied} (priority=${item.priority})`);
+    } else {
+      console.log(`[generateRoadmap] Skill '${skill.skill_name}' → EXCLUDED (is_met=${skill.is_met}, validation=${skill.validation_status})`);
     }
   }
   
@@ -457,14 +462,15 @@ const fetchRoadmapInputData = (user_id, role_id = null) => {
       SELECT 
         rs.readiness_id,
         rs.user_id,
-        rs.role_id,
-        rs.score,
+        rs.category_id as role_id,
+        rs.total_score as score,
+        rs.max_possible_score,
         rs.calculated_at,
         c.category_name as role_name
       FROM readiness_scores rs
-      JOIN categories c ON rs.role_id = c.category_id
+      JOIN categories c ON rs.category_id = c.category_id
       WHERE rs.user_id = ?
-        ${role_id ? 'AND rs.role_id = ?' : ''}
+        ${role_id ? 'AND rs.category_id = ?' : ''}
       ORDER BY rs.calculated_at DESC
       LIMIT 1
     `;
@@ -487,30 +493,28 @@ const fetchRoadmapInputData = (user_id, role_id = null) => {
       const readiness = readinessResults[0];
       
       // Step 2: Get the breakdown for this readiness score
+      // Note: Using category_skills instead of benchmark_skills
       const breakdownQuery = `
         SELECT 
           rsb.skill_id,
           s.name as skill_name,
           s.category_id,
           c.category_name,
-          rsb.user_level,
-          rsb.required_level,
-          rsb.points_earned,
-          rsb.points_possible,
-          rsb.is_required,
+          rsb.required_weight,
+          rsb.achieved_weight,
+          rsb.status,
           rsb.skill_source,
           us.validation_status,
-          bs.weight
+          cs.weight,
+          cs.importance
         FROM readiness_score_breakdown rsb
         JOIN skills s ON rsb.skill_id = s.skill_id
         LEFT JOIN categories c ON s.category_id = c.category_id
         LEFT JOIN user_skills us ON us.user_id = ? AND us.skill_id = rsb.skill_id
-        LEFT JOIN benchmark_skills bs ON bs.skill_id = rsb.skill_id
-          AND bs.benchmark_id = (
-            SELECT benchmark_id FROM benchmarks WHERE category_id = ? LIMIT 1
-          )
+        LEFT JOIN category_skills cs ON cs.skill_id = rsb.skill_id
+          AND cs.category_id = ?
         WHERE rsb.readiness_id = ?
-        ORDER BY rsb.is_required DESC, bs.weight DESC
+        ORDER BY cs.importance = 'required' DESC, cs.weight DESC
       `;
       
       db.query(breakdownQuery, [user_id, readiness.role_id, readiness.readiness_id], (breakdownErr, breakdownResults) => {
@@ -519,12 +523,22 @@ const fetchRoadmapInputData = (user_id, role_id = null) => {
           return reject({ error: 'DATABASE_ERROR', message: 'Failed to fetch breakdown data' });
         }
         
+        console.log(`[roadmapService] fetchRoadmapInputData: Found ${breakdownResults.length} breakdown skills`);
+        if (breakdownResults.length > 0) {
+          console.log('[roadmapService] Sample breakdown skill:', JSON.stringify(breakdownResults[0]));
+        }
+        
         // Step 3: Transform into input contract format
+        // Adapted for category_skills structure and readiness_score_breakdown columns
         const skills = breakdownResults.map(skill => {
-          const userLevelValue = LEVEL_VALUES[skill.user_level] || 0;
-          const requiredLevelValue = LEVEL_VALUES[skill.required_level] || 0;
-          const isMet = userLevelValue >= requiredLevelValue;
-          const gapPoints = skill.points_possible - skill.points_earned;
+          // Use status from breakdown to determine if skill is met
+          const isMet = skill.status === 'met';
+          const gapPoints = (skill.required_weight || 0) - (skill.achieved_weight || 0);
+          
+          // Determine if skill is required (default to 'optional' if not found in category_skills)
+          // This handles cases where category_skills JOIN returns NULL
+          const importance = skill.importance || 'optional';
+          const isRequired = importance === 'required';
           
           return {
             skill_id: skill.skill_id,
@@ -532,20 +546,20 @@ const fetchRoadmapInputData = (user_id, role_id = null) => {
             category_id: skill.category_id,
             category_name: skill.category_name,
             
-            // Levels
-            user_level: skill.user_level || 'none',
-            required_level: skill.required_level || 'beginner',
-            user_level_value: userLevelValue,
-            required_level_value: requiredLevelValue,
-            level_gap: requiredLevelValue - userLevelValue,
+            // Levels - use 'none' for missing skills to match RULE 1 check
+            user_level: isMet ? 'intermediate' : 'none',
+            required_level: 'intermediate',
+            user_level_value: skill.achieved_weight || 0,
+            required_level_value: skill.required_weight || 0,
+            level_gap: gapPoints > 0 ? gapPoints : 0,
             
-            // Importance
-            is_required: skill.is_required === 1,
+            // Importance (from category_skills, with fallback)
+            is_required: isRequired,
             weight: skill.weight || 1,
             
             // Points
-            points_earned: skill.points_earned || 0,
-            points_possible: skill.points_possible || 0,
+            points_earned: skill.achieved_weight || 0,
+            points_possible: skill.required_weight || 0,
             gap_points: gapPoints > 0 ? gapPoints : 0,
             
             // Status
@@ -566,12 +580,18 @@ const fetchRoadmapInputData = (user_id, role_id = null) => {
         };
         
         // Step 5: Return complete input contract
+        // Calculate percentage score
+        const maxScore = readiness.max_possible_score || 100;
+        const percentageScore = maxScore > 0 ? Math.round((readiness.score / maxScore) * 100) : 0;
+        
+        console.log(`[roadmapService] Summary: total=${summary.total_skills}, met=${summary.met_count}, missing=${summary.missing_count}, required_missing=${summary.required_missing}`);
+        
         const inputContract = {
           readiness_id: readiness.readiness_id,
           user_id: readiness.user_id,
           role_id: readiness.role_id,
           role_name: readiness.role_name,
-          current_score: readiness.score,
+          current_score: percentageScore,
           calculated_at: readiness.calculated_at,
           skills: skills,
           summary: summary
@@ -593,11 +613,12 @@ router.get('/input/:user_id', async (req, res) => {
   const { user_id } = req.params;
   const { role_id } = req.query;
   
-  if (!user_id) {
+  const parsedUserId = parseInt(user_id);
+  if (!user_id || isNaN(parsedUserId)) {
     return res.status(400).json({
       success: false,
-      error: 'MISSING_USER_ID',
-      message: 'user_id is required'
+      error: 'INVALID_USER_ID',
+      message: 'user_id must be a valid number'
     });
   }
   
@@ -746,11 +767,12 @@ router.get('/generate/:user_id', async (req, res) => {
   const { user_id } = req.params;
   const { role_id, limit } = req.query;
   
-  if (!user_id) {
+  const parsedUserId = parseInt(user_id);
+  if (!user_id || isNaN(parsedUserId)) {
     return res.status(400).json({
       success: false,
-      error: 'MISSING_USER_ID',
-      message: 'user_id is required'
+      error: 'INVALID_USER_ID',
+      message: 'user_id must be a valid number'
     });
   }
   
@@ -967,7 +989,7 @@ const fetchSavedRoadmap = (roadmap_id) => {
       const itemsQuery = `
         SELECT * FROM roadmap_items
         WHERE roadmap_id = ?
-        ORDER BY rank ASC
+        ORDER BY \`rank\` ASC
       `;
       
       db.query(itemsQuery, [roadmap_id], (itemsErr, itemsResults) => {

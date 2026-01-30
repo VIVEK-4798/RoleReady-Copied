@@ -466,13 +466,33 @@ router.post('/save-skills', async (req, res) => {
         }
 
         try {
-          // First, clear existing user skills with source='self'
-          const deleteQuery = `
-            DELETE FROM user_skills 
-            WHERE user_id = ? AND source = ?
-          `;
+          // Get the skill_ids being saved (for comparison)
+          const newSkillIds = skills.map(s => s.skill_id);
+          
+          // Step 1: Delete skills that are NOT in the new list
+          // Preserves validated skills (mentor-approved) unless explicitly removed
+          let deleteQuery;
+          let deleteParams;
+          
+          if (newSkillIds.length === 0) {
+            // User is clearing all skills - delete all non-validated skills
+            deleteQuery = `
+              DELETE FROM user_skills 
+              WHERE user_id = ? AND source IN ('self', 'resume')
+            `;
+            deleteParams = [user_id];
+          } else {
+            // Delete skills NOT in the new list (from 'self' or 'resume' sources)
+            deleteQuery = `
+              DELETE FROM user_skills 
+              WHERE user_id = ? 
+                AND source IN ('self', 'resume')
+                AND skill_id NOT IN (?)
+            `;
+            deleteParams = [user_id, newSkillIds];
+          }
 
-          connection.query(deleteQuery, [user_id, source], (deleteErr) => {
+          connection.query(deleteQuery, deleteParams, (deleteErr) => {
             if (deleteErr) {
               return connection.rollback(() => {
                 connection.release();
@@ -515,10 +535,15 @@ router.post('/save-skills', async (req, res) => {
               new Date()
             ]);
 
+            // Use ON DUPLICATE KEY UPDATE to handle skills that may exist with different source
             const insertQuery = `
               INSERT INTO user_skills 
               (user_id, skill_id, level, source, created_at) 
               VALUES ?
+              ON DUPLICATE KEY UPDATE 
+                level = VALUES(level),
+                source = VALUES(source),
+                created_at = VALUES(created_at)
             `;
 
             connection.query(insertQuery, [values], (insertErr, result) => {

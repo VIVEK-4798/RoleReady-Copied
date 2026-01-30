@@ -6,27 +6,7 @@ import DefaultHeader from '@/components/header/default-header';
 import Footer4 from '@/components/footer/footer-4';
 import { api } from '@/utils/apiProvider';
 
-/* ============================================================================
-   🧭 ROADMAP PAGE - STEP 5: Simple, Clean UI
-   ============================================================================
-   
-   ONE screen, no polish obsession.
-   
-   Sections:
-   - Summary: "Based on your latest readiness score of X"
-   - High Priority (Do First)
-   - Medium Priority (Next)
-   - Low Priority (Optional / Nice to Have)
-   
-   Each item shows:
-   - Skill name
-   - Why it matters (reason)
-   - Validation status badge
-   
-   NO checkboxes.
-   NO completion tracking.
-   NO dates.
-   ============================================================================ */
+
 
 const RoadmapPage = () => {
   const navigate = useNavigate();
@@ -55,17 +35,14 @@ const RoadmapPage = () => {
     setError(null);
     
     try {
-      // Try to get the latest saved roadmap first
-      const latestRes = await axios.get(`${api}/api/roadmap/latest/${user_id}`);
+      // Always generate fresh roadmap to get latest data
+      const genRes = await axios.get(`${api}/api/roadmap/generate/${user_id}`);
       
-      if (latestRes.data.success) {
-        setRoadmap(latestRes.data.roadmap);
+      if (genRes.data.success) {
+        setRoadmap(genRes.data.roadmap);
       }
     } catch (err) {
-      // No saved roadmap, try to generate one
-      if (err.response?.data?.error === 'NO_ROADMAP_FOUND') {
-        await generateNewRoadmap();
-      } else if (err.response?.data?.error === 'NO_READINESS_FOUND') {
+      if (err.response?.data?.error === 'NO_READINESS_FOUND') {
         setError({
           type: 'no_readiness',
           message: 'You need to calculate your readiness score first before viewing your roadmap.'

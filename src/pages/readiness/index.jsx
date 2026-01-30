@@ -1041,6 +1041,15 @@ const ReadinessPage = () => {
                           )}
                         </button>
                         
+                        {/* Roadmap Button */}
+                        <button 
+                          onClick={() => navigate('/roadmap')}
+                          className="readiness-btn readiness-btn--secondary"
+                          style={{ backgroundColor: '#8b5cf6', borderColor: '#8b5cf6' }}
+                        >
+                          🧭 View Roadmap
+                        </button>
+                        
                         {/* STEP 5: Link to Dashboard for history/trends */}
                         <button 
                           onClick={() => navigate('/vendor-dashboard/dashboard')}

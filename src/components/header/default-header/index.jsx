@@ -50,9 +50,14 @@ const Header1 = () => {
             
                   {/* Conditionally render Post Job button */}
                   {(user === "user" ) && (
-                    <Link to="/readiness" className="nav-link">
-                      🎯 Readiness Score
-                    </Link>
+                    <>
+                      <Link to="/readiness" className="nav-link">
+                        🎯 Readiness Score
+                      </Link>
+                      <Link to="/roadmap" className="nav-link" style={{ marginLeft: '10px' }}>
+                        🧭 Roadmap
+                      </Link>
+                    </>
                   )}
                   {(user === "mentor" || user === "admin") && (
                     <Link
