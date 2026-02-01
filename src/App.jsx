@@ -17,16 +17,17 @@ if (typeof window !== "undefined") {
 import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 import ScrollTopBehaviour from "./components/common/ScrollTopBehaviour";
 import Home from "./pages";
-import Home_1 from "./pages/homes/home_1";
-import Home_2 from "./pages/homes/home_2";
-import Home_3 from "./pages/homes/home_3";
-import Home_4 from "./pages/homes/home_4";
+// UNUSED HOME PAGES - Commented for cleanup
+// import Home_1 from "./pages/homes/home_1";
+// import Home_2 from "./pages/homes/home_2";
+// import Home_3 from "./pages/homes/home_3";
+// import Home_4 from "./pages/homes/home_4";
 import Home_5 from "./pages/homes/home_5";
-import Home_6 from "./pages/homes/home_6";
-import Home_7 from "./pages/homes/home_7";
-import Home_8 from "./pages/homes/home_8";
-import Home_9 from "./pages/homes/home_9";
-import Home_10 from "./pages/homes/home_10";
+// import Home_6 from "./pages/homes/home_6";
+// import Home_7 from "./pages/homes/home_7";
+// import Home_8 from "./pages/homes/home_8";
+// import Home_9 from "./pages/homes/home_9";
+// import Home_10 from "./pages/homes/home_10";
 import BlogListV1 from "./pages/blogs/blog-list-v1";
 import BlogListV2 from "./pages/blogs/blog-list-v2";
 import BlogSingleDynamic from "./pages/blogs/blog-details";
@@ -69,35 +70,42 @@ import VendorDashboard from "./pages/dashboard/vendor-dashboard/dashboard";
 import MentorDashboard from "./pages/dashboard/mentor-dashboard/dashboard";
 import MentorProfile from "./pages/dashboard/mentor-dashboard/profile";
 import VendorProfile from "./pages/dashboard/vendor-dashboard/profile";
-import HotelListPage1 from "./pages/hotel/hotel-list-v1";
-import HotelListPage2 from "./pages/hotel/hotel-list-v2";
-import HotelListPage3 from "./pages/hotel/hotel-list-v3";
+// UNUSED HOTEL PAGES - Commented for cleanup
+// import HotelListPage1 from "./pages/hotel/hotel-list-v1";
+// import HotelListPage2 from "./pages/hotel/hotel-list-v2";
+// import HotelListPage3 from "./pages/hotel/hotel-list-v3";
 import HotelListPage4 from "./pages/hotel/hotel-list-v4";
-import HotelListPage5 from "./pages/hotel/hotel-list-v5";
+// import HotelListPage5 from "./pages/hotel/hotel-list-v5";
 import HotelSingleV1Dynamic from "./pages/hotel/hotel-single-v1";
-import HotelSingleV2Dynamic from "./pages/hotel/hotel-single-v2";
-import BookingPage from "./pages/hotel/booking-page";
-import TourListPage1 from "./pages/tour/tour-list-v1";
+// import HotelSingleV2Dynamic from "./pages/hotel/hotel-single-v2";
+// import BookingPage from "./pages/hotel/booking-page";
+// UNUSED TOUR PAGES - Commented for cleanup
+// import TourListPage1 from "./pages/tour/tour-list-v1";
 import TourListPage2 from "./pages/tour/tour-list-v2";
-import TourListPage3 from "./pages/tour/tour-list-v3";
+// import TourListPage3 from "./pages/tour/tour-list-v3";
 import TourSingleV1Dynamic from "./pages/tour/tour-single";
-import ActivityListPage1 from "./pages/activity/activity-list-v1";
-import ActivityListPage2 from "./pages/activity/activity-list-v2";
-import ActivityListPage3 from "./pages/activity/activity-list-v3";
-import ActivitySingleV1Dynamic from "./pages/activity/activity-single";
-import RentalListPage1 from "./pages/rental/rental-list-v1";
-import RentalListPage2 from "./pages/rental/rental-list-v2";
-import RentalListPage3 from "./pages/rental/rental-list-v3";
-import RentalSingleV1Dynamic from "./pages/rental/rental-single";
-import CarListPage1 from "./pages/car/car-list-v1";
-import CarListPage2 from "./pages/car/car-list-v2";
-import CarListPage3 from "./pages/car/car-list-v3";
-import CarSingleV1Dynamic from "./pages/car/car-single";
-import CruiseListPage1 from "./pages/cruise/cruise-list-v1";
-import CruiseListPage2 from "./pages/cruise/cruise-list-v2";
-import CruiseListPage3 from "./pages/cruise/cruise-list-v3";
-import CruiseSingleV1Dynamic from "./pages/cruise/cruise-single";
-import FlightListPage1 from "./pages/flight/flight-list-v1";
+// UNUSED ACTIVITY PAGES - Commented for cleanup
+// import ActivityListPage1 from "./pages/activity/activity-list-v1";
+// import ActivityListPage2 from "./pages/activity/activity-list-v2";
+// import ActivityListPage3 from "./pages/activity/activity-list-v3";
+// import ActivitySingleV1Dynamic from "./pages/activity/activity-single";
+// UNUSED RENTAL PAGES - Commented for cleanup
+// import RentalListPage1 from "./pages/rental/rental-list-v1";
+// import RentalListPage2 from "./pages/rental/rental-list-v2";
+// import RentalListPage3 from "./pages/rental/rental-list-v3";
+// import RentalSingleV1Dynamic from "./pages/rental/rental-single";
+// UNUSED CAR PAGES - Commented for cleanup
+// import CarListPage1 from "./pages/car/car-list-v1";
+// import CarListPage2 from "./pages/car/car-list-v2";
+// import CarListPage3 from "./pages/car/car-list-v3";
+// import CarSingleV1Dynamic from "./pages/car/car-single";
+// UNUSED CRUISE PAGES - Commented for cleanup
+// import CruiseListPage1 from "./pages/cruise/cruise-list-v1";
+// import CruiseListPage2 from "./pages/cruise/cruise-list-v2";
+// import CruiseListPage3 from "./pages/cruise/cruise-list-v3";
+// import CruiseSingleV1Dynamic from "./pages/cruise/cruise-single";
+// UNUSED FLIGHT PAGES - Commented for cleanup
+// import FlightListPage1 from "./pages/flight/flight-list-v1";
 import Contact from "./pages/others/contact";
 import Destinations from "./pages/others/destinations";
 import Pricing from "./pages/pricing";
@@ -145,6 +153,7 @@ function App() {
           <Routes>
             <Route path="/">
               <Route index element={<Home_5 />} />
+              {/* UNUSED HOME ROUTES - Commented for cleanup
               <Route path="home_1" element={<Home_1 />} />
               <Route path="home_2" element={<Home_2 />} />
               <Route path="home_3" element={<Home_3 />} />
@@ -155,6 +164,7 @@ function App() {
               <Route path="home_8" element={<Home_8 />} />
               <Route path="home_9" element={<Home_9 />} />
               <Route path="home_10" element={<Home_10 />} />
+              */}
 
               <Route path="pricing" element={<Pricing />} />
               <Route path="collegeTPO" element={<CollegeTPO />} />
@@ -274,26 +284,37 @@ function App() {
                 <Route path="recovery" element={<BDVendorRecovery />} />
               </Route>
 
+              {/* UNUSED HOTEL ROUTES - Commented for cleanup
               <Route path="hotel-list-v1" element={<HotelListPage1 />} />
               <Route path="hotel-list-v2" element={<HotelListPage2 />} />
               <Route path="hotel-list-v3" element={<HotelListPage3 />} />
+              */}
               <Route path="hotel-list-v4" element={<HotelListPage4 />} />
+              {/* UNUSED HOTEL ROUTES continued
               <Route path="hotel-list-v5" element={<HotelListPage5 />} />
+              */}
               <Route
                 path="hotel-single-v1/:id"
                 element={<HotelSingleV1Dynamic />}
               />
+              {/* UNUSED HOTEL ROUTES continued
               <Route
                 path="hotel-single-v2/:id"
                 element={<HotelSingleV2Dynamic />}
               />
               <Route path="booking-page" element={<BookingPage />} />
+              */}
 
+              {/* UNUSED TOUR ROUTES - Commented for cleanup
               <Route path="tour-list-v1" element={<TourListPage1 />} />
+              */}
               <Route path="tour-list-v2" element={<TourListPage2 />} />
+              {/* UNUSED TOUR ROUTES continued
               <Route path="tour-list-v3" element={<TourListPage3 />} />
+              */}
               <Route path="tour-single/:id" element={<TourSingleV1Dynamic />} />
 
+              {/* UNUSED ACTIVITY ROUTES - Commented for cleanup
               <Route path="activity-list-v1" element={<ActivityListPage1 />} />
               <Route path="activity-list-v2" element={<ActivityListPage2 />} />
               <Route path="activity-list-v3" element={<ActivityListPage3 />} />
@@ -301,7 +322,9 @@ function App() {
                 path="activity-single/:id"
                 element={<ActivitySingleV1Dynamic />}
               />
+              */}
 
+              {/* UNUSED RENTAL ROUTES - Commented for cleanup
               <Route path="rental-list-v1" element={<RentalListPage1 />} />
               <Route path="rental-list-v2" element={<RentalListPage2 />} />
               <Route path="rental-list-v3" element={<RentalListPage3 />} />
@@ -309,12 +332,16 @@ function App() {
                 path="rental-single/:id"
                 element={<RentalSingleV1Dynamic />}
               />
+              */}
 
+              {/* UNUSED CAR ROUTES - Commented for cleanup
               <Route path="car-list-v1" element={<CarListPage1 />} />
               <Route path="car-list-v2" element={<CarListPage2 />} />
               <Route path="car-list-v3" element={<CarListPage3 />} />
               <Route path="car-single/:id" element={<CarSingleV1Dynamic />} />
+              */}
 
+              {/* UNUSED CRUISE ROUTES - Commented for cleanup
               <Route path="cruise-list-v1" element={<CruiseListPage1 />} />
               <Route path="cruise-list-v2" element={<CruiseListPage2 />} />
               <Route path="cruise-list-v3" element={<CruiseListPage3 />} />
@@ -322,8 +349,11 @@ function App() {
                 path="cruise-single/:id"
                 element={<CruiseSingleV1Dynamic />}
               />
+              */}
 
+              {/* UNUSED FLIGHT ROUTES - Commented for cleanup
               <Route path="flight-list-v1" element={<FlightListPage1 />} />
+              */}
             </Route>
           </Routes>
           <ScrollTopBehaviour />

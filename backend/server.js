@@ -6,7 +6,7 @@ const cors = require('cors');
 const { swaggerUi, swaggerSpec } = require("./swagger");
 
 const corsOptions = {
-  origin: 'http://localhost:5173',  
+  origin: 'http://localhost:5174',  
   // origin: 'https://startups24x7.com',  
   methods: 'GET,POST,PUT,PATCH,DELETE',
   credentials: true
@@ -78,7 +78,7 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 
 // Start the server
-const PORT = process.env.SERVER_PORT || 6000;
+const PORT = process.env.SERVER_PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
   // console.log("Swagger docs at http://localhost:5000/api-docs");
