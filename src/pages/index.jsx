@@ -1,5 +1,5 @@
 import Wrapper from "@/components/layout/Wrapper";
-import MainHome from "../pages/homes/home_1";
+import MainHome from "../pages/homes/home_5";
 
 import MetaComponent from "@/components/common/MetaComponent";
 
