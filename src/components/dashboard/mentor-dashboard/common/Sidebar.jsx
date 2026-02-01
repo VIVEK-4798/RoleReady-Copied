@@ -187,6 +187,23 @@ const Sidebar = () => {
           </a>
         </div> */}
 
+        {/* Notifications */}
+        <div className="sidebar__item ">
+          <Link
+            to="/mentor-dashboard/notifications"
+            className="sidebar__button d-flex items-center text-15 lh-1 fw-500"
+          >
+            <span style={{ 
+              marginRight: "15px", 
+              fontSize: "1.2rem",
+              width: "26px",
+              textAlign: "center"
+            }}>🔔</span>
+            Notifications
+          </Link>
+        </div>
+        {/* End notifications */}
+
         <div className="sidebar__item ">
           <a
             href="#"

@@ -5,6 +5,7 @@ import { toast } from 'react-toastify';
 import DefaultHeader from '@/components/header/default-header';
 import Footer4 from '@/components/footer/footer-4';
 import { api } from '@/utils/apiProvider';
+import NotificationBanner from '@/components/notifications/NotificationBanner';
 
 
 
@@ -354,6 +355,14 @@ const RoadmapPage = () => {
       
       <section className="pt-40 pb-40" style={{ backgroundColor: '#f8fafc', minHeight: '80vh' }}>
         <div className="container">
+          {/* Contextual Notification Banners */}
+          {user_id && (
+            <NotificationBanner 
+              userId={user_id}
+              types={['roadmap_updated', 'readiness_outdated']}
+            />
+          )}
+          
           {/* Page Header */}
           <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
             <h1 style={{ fontSize: '2rem', fontWeight: 700, color: '#1e293b', marginBottom: '0.5rem' }}>

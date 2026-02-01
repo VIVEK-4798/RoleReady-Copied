@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
+const { triggerMentorValidation, triggerReadinessOutdated } = require('./notificationService');
 
 /* ============================================================================
    🎓 MENTOR VALIDATION SERVICE - STEP 3
@@ -207,6 +208,14 @@ router.post('/validate', async (req, res) => {
           });
         }
         
+        // Trigger notification (side-effect, don't block response)
+        triggerMentorValidation(user_id, 1, 0).catch(err => {
+          console.error('[mentorValidation] Notification error:', err);
+        });
+        triggerReadinessOutdated(user_id).catch(err => {
+          console.error('[mentorValidation] Notification error:', err);
+        });
+        
         return res.status(200).json({
           success: true,
           message: `Validated: ${skill.skill_name}`,
@@ -310,6 +319,14 @@ router.post('/reject', async (req, res) => {
             message: 'Failed to reject skill'
           });
         }
+        
+        // Trigger notification (side-effect, don't block response)
+        triggerMentorValidation(user_id, 0, 1).catch(err => {
+          console.error('[mentorValidation] Notification error:', err);
+        });
+        triggerReadinessOutdated(user_id).catch(err => {
+          console.error('[mentorValidation] Notification error:', err);
+        });
         
         return res.status(200).json({
           success: true,

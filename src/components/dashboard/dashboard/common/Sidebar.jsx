@@ -27,12 +27,18 @@ const Sidebar = () => {
     },
     {
       id: 4,
+      icon: "/img/dashboard/sidebar/bell.svg",
+      name: " Notifications",
+      routePath: "/dashboard/notifications",
+    },
+    {
+      id: 5,
       icon: "/img/dashboard/sidebar/gear.svg",
       name: " Settings",
       routePath: "/dashboard/db-settings",
     },
     {
-      id: 5,
+      id: 6,
       icon: "/img/dashboard/sidebar/log-out.svg",
       name: " Logout",
       routePath: "/login",

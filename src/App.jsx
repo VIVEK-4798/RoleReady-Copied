@@ -122,6 +122,7 @@ import MentorValidationQueue from "./pages/dashboard/mentor-dashboard/validation
 import ReadinessPage from "./pages/readiness";
 import RoadmapPage from "./pages/roadmap";
 import ReadinessReportPage from "./pages/report";
+import NotificationsPage from "./pages/notifications";
 
 
 function App() {
@@ -187,6 +188,7 @@ function App() {
                 <Route path="db-booking" element={<DBBooking />} />
                 <Route path="db-wishlist" element={<DBWishlist />} />
                 <Route path="db-settings" element={<DBSettings />} />
+                <Route path="notifications" element={<NotificationsPage />} />
               </Route>
 
               <Route path="admin-dashboard">
@@ -246,6 +248,7 @@ function App() {
                 <Route path="dashboard" element={<MentorDashboard />} />
                 <Route path="profile" element={<MentorProfile />} />
                 <Route path="validation-queue" element={<MentorValidationQueue />} />
+                <Route path="notifications" element={<NotificationsPage />} />
                 <Route path="venues" element={<MentorVenue />} />
                 <Route path="venue/:mode" element={<MentorAddVenue />} />
                 <Route path="vendor/:mode" element={<MentorAddVendor />} />

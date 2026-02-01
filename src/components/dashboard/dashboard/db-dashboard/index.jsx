@@ -7,8 +7,24 @@ import { Link } from "react-router-dom";
 import RercentBooking from "./components/RercentBooking";
 import Footer from "../common/Footer";
 import TargetRoleCard from "../../../role-selection/TargetRoleCard";
+import NotificationBanner from "../../../notifications/NotificationBanner";
+import { useState, useEffect } from "react";
 
 const index = () => {
+  const [userId, setUserId] = useState(null);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      try {
+        const user = JSON.parse(storedUser);
+        setUserId(user.user_id || user.id);
+      } catch (e) {
+        console.error("Error parsing user:", e);
+      }
+    }
+  }, []);
+
   return (
     <>
       {/*  */}
@@ -38,6 +54,15 @@ const index = () => {
               {/* End .col-12 */}
             </div>
             {/* End .row */}
+
+            {/* Contextual Notification Banners */}
+            {userId && (
+              <NotificationBanner 
+                userId={userId}
+                types={['readiness_outdated', 'mentor_validation', 'role_changed']}
+              />
+            )}
+            {/* End Notification Banners */}
 
             {/* Target Role Card - Important for users */}
             <div className="row pb-30">

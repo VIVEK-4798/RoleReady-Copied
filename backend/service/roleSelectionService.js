@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
+const { triggerRoleChanged } = require('./notificationService');
 
 /* ============================================================================
    🎯 ROLE SELECTION & CHANGE IMPACT SERVICE
@@ -220,6 +221,11 @@ router.post('/change-role', async (req, res) => {
       DELETE FROM roadmaps WHERE user_id = ?
     `;
     await queryAsync(clearRoadmapQuery, [user_id]);
+    
+    // 7. Trigger notification for role change (side-effect, don't block)
+    triggerRoleChanged(user_id, newRole.category_name).catch(err => {
+      console.error('[roleSelectionService] Failed to trigger notification:', err);
+    });
     
     res.json({
       success: true,

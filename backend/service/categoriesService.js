@@ -25,10 +25,7 @@ app.get('/get-categories', (req, res) => {
 			c.category_name,
 			c.category_color_class,
 			c.description,
-			c.normalized_name,
-			c.domain,
 			c.is_active,
-			c.created_at,
 			c.updated_at,
 			c.updated_by,
 			COUNT(cs.skill_id) as skill_count

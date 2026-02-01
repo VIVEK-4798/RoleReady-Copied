@@ -2,10 +2,12 @@ import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import MainMenu from "../MainMenu";
 import MobileMenu from "../MobileMenu";
+import NotificationBell from "../../notifications/NotificationBell";
 
 const HeaderDashBoard = () => {
   const [navbar, setNavbar] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [userId, setUserId] = useState(null);
 
   const handleToggle = () => {
     setIsOpen(!isOpen);
@@ -26,6 +28,17 @@ const HeaderDashBoard = () => {
       body.classList.add("-is-sidebar-open");
     } else {
       body.classList.remove("-is-sidebar-open");
+    }
+    
+    // Get user ID from localStorage
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      try {
+        const user = JSON.parse(storedUser);
+        setUserId(user.user_id || user.id);
+      } catch (e) {
+        console.error("Error parsing user from localStorage:", e);
+      }
     }
   }, [isOpen]);
 
@@ -73,20 +86,13 @@ const HeaderDashBoard = () => {
                 </div> */}
                 {/* End header-menu */}
 
-                {/* <div className="row items-center x-gap-5 y-gap-20 pl-20 lg:d-none">
+                {/* Notification Bell */}
+                <div className="row items-center x-gap-5 y-gap-20 pl-20 lg:d-none">
                   <div className="col-auto">
-                    <button className="button -blue-1-05 size-50 rounded-22 flex-center">
-                      <i className="icon-email-2 text-20"></i>
-                    </button>
+                    <NotificationBell userId={userId} />
                   </div>
-
-                  <div className="col-auto">
-                    <button className="button -blue-1-05 size-50 rounded-22 flex-center">
-                      <i className="icon-notification text-20"></i>
-                    </button>
-                  </div>
-                </div> */}
-                {/* End .row */}
+                </div>
+                {/* End notification row */}
 
                 {/* <div className="pl-15">
                   <img

@@ -8,7 +8,7 @@ const { swaggerUi, swaggerSpec } = require("./swagger");
 const corsOptions = {
   origin: 'http://localhost:5173',  
   // origin: 'https://startups24x7.com',  
-  methods: 'GET,POST,PUT,DELETE',
+  methods: 'GET,POST,PUT,PATCH,DELETE',
   credentials: true
 };
 
@@ -16,7 +16,7 @@ const corsOptions = {
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 app.use(cors(corsOptions));
-// app.options('*', cors(corsOptions));
+app.options('*', cors(corsOptions)); // Enable preflight for all routes
 
 const userService = require('./service/UserService.js');
 const authService = require('./service/auth.js');
@@ -44,6 +44,7 @@ const roadmapService = require('./service/roadmapService.js');  // Dynamic Roadm
 const reportService = require('./service/reportService.js');  // Readiness Report
 const adminService = require('./service/adminService.js');  // Admin Benchmark Management
 const roleSelectionService = require('./service/roleSelectionService.js');  // Role Selection & Change
+const { router: notificationRoutes } = require('./service/notificationService.js');  // Notifications & Triggers
 
 // routes
 app.use('/api/user', userService);
@@ -72,11 +73,12 @@ app.use('/api/roadmap', roadmapService);  // Dynamic Roadmap
 app.use('/api/report', reportService);  // Readiness Report
 app.use('/api/admin', adminService);  // Admin Benchmark Management
 app.use('/api/role-selection', roleSelectionService);  // Role Selection & Change
+app.use('/api/notifications', notificationRoutes);  // Notifications & Triggers
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 
 // Start the server
-const PORT = process.env.SERVER_PORT || 5000;
+const PORT = process.env.SERVER_PORT || 6000;
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
   // console.log("Swagger docs at http://localhost:5000/api-docs");

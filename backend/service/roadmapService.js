@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
+const { triggerRoadmapUpdated } = require('./notificationService');
 
 /* ============================================================================
    🧭 DYNAMIC ROADMAP SERVICE - STEP 1: Input Contract
@@ -1082,6 +1083,11 @@ router.post('/save/:user_id', async (req, res) => {
     
     // Step 2: Save to database
     const roadmap_id = await saveRoadmapSnapshot(roadmap);
+    
+    // Trigger notification (side-effect, don't block response)
+    triggerRoadmapUpdated(parseInt(user_id), roadmap.items.length).catch(err => {
+      console.error('[roadmapService] Notification error:', err);
+    });
     
     return res.status(201).json({
       success: true,
