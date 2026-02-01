@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-const LocationSearch = () => {
+const SearchBar = () => {
   const [searchValue, setSearchValue] = useState("");
   const [selectedItem, setSelectedItem] = useState(null);
 
@@ -57,6 +57,7 @@ const LocationSearch = () => {
             />
           </div>
         </div>
+        {/* End location Field */}
 
         <div className="shadow-2 dropdown-menu min-width-400">
           <div className="bg-white px-20 py-20 sm:px-0 sm:py-15 rounded-4">
@@ -91,4 +92,4 @@ const LocationSearch = () => {
   );
 };
 
-export default LocationSearch;
+export default SearchBar;

@@ -4,7 +4,7 @@ import BannerUploader from "./content/BannerUploader";
 import FeaturedUploader from "./content/FeaturedUploader";
 import GalleryUploader from "./content/GalleryUploader";
 import { useEffect, useState } from "react";
-import LocationSearch from "@/components/hero/hero-1/LocationSearch";
+import LocationSearch from "@/components/hero/hero-5/LocationSearch";
 import axios from 'axios';
 import { api } from "@/utils/apiProvider";
 import { debounce } from "@/utils/DOMUtils";
